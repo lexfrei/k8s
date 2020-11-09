@@ -1,0 +1,21 @@
+repositories:
+  - name: kubernetes-dashboard
+    url: https://kubernetes.github.io/dashboard/
+
+releases:
+  # https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard
+  - name: kubernetes-dashboard
+    namespace: kubernetes-dashboard
+    installed: true
+    chart: kubernetes-dashboard/kubernetes-dashboard
+    version: 2.8.2
+    values:
+      - ingress:
+          enabled: true
+          hosts:
+            - dashboard.k8s.home.lex.la
+          annotations:
+            traefik.ingress.kubernetes.io/router.tls: "true"
+          # nginx spesific annotations:
+          #   kubernetes.io/ingress.class: nginx
+          #   nginx.ingress.kubernetes.io/secure-backends: "true"

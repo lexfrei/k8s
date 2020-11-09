@@ -1,0 +1,41 @@
+# repositories:
+#   - name: longhorn
+#     url: https://charts.longhorn.io
+# https://artifacthub.io/packages/helm/longhorn/longhorn
+# https://longhorn.io/docs/1.0.2/deploy/install/install-with-helm
+
+releases:
+  - name: longhorn
+    namespace: longhorn-system
+    installed: true
+    chart: ../charts/longhorn
+    values:
+      - image:
+          longhorn:
+            engine:
+              tag: master-arm64
+            manager:
+              tag: master-arm64
+            ui:
+              tag: master-arm64
+            instanceManager:
+              tag: master-arm64
+          csi:
+            attacher:
+              tag: v2.2.1-lh1
+            provisioner:
+              tag: v1.6.0-lh1
+            nodeDriverRegistrar:
+              tag: v1.2.0-lh1
+            resizer:
+              tag: v0.5.1-lh1
+            snapshotter:
+              tag: v2.1.1-lh1
+          pullPolicy: "Always"
+        defaultSettings:
+          defaultDataPath: "/mnt/storage"
+        ingress:
+          enabled: true
+          host: longhorn.k8s.home.lex.la
+          annotations:
+            traefik.ingress.kubernetes.io/router.tls: "true"
