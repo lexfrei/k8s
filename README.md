@@ -11,7 +11,7 @@ Kubernetes cluster ready for use on RPis or any other arm64 systems
 * kubernetes-dashboard
 * longhorn
 * Metallb
-* traefic
+* Traefik
 * node-exporter
 * victoria-metrics
 * ...
