@@ -1,0 +1,21 @@
+repositories:
+  - name: vm
+    url: https://victoriametrics.github.io/helm-charts/
+
+releases:
+  # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-single
+  - name: victoria-metrics-single
+    namespace: monitoring
+    chart: vm/victoria-metrics-single
+    version: 0.6.2
+    installed: false
+
+  - name: victoria-operator
+    namespace: monitoring
+    chart: vm/victoria-metrics-operator
+    version: 0.1.0
+    installed: false
+    values:
+      - image:
+          repository: victoriametrics/operator
+          tag: latest

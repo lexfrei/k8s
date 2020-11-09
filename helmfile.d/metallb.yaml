@@ -1,0 +1,30 @@
+repositories:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+
+releases:
+  # https://hub.helm.sh/charts/bitnami/metallb
+  - name: metallb
+    namespace: metallb-system
+    installed: true
+    chart: bitnami/metallb
+    version: 0.1.29
+    values:
+      - controller:
+          image:
+            repository: metallb/controller
+            tag: v0.9.5
+        speaker:
+          image:
+            repository: metallb/speaker
+            tag: v0.9.5
+        configInline:
+          address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+            - 192.168.88.211-192.168.88.230
+          - name: traefik
+            protocol: layer2
+            addresses:
+            - 192.168.88.200/32

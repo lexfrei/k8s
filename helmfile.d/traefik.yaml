@@ -1,0 +1,27 @@
+repositories:
+  - name: traefik
+    url: https://helm.traefik.io/traefik
+
+releases:
+  # https://artifacthub.io/packages/helm/traefik/traefik
+  #
+  # Check this page before upgrade
+  # https://doc.traefik.io/traefik/migration/v2/
+  #
+  - name: traefik
+    namespace: traefik-system
+    chart: traefik/traefik
+    version: 9.10.1
+    installed: true
+    values:
+      - ingressRoute:
+          dashboard:
+            enabled: true
+        service:
+          annotations:
+            metallb.universe.tf/address-pool: traefik
+        additionalArguments:
+          - "--serversTransport.insecureSkipVerify=true"
+          - "--pilot.token=0b027342-e0b7-4503-91cc-d536be20128a"
+        globalArguments:
+        - "--global.checknewversion"
