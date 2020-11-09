@@ -21,7 +21,8 @@ Kubernetes cluster ready for use on RPis or any other arm64 systems
 1. Exclude some ip's from your dhcp-pool. Put them to metallb config
 2. Add Traefik's IP to your DNS
 3. Change all DNSs in the repo. You can find it with `lex.la` substring
-4. Install Ubuntu 20.04 to your system
+4. Add DNS wildcard to your DNS-server (ex.: `*.k8s.home.lex.la`)
+5. Install Ubuntu 20.04 to your system
 
 On your host:
 
