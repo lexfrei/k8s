@@ -76,5 +76,6 @@ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboar
 kubectl apply -f charts/traefik-dashboard/ingressroute.yaml
 ```
 
-### Longhrn
+### Longhorn
+
 Already enabled
