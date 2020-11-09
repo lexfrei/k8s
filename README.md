@@ -44,7 +44,8 @@ cat /var/lib/rancher/k3s/server/node-token
 ```
 
 On slave:
-```
+
+```shell
 curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL=https://master01:6443 K3S_TOKEN=TOKEN-FROM-MASTER sh -
 ```
 
