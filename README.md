@@ -23,6 +23,7 @@ Kubernetes cluster ready for use on RPis or any other arm64 systems
 3. Change all DNSs in the repo. You can find it with `lex.la` substring
 4. Add DNS wildcard to your DNS-server (ex.: `*.k8s.home.lex.la`)
 5. Install Ubuntu 20.04 to your system
+6. `sudo apt install wireguard`
 
 On your host:
 
@@ -37,7 +38,7 @@ On all hosts add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to 
 On master:
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest sh -s - --disable traefik,local-storage,servicelb,metrics-server --cluster-domain k8s.home.lex.la
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest sh -s - --disable traefik,local-storage,servicelb,metrics-server --cluster-domain k8s.home.lex.la --flannel-backend=wireguard
 # copy content to ~/.kube/config and change address
 cat /etc/rancher/k3s/k3s.yaml
 # copy token for slave
