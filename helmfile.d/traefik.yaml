@@ -22,6 +22,5 @@ releases:
             metallb.universe.tf/address-pool: traefik
         additionalArguments:
           - "--serversTransport.insecureSkipVerify=true"
-          - "--pilot.token=0b027342-e0b7-4503-91cc-d536be20128a"
         globalArguments:
         - "--global.checknewversion"
