@@ -8,7 +8,7 @@ releases:
     namespace: metallb-system
     installed: true
     chart: bitnami/metallb
-    version: 0.1.29
+    version: 1.0.1
     values:
       - controller:
           image:

@@ -7,19 +7,19 @@
 releases:
   - name: longhorn
     namespace: longhorn-system
-    installed: true
+    installed: false
     chart: ../charts/longhorn
     values:
       - image:
           longhorn:
             engine:
-              tag: master-arm64
+              tag: master
             manager:
-              tag: master-arm64
+              tag: master
             ui:
-              tag: master-arm64
+              tag: master
             instanceManager:
-              tag: master-arm64
+              tag: master
           csi:
             attacher:
               tag: v2.2.1-lh1
