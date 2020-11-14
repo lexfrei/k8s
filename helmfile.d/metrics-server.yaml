@@ -8,7 +8,7 @@ releases:
     namespace: kube-system
     installed: true
     chart: stable/metrics-server
-    version: 2.11.2
+    version: 2.11.4
     values:
       - image:
           repository: k8s.gcr.io/metrics-server-arm64
