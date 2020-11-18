@@ -35,14 +35,20 @@ On your host:
 
 On all hosts add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to `/boot/firmware/cmdline.txt`
 
-On master:
+On 1st master:
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest sh -s - --disable traefik,local-storage,servicelb,metrics-server --cluster-domain k8s.home.lex.la --flannel-backend=wireguard
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest INSTALL_K3S_EXEC="--disable traefik,local-storage,servicelb,metrics-server --cluster-domain k8s.home.lex.la --flannel-backend=wireguard --cluster-init" sh -
 # copy content to ~/.kube/config and change address
 cat /etc/rancher/k3s/k3s.yaml
 # copy token for slave
 cat /var/lib/rancher/k3s/server/node-token
+```
+
+On else master nodes:
+
+```shell
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_TOKEN=TOKEN-FROM-MASTER INSTALL_K3S_EXEC="server --server https://master01:6443 --disable traefik,local-storage,servicelb,metrics-server --cluster-domain k8s.home.lex.la --flannel-backend=wireguard" sh -
 ```
 
 On slave:
