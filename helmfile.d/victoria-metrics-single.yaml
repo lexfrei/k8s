@@ -8,7 +8,7 @@ releases:
     namespace: monitoring
     chart: vm/victoria-metrics-single
     version: 0.6.4
-    installed: false
+    installed: true
 
   - name: victoria-operator
     namespace: monitoring

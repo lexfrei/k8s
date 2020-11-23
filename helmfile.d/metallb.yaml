@@ -23,8 +23,8 @@ releases:
           - name: default
             protocol: layer2
             addresses:
-            - 192.168.88.201-192.168.88.231
+            - 192.168.6.0/24
           - name: traefik
             protocol: layer2
             addresses:
-            - 192.168.88.200/32
+            - 192.168.5.200/32

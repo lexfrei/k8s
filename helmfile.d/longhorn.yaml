@@ -7,7 +7,7 @@
 releases:
   - name: longhorn
     namespace: longhorn-system
-    installed: false
+    installed: true
     chart: ../charts/longhorn
     values:
       - image:
@@ -39,3 +39,4 @@ releases:
           host: longhorn.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.tls: "true"
+            traefik.ingress.kubernetes.io/router.tls.certresolver: "stagessl"
