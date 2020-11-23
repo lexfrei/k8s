@@ -11,7 +11,7 @@ releases:
   - name: traefik
     namespace: traefik-system
     chart: traefik/traefik
-    version: 9.10.1
+    version: 9.11.0
     installed: true
     values:
       - ingressRoute:
@@ -22,5 +22,17 @@ releases:
             metallb.universe.tf/address-pool: traefik
         additionalArguments:
           - "--serversTransport.insecureSkipVerify=true"
+          - "--certificatesresolvers.stagessl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+          - "--certificatesresolvers.stagessl.acme.dnschallenge.provider=cloudflare"
+          - "--certificatesresolvers.stagessl.acme.storage=/data/stage-acme.json"
+          # - "--log.level=DEBUG"
         globalArguments:
-        - "--global.checknewversion"
+          - "--global.checknewversion"
+        env:
+          - name: CLOUDFLARE_DNS_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: tokens
+                key: cf-token
+        persistence:
+          enabled: true
