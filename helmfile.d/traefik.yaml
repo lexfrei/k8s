@@ -14,25 +14,30 @@ releases:
     version: 9.11.0
     installed: true
     values:
-      - ingressRoute:
-          dashboard:
-            enabled: true
         service:
           annotations:
             metallb.universe.tf/address-pool: traefik
         additionalArguments:
+          # Disable internal ssl check
           - "--serversTransport.insecureSkipVerify=true"
+          # SSL for testing
           - "--certificatesresolvers.stagessl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
           - "--certificatesresolvers.stagessl.acme.dnschallenge.provider=cloudflare"
           - "--certificatesresolvers.stagessl.acme.storage=/data/stage-acme.json"
-          # - "--log.level=DEBUG"
+          # SSL for prod
+          - "--certificatesresolvers.prodssl.acme.dnschallenge.provider=cloudflare"
+          - "--certificatesresolvers.prodssl.acme.storage=/data/acme.json"
         globalArguments:
           - "--global.checknewversion"
-        env:
-          - name: CLOUDFLARE_DNS_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: tokens
-                key: cf-token
         persistence:
           enabled: true
+        deployment:
+          initContainers:
+            # The "volume-permissions" init container is required if you run into permission issues.
+            # Related issue: https://github.com/traefik/traefik/issues/6972
+            - name: volume-permissions
+              image: busybox:1.31.1
+              command: ["sh", "-c", "chmod -Rv 600 /data/*"]
+              volumeMounts:
+                - name: data
+                  mountPath: /data
