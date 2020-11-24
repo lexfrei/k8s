@@ -14,7 +14,7 @@ releases:
     version: 9.11.0
     installed: true
     values:
-        service:
+      - service:
           annotations:
             metallb.universe.tf/address-pool: traefik
         additionalArguments:
