@@ -39,4 +39,4 @@ releases:
           host: longhorn.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.tls: "true"
-            traefik.ingress.kubernetes.io/router.tls.certresolver: "stagessl"
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
