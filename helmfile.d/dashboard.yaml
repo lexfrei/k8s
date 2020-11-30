@@ -8,12 +8,11 @@ releases:
     namespace: kubernetes-dashboard
     installed: true
     chart: kubernetes-dashboard/kubernetes-dashboard
-    version: 2.8.2
+    version: 3.0.0
     values:
       - ingress:
           enabled: true
           hosts:
             - dashboard.k8s.home.lex.la
           annotations:
-            traefik.ingress.kubernetes.io/router.tls: "true"
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
