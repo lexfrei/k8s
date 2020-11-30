@@ -27,6 +27,10 @@ releases:
           # SSL for prod
           - "--certificatesresolvers.prodssl.acme.dnschallenge.provider=cloudflare"
           - "--certificatesresolvers.prodssl.acme.storage=/data/acme.json"
+          - "--certificatesresolvers.prodssl.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+          - "--entrypoints.websecure.http.tls=true"
+          - "--entrypoints.websecure.http.tls.certresolver=prodssl"
+          - "--entrypoints.web.http.middlewares=traefik-system-https-scheme-redirect@kubernetescrd"
         globalArguments:
           - "--global.checknewversion"
         persistence:
@@ -41,3 +45,9 @@ releases:
               volumeMounts:
                 - name: data
                   mountPath: /data
+        env:
+          - name: CF_DNS_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: cf-token
+                key: token
