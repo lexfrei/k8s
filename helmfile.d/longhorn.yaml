@@ -3,6 +3,8 @@
 #     url: https://charts.longhorn.io
 # https://artifacthub.io/packages/helm/longhorn/longhorn
 # https://longhorn.io/docs/1.0.2/deploy/install/install-with-helm
+# Replace local chart with official one asap
+# https://github.com/longhorn/longhorn/milestone/17
 
 releases:
   - name: longhorn
@@ -38,5 +40,4 @@ releases:
           enabled: true
           host: longhorn.k8s.home.lex.la
           annotations:
-            traefik.ingress.kubernetes.io/router.tls: "true"
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
