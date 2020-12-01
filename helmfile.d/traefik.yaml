@@ -30,7 +30,6 @@ releases:
           - "--certificatesresolvers.prodssl.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
           - "--entrypoints.websecure.http.tls=true"
           - "--entrypoints.websecure.http.tls.certresolver=prodssl"
-          - "--entrypoints.web.http.middlewares=traefik-system-https-scheme-redirect@kubernetescrd"
         globalArguments:
           - "--global.checknewversion"
         persistence:
@@ -51,3 +50,6 @@ releases:
               secretKeyRef:
                 name: cf-token
                 key: token
+        ports:
+          web:
+            redirectTo: websecure
