@@ -1,0 +1,18 @@
+repositories:
+  - name:  k8s-at-home
+    url: https://k8s-at-home.com/charts/
+
+releases:
+  # https://artifacthub.io/packages/helm/k8s-at-home/heimdall
+  - name: heimdall
+    namespace: heimdall
+    installed: true
+    chart: k8s-at-home/heimdall
+    version: 2.0.1
+    values:
+      - ingress:
+          enabled: true
+          hosts:
+            - start.k8s.home.lex.la
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
