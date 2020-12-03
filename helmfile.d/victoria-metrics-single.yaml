@@ -9,13 +9,3 @@ releases:
     chart: vm/victoria-metrics-single
     version: 0.6.5
     installed: true
-
-  - name: victoria-operator
-    namespace: monitoring
-    chart: vm/victoria-metrics-operator
-    version: 0.1.0
-    installed: false
-    values:
-      - image:
-          repository: victoriametrics/operator
-          tag: latest
