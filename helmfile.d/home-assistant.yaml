@@ -1,0 +1,18 @@
+repositories:
+  - name: k8s-at-home
+    url: https://k8s-at-home.com/charts/
+
+releases:
+  # https://hub.helm.sh/charts/bitnami/metallb
+  - name: home-assistant
+    namespace: home-assistant
+    installed: true
+    chart: k8s-at-home/home-assistant
+    version: 3.2.0
+    values:
+      - ingress:
+          enabled: true
+          hosts:
+            - ha.k8s.home.lex.la
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
