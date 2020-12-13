@@ -8,7 +8,7 @@ releases:
     namespace: kubernetes-dashboard
     installed: true
     chart: kubernetes-dashboard/kubernetes-dashboard
-    version: 3.0.0
+    version: 3.0.2
     values:
       - ingress:
           enabled: true

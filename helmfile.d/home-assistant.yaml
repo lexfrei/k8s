@@ -8,7 +8,7 @@ releases:
     namespace: home-assistant
     installed: true
     chart: k8s-at-home/home-assistant
-    version: 3.2.0
+    version: 4.0.0
     values:
       - ingress:
           enabled: true
