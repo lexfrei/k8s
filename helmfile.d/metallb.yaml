@@ -1,3 +1,6 @@
+# https://github.com/metallb/metallb/milestone/10
+# Replace repo asap
+
 repositories:
   - name: bitnami
     url: https://charts.bitnami.com/bitnami
