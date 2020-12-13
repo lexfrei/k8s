@@ -12,29 +12,7 @@ releases:
     installed: true
     chart: ../charts/longhorn
     values:
-      - image:
-          longhorn:
-            engine:
-              tag: master
-            manager:
-              tag: master
-            ui:
-              tag: master
-            instanceManager:
-              tag: master
-          csi:
-            attacher:
-              tag: v2.2.1-lh1
-            provisioner:
-              tag: v1.6.0-lh1
-            nodeDriverRegistrar:
-              tag: v1.2.0-lh1
-            resizer:
-              tag: v0.5.1-lh1
-            snapshotter:
-              tag: v2.1.1-lh1
-          pullPolicy: "Always"
-        defaultSettings:
+      - defaultSettings:
           defaultDataPath: "/mnt/storage"
         ingress:
           enabled: true
