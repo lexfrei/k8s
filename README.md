@@ -29,7 +29,7 @@ On your host:
 
 1. [Helm](https://helm.sh/docs/intro/install/)
 2. [Helm diff plugin](https://github.com/databus23/helm-diff#install)
-3. [helfmile](https://github.com/roboll/helmfile)
+3. [helmfile](https://github.com/roboll/helmfile)
 
 ## Install k3s
 
