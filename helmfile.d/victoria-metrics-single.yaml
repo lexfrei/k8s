@@ -7,5 +7,5 @@ releases:
   - name: victoria-metrics-single
     namespace: monitoring
     chart: vm/victoria-metrics-single
-    version: 0.6.6
+    version: 0.6.7
     installed: true

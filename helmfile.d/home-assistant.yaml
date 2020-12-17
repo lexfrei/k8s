@@ -6,9 +6,9 @@ releases:
   # https://hub.helm.sh/charts/bitnami/metallb
   - name: home-assistant
     namespace: home-assistant
-    installed: true
+    installed: false
     chart: k8s-at-home/home-assistant
-    version: 4.0.0
+    version: 5.0.0
     values:
       - ingress:
           enabled: true
