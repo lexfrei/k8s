@@ -8,11 +8,13 @@ releases:
     namespace: heimdall
     installed: true
     chart: k8s-at-home/heimdall
-    version: 4.0.0
+    version: 4.1.1
     values:
       - ingress:
           enabled: true
           hosts:
-            - start.k8s.home.lex.la
+            - host: start.k8s.home.lex.la
+              paths:
+                - path: /
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
