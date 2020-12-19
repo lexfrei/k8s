@@ -20,10 +20,6 @@ releases:
         additionalArguments:
           # Disable internal ssl check
           - "--serversTransport.insecureSkipVerify=true"
-          # SSL for testing
-          - "--certificatesresolvers.stagessl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-          - "--certificatesresolvers.stagessl.acme.dnschallenge.provider=cloudflare"
-          - "--certificatesresolvers.stagessl.acme.storage=/data/stage-acme.json"
           # SSL for prod
           - "--certificatesresolvers.prodssl.acme.dnschallenge.provider=cloudflare"
           - "--certificatesresolvers.prodssl.acme.storage=/data/acme.json"
