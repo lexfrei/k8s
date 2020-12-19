@@ -86,3 +86,14 @@ kubectl apply -f charts/traefik-dashboard/ingressroute.yaml
 ### Longhorn
 
 Already enabled
+
+## Update k8s
+
+Use [system-upgrade-controller](https://github.com/rancher/system-upgrade-controller/)
+
+```shell
+# Only once, install upgrader
+kubectl apply -f charts/system-upgrade/system-upgrade.yaml
+# Apply update plan
+kubectl apply -f charts/system-upgrade/k3s-plans.yaml
+```
