@@ -1,0 +1,19 @@
+repositories:
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+
+releases:
+  # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-single
+  - name: grafana
+    namespace: monitoring
+    chart: grafana/grafana
+    version: 6.1.17
+    installed: true
+    values:
+      - ingress:
+          enabled: true
+          hosts: ["grafana.k8s.home.lex.la"]
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        persistence:
+          enabled: true
