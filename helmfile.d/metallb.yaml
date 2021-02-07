@@ -11,13 +11,14 @@ releases:
     namespace: metallb-system
     installed: true
     chart: bitnami/metallb
-    version: 2.0.4
+    version: 2.2.2
     values:
       - controller:
           image:
             repository: metallb/controller
             tag: v0.9.5
         speaker:
+          secretValue: wXuJ5Ronmdq9uG9YlsuF0X2BURyBLz9a34AqsymDwDMleiLTbKApW0mpgI3GulPqGrihWCBjEo5CdNTUkTy9YnvVPu6t8xDFkJrloZ8HVr6GYpjGTL8o715le0dmazHZbyZDkqYFzOaeXZs3q8BZFmysAe1B9zVsEszt1gFgh0uGicibkXgjCyl4E0J3WKpbeIhtDgu1BxR99CHTtI8480teb943Pok2cEJ4pnXb7WWhVMzJCqRJmWv9LwhUTUXH
           image:
             repository: metallb/speaker
             tag: v0.9.5

@@ -7,8 +7,8 @@ releases:
   - name: grafana
     namespace: monitoring
     chart: grafana/grafana
-    version: 6.1.17
-    installed: true
+    version: 6.2.2
+    installed: false
     values:
       - ingress:
           enabled: true
@@ -17,3 +17,4 @@ releases:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         persistence:
           enabled: true
+          size: 1Gi
