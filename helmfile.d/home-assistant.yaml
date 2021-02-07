@@ -3,12 +3,12 @@ repositories:
     url: https://k8s-at-home.com/charts/
 
 releases:
-  # https://hub.helm.sh/charts/bitnami/metallb
+  # TODO: Add link
   - name: home-assistant
     namespace: home-assistant
     installed: false
     chart: k8s-at-home/home-assistant
-    version: 5.0.0
+    version: 5.5.1
     values:
       - ingress:
           enabled: true
