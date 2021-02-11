@@ -3,16 +3,17 @@ repositories:
     url: https://k8s-at-home.com/charts/
 
 releases:
-  # TODO: Add link
+  # https://artifacthub.io/packages/helm/k8s-at-home/home-assistant
   - name: home-assistant
     namespace: home-assistant
-    installed: false
+    installed: true
     chart: k8s-at-home/home-assistant
     version: 5.5.1
     values:
       - ingress:
           enabled: true
           hosts:
-            - ha.k8s.home.lex.la
+            paths:
+              - ha.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
