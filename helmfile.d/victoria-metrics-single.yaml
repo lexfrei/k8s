@@ -8,4 +8,4 @@ releases:
     namespace: monitoring
     chart: vm/victoria-metrics-single
     version: 0.6.13
-    installed: false
+    installed: true
