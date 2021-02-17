@@ -8,12 +8,13 @@ releases:
     namespace: home-assistant
     installed: true
     chart: k8s-at-home/home-assistant
-    version: 5.5.1
+    version: 6.0.1
     values:
       - ingress:
           enabled: true
           hosts:
-            paths:
-              - ha.k8s.home.lex.la
+            - host: ha.k8s.home.lex.la
+              paths:
+                - path: "/"
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
