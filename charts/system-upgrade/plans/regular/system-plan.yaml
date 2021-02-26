@@ -9,6 +9,7 @@ stringData:
   upgrade.sh: |
     #!/bin/sh
     apt update && apt upgrade -y
+    apt autoremove -y
     if [ -f /var/run/reboot-required ]; then
       reboot
     fi
