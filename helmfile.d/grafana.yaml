@@ -7,7 +7,7 @@ releases:
   - name: grafana
     namespace: monitoring
     chart: grafana/grafana
-    version: 6.4.2
+    version: 6.4.4
     installed: true
     values:
       - ingress:
