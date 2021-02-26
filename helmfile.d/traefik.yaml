@@ -11,7 +11,7 @@ releases:
   - name: traefik
     namespace: traefik-system
     chart: traefik/traefik
-    version: 9.14.2
+    version: 9.14.3
     installed: true
     values:
       - service:

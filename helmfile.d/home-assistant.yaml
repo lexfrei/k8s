@@ -15,6 +15,6 @@ releases:
           hosts:
             - host: ha.k8s.home.lex.la
               paths:
-                - path: "/"
+                - path: /
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"

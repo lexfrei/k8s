@@ -6,6 +6,6 @@ releases:
   # https://artifacthub.io/packages/helm/prometheus-community/prometheus-node-exporter
   - name: node-exporter
     namespace: monitoring
-    installed: false
+    installed: true
     chart: prometheus-community/prometheus-node-exporter
     version: 1.15.0
