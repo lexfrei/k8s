@@ -13,8 +13,7 @@ releases:
     values:
       - grafana:
           ingress:
-          enabled: true
-          hosts: ["grafana.k8s.home.lex.la"]
-          annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        
+            enabled: true
+            hosts: ["grafana.k8s.home.lex.la"]
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
