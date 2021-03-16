@@ -8,7 +8,7 @@ releases:
     namespace: monitoring
     chart: grafana/grafana
     version: 6.4.4
-    installed: true
+    installed: false
     values:
       - ingress:
           enabled: true
