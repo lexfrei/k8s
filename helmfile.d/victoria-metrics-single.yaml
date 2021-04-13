@@ -1,11 +1,11 @@
 repositories:
-  - name: vm
+  - name: victoria-metrics
     url: https://victoriametrics.github.io/helm-charts/
 
 releases:
   # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-single
   - name: victoria-metrics-single
     namespace: monitoring
-    chart: vm/victoria-metrics-single
-    version: 0.6.16
+    chart: victoria-metrics/victoria-metrics-single
+    version: 0.6.22
     installed: false
