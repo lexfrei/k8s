@@ -3,18 +3,27 @@ repositories:
     url: https://grafana.github.io/helm-charts
 
 releases:
-  # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-single
+  # https://artifacthub.io/packages/helm/grafana/grafana
   - name: grafana
     namespace: monitoring
     chart: grafana/grafana
-    version: 6.4.4
-    installed: false
+    version: 6.7.4
+    installed: true
     values:
       - ingress:
           enabled: true
           hosts: ["grafana.k8s.home.lex.la"]
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        persistence:
-          enabled: true
-          size: 1Gi
+        admin:
+          existingSecret: grafana-secret
+        adminPassword: admin
+        dashboards:
+          default:
+            node-exporter-stats:
+              gnetId: 11074
+              revision: 9
+              datasource: Prometheus
+        sidecar:
+          dashboards:
+            enabled: true

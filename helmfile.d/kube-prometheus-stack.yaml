@@ -9,11 +9,7 @@ releases:
     namespace: monitoring
     installed: true
     chart: prometheus-community/kube-prometheus-stack
-    version: 13.13.0
+    version: 14.6.2
     values:
       - grafana:
-          ingress:
-            enabled: true
-            hosts: ["grafana.k8s.home.lex.la"]
-            annotations:
-              traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          enabled: false
