@@ -8,4 +8,3 @@ releases:
     namespace: monitoring
     installed: false
     chart: prometheus-community/prometheus-node-exporter
-    version: 1.16.2
