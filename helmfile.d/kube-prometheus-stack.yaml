@@ -9,7 +9,6 @@ releases:
     namespace: monitoring
     installed: true
     chart: prometheus-community/kube-prometheus-stack
-    version: 14.6.2
     values:
       - grafana:
           enabled: false
