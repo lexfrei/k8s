@@ -1,0 +1,13 @@
+version: v0.132.1
+dependencies:
+- name: grafana
+  repository: https://grafana.github.io/helm-charts
+  version: 6.7.5
+- name: prometheus-node-exporter
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 1.18.0
+- name: victoria-metrics-single
+  repository: https://victoriametrics.github.io/helm-charts/
+  version: 0.6.22
+digest: sha256:b808ab0ab64f62e40fd69e8e5e85605e5b69892b51f73fc16cf51cb692f926e3
+generated: "2021-04-21T00:13:55.3624362+03:00"
