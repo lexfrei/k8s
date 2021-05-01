@@ -1,0 +1,48 @@
+repositories:
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+  - name: victoria-metrics
+    url: https://victoriametrics.github.io/helm-charts/
+
+releases:    
+  # https://artifacthub.io/packages/helm/grafana/grafana
+  - name: grafana
+    namespace: monitoring
+    chart: grafana/grafana
+    installed: true
+    values:
+      - ingress:
+          enabled: true
+          hosts: ["grafana.k8s.home.lex.la"]
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        admin:
+          existingSecret: grafana-secret
+        adminPassword: admin
+        dashboards:
+          default:
+            prometheus-stats:
+              url: https://raw.githubusercontent.com/starsliao/Prometheus/master/node_exporter/node-exporter-for-prometheus-dashboard-en.json
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: Prometheus
+                type: prometheus
+                access: proxy
+                url: http://victoria-metrics-single:9000
+                isDefault: true
+
+  # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-single
+  - name: victoria-metrics-single
+    namespace: monitoring
+    chart: victoria-metrics/victoria-metrics-single
+    installed: true
+
+  # https://artifacthub.io/packages/helm/prometheus-community/prometheus-node-exporter
+  - name: node-exporter
+    namespace: monitoring
+    installed: true
+    chart: prometheus-community/prometheus-node-exporter
