@@ -6,7 +6,7 @@ releases:
   # https://artifacthub.io/packages/helm/k8s-at-home/heimdall
   - name: heimdall
     namespace: heimdall
-    installed: true
+    installed: false
     chart: k8s-at-home/heimdall
     values:
       - ingress:
