@@ -1,22 +1,64 @@
 repositories:
   - name: grafana
     url: https://grafana.github.io/helm-charts
-  - name: prometheus-community
-    url: https://prometheus-community.github.io/helm-charts
   - name: victoria-metrics
     url: https://victoriametrics.github.io/helm-charts/
 
 releases:    
   # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-k8s-stack
   - name: victoria-metrics-k8s-stack
-    namespace: monitoring
+    namespace: monitoring-huetoring
     chart: victoria-metrics/victoria-metrics-k8s-stack
     installed: true
     values:
       - grafana:
-          ingress:
+          enabled: false
+
+  - name: grafana
+    namespace: monitoring
+    chart: grafana/grafana
+    installed: true
+    values:
+      - ingress:
+          enabled: true
+          hosts: 
+            - grafana.k8s.home.lex.la
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        adminPassword: admin
+        dashboards:
+          default:
+            victoriametrics:
+              url: https://raw.githubusercontent.com/VictoriaMetrics/VictoriaMetrics/master/dashboards/victoriametrics.json
+            vmagent:
+              url: https://raw.githubusercontent.com/VictoriaMetrics/VictoriaMetrics/master/dashboards/vmagent.json
+            nodeexporter:
+              gnetId: 1860
+              revision: 22
+              datasource: VictoriaMetrics
+            prometheus-stats:
+              gnetId: 11074
+              revision: 9
+              datasource: VictoriaMetrics
+            longhorn-stats:
+              gnetId: 13032
+              revision: 6
+              datasource: VictoriaMetrics
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: VictoriaMetrics
+                type: prometheus
+                url: "http://vmsingle-victoria-metrics-k8s-stack.monitoring.svc:8429"
+                access: proxy
+                isDefault: true
+        sidecar:
+          datasources:
             enabled: true
-            annotations: 
-              traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-            hosts:
-              - grafana.k8s.home.lex.la
+          dashboards:
+            enabled: true
+        defaultDashboardsEnabled: true
+        persistence:
+          enabled: true
+          size: 1Gi
