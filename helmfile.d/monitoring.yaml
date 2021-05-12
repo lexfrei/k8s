@@ -24,6 +24,11 @@ releases:
               resources:
                 requests:
                   storage: 4Gi
+            securityContext:
+              runAsUser: 1000
+              fsGroup: 1000
+              runAsGroup: 1000
+
         vmagent:
           enabled: true
           spec:
