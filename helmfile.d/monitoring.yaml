@@ -28,7 +28,7 @@ releases:
               runAsUser: 1000
               fsGroup: 1000
               runAsGroup: 1000
-
+            containerWorkingDir: "/tmp"
         vmagent:
           enabled: true
           spec:
