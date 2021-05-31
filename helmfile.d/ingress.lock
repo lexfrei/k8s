@@ -2,9 +2,9 @@ version: v0.132.1
 dependencies:
 - name: metallb
   repository: https://charts.bitnami.com/bitnami
-  version: 2.3.7
+  version: 2.4.0
 - name: traefik
   repository: https://helm.traefik.io/traefik
   version: 9.19.1
-digest: sha256:10e4d8d0db2af49086506a10b03e20e3c4accb5bb03f12fca367bf9a610ff0f0
-generated: "2021-05-23T12:06:19.2912267+03:00"
+digest: sha256:ace21e239f929009e3b350a155be5b6b3d1f8af63395175c52b98e5f019be05b
+generated: "2021-05-27T11:08:54.6089214+03:00"

@@ -35,7 +35,8 @@ releases:
             scrapeInterval: 25s
             extraArgs:
               promscrape.streamParse: "true"
-
+              
+  # https://artifacthub.io/packages/helm/grafana/grafana
   - name: grafana
     namespace: monitoring
     chart: grafana/grafana
