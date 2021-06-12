@@ -10,10 +10,12 @@ releases:
     chart: k8s-at-home/home-assistant
     values:
       - ingress:
-          enabled: true
-          hosts:
-            - host: ha.k8s.home.lex.la
-              paths:
-                - path: /
-          annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          main:
+            enabled: true
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+            hosts:
+              - host: ha.k8s.home.lex.la
+                paths:
+                  - path: /
+
