@@ -2,6 +2,6 @@ version: v0.132.1
 dependencies:
 - name: heimdall
   repository: https://k8s-at-home.com/charts/
-  version: 6.4.0
-digest: sha256:b3d018ab00cc9ddb5488843fb0e51da38815ffc20adffcffb6a45ab0315fd19d
-generated: "2021-05-05T19:24:34.3334832+03:00"
+  version: 7.0.0
+digest: sha256:43817cd4aced4f6a65527789cc35e0d8a128306bccebf02c167622197cdf2dd6
+generated: "2021-06-14T16:02:41.3925585+03:00"

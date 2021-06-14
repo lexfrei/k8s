@@ -18,4 +18,3 @@ releases:
               - host: ha.k8s.home.lex.la
                 paths:
                   - path: /
-
