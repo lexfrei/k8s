@@ -1,0 +1,14 @@
+{
+    "extends": [":pinDependencies"],
+    "major": {
+        "stabilityDays": 3
+    },
+    "schedule": [
+        "before 2am"
+    ],
+    "timezone": "Europe/Moscow",
+    "packageRules": [{
+        "managers": ["helmfile"],
+        "fileMatch": "(^|/)helmfile.d\/.*\\.yaml$"
+    }]
+}
