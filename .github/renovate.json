@@ -6,6 +6,7 @@
     "schedule": [
         "before 2am"
     ],
+    "dependencyDashboard": true,
     "timezone": "Europe/Moscow",
     "helmfile": {
         "fileMatch": "(^|/)helmfile.d\/.*\\.yaml$"
