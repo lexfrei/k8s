@@ -1,4 +1,4 @@
-version: v0.132.1
+version: v0.139.9
 dependencies:
 - name: heimdall
   repository: https://k8s-at-home.com/charts/
