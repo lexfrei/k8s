@@ -4,7 +4,7 @@ repositories:
   - name: victoria-metrics
     url: https://victoriametrics.github.io/helm-charts/
 
-releases:    
+releases:
   # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-k8s-stack
   - name: victoria-metrics-k8s-stack
     namespace: monitoring
@@ -15,27 +15,9 @@ releases:
           enabled: false
         vmsingle:
           spec:
-            retentionPeriod: "12"
-            replicaCount: 1
-            removePvcAfterDelete: true
-            storage:
-              accessModes:
-                - ReadWriteOnce
-              resources:
-                requests:
-                  storage: 4Gi
-            securityContext:
-              runAsUser: 1000
-              fsGroup: 1000
-              runAsGroup: 1000
-            containerWorkingDir: "/tmp"
-        vmagent:
-          enabled: true
-          spec:
-            scrapeInterval: 25s
-            extraArgs:
-              promscrape.streamParse: "true"
-              
+            persistentVolume:
+              storageClass: "longhorn-ssd"
+
   # https://artifacthub.io/packages/helm/grafana/grafana
   - name: grafana
     namespace: monitoring
@@ -44,7 +26,7 @@ releases:
     values:
       - ingress:
           enabled: true
-          hosts: 
+          hosts:
             - grafana.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
@@ -58,29 +40,29 @@ releases:
               url: https://raw.githubusercontent.com/VictoriaMetrics/VictoriaMetrics/master/dashboards/vmagent.json
             nodeexporter:
               gnetId: 1860
-              revision: 22
+              revision: 23
               datasource: VictoriaMetrics
             prometheus-stats:
               gnetId: 11074
               revision: 9
               datasource: VictoriaMetrics
-            longhorn-stats:
-              gnetId: 13032
-              revision: 6
-              datasource: VictoriaMetrics
+            # longhorn-stats:
+            #   gnetId: 13032
+            #   revision: 6
+            #   datasource: Prometheus
         dashboardProviders:
           dashboardproviders.yaml:
             apiVersion: 1
             providers:
-            - name: 'default'
-              orgId: 1
-              folder: ''
-              type: file
-              disableDeletion: false
-              editable: true
-              options:
-                path: /var/lib/grafana/dashboards/default
-        ##
+              - name: "default"
+                orgId: 1
+                folder: ""
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards/default
+        #
         datasources:
           datasources.yaml:
             apiVersion: 1
@@ -98,3 +80,4 @@ releases:
         persistence:
           enabled: true
           size: 1Gi
+          storageClassName: "longhorn-main"

@@ -48,6 +48,7 @@ releases:
           - "--global.checknewversion"
         persistence:
           enabled: true
+          storageClass: "longhorn-main"
         deployment:
           initContainers:
             # The "volume-permissions" init container is required if you run into permission issues.
