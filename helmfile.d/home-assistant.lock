@@ -2,6 +2,6 @@ version: v0.132.1
 dependencies:
 - name: home-assistant
   repository: https://k8s-at-home.com/charts/
-  version: 9.3.0
-digest: sha256:d90da1ac5a50a06c970ee71b3ef988d74ff651fe4d4db493288977ea9d43fb8a
-generated: "2021-07-17T15:28:37.6103534+03:00"
+  version: 10.0.0
+digest: sha256:843ca9bb4c13079f55ded7070bc8aeb2924af1ddd722243043583a5555a211d9
+generated: "2021-08-14T20:50:17.8252181+03:00"
