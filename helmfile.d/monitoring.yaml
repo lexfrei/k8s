@@ -46,6 +46,10 @@ releases:
               gnetId: 11074
               revision: 9
               datasource: VictoriaMetrics
+            traefik-stats:
+              gnetId: 4475
+              revision: 5
+              datasource: VictoriaMetrics
             # longhorn-stats:
             #   gnetId: 13032
             #   revision: 6
@@ -85,6 +89,10 @@ releases:
           enabled: true
           size: 1Gi
           storageClassName: "longhorn-main"
+        # plugins:
+        #   - grafana-image-renderer
+        deploymentStrategy:
+          type: Recreate
 
   - name: loki-stack
     namespace: monitoring
@@ -96,11 +104,19 @@ releases:
             enabled: true
             size: 20Gi
             storageClassName: "longhorn-ssd"
+          ingress:
+            enabled: true
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+            hosts:
+              - host: loki.k8s.home.lex.la
+                paths:
+                  - /loki
         promtail:
           extraScrapeConfigs:
             - job_name: journal
               journal:
-                path: /var/log/journal
+                path: /run/log/journal
                 max_age: 12h
                 labels:
                   job: systemd-journal
@@ -112,8 +128,8 @@ releases:
           extraVolumes:
             - name: journal
               hostPath:
-                path: /var/log/journal
+                path: /run/log/journal
           extraVolumeMounts:
             - name: journal
-              mountPath: /var/log/journal
+              mountPath: /run/log/journal
               readOnly: true

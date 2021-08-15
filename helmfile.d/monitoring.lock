@@ -2,12 +2,12 @@ version: v0.132.1
 dependencies:
 - name: grafana
   repository: https://grafana.github.io/helm-charts
-  version: 6.14.1
+  version: 6.15.0
 - name: loki-stack
   repository: https://grafana.github.io/helm-charts
   version: 2.4.1
 - name: victoria-metrics-k8s-stack
   repository: https://victoriametrics.github.io/helm-charts/
-  version: 0.3.2
-digest: sha256:7c488d453e5ad9d04acca271add0deff314e61f308486139b09b4ce7be82a673
-generated: "2021-07-30T17:24:59.9417727+03:00"
+  version: 0.3.3
+digest: sha256:35eeffcbc9d6525a6937f66c414a8835a5776dd36c27e8448fed1d9a4752117f
+generated: "2021-08-14T20:50:49.2778069+03:00"
