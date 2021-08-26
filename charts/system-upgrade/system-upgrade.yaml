@@ -82,6 +82,8 @@ spec:
           name: etc-ssl
         - mountPath: /etc/pki
           name: etc-pki
+        - mountPath: /etc/ca-certificates
+          name: etc-ca-certificates
         - mountPath: /tmp
           name: tmp
       serviceAccountName: system-upgrade
@@ -109,5 +111,9 @@ spec:
           path: /etc/pki
           type: DirectoryOrCreate
         name: etc-pki
+      - hostPath:
+          path: /etc/ca-certificates
+          type: DirectoryOrCreate
+        name: etc-ca-certificates
       - emptyDir: {}
         name: tmp
