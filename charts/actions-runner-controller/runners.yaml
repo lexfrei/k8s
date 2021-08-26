@@ -1,0 +1,6 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: Runner
+metadata:
+  name: vk2tg-runner
+spec:
+  repository: lexfrei/vk2tg

@@ -1,0 +1,13 @@
+repositories:
+  - name: jetstack 
+    url: https://charts.jetstack.io
+
+releases:
+  # https://artifacthub.io/packages/helm/cert-manager/cert-manager
+  - name: cert-manager
+    namespace: cert-manager
+    installed: true
+    chart: jetstack/cert-manager
+    # values:
+    #   - installCRDs: true
+
