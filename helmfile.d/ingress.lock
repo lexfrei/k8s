@@ -7,4 +7,4 @@ dependencies:
   repository: https://helm.traefik.io/traefik
   version: 10.3.2
 digest: sha256:ab517e10d3345eb3ea6a10727f91c495c14bc4984bae2227609067b2ebbfd0fd
-generated: "2021-08-23T22:14:27.7089008+03:00"
+generated: "2021-08-31T21:04:50.029633+03:00"
