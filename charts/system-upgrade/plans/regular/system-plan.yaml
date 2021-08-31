@@ -18,7 +18,7 @@ stringData:
 apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
-  name: system-upgrade-server
+  name: system-upgrade-server-plan
   namespace: system-upgrade
 spec:
   concurrency: 1
@@ -31,7 +31,7 @@ spec:
           - "true"
   serviceAccountName: system-upgrade
   secrets:
-    - name: system-upgrade-secret
+    - name: system-upgrade-secret-plan
       path: /host/run/system-upgrade/secrets
   version: focal
   upgrade:

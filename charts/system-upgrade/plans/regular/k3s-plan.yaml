@@ -1,7 +1,7 @@
 apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
-  name: server-plan
+  name: k3s-upgrade-server-plan
   namespace: system-upgrade
 spec:
   concurrency: 1
@@ -16,11 +16,12 @@ spec:
   upgrade:
     image: rancher/k3s-upgrade
   channel: https://update.k3s.io/v1-release/channels/latest
+
 ---
 apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
-  name: agent-plan
+  name: k3s-upgrade-agent-plan
   namespace: system-upgrade
 spec:
   concurrency: 1
