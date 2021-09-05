@@ -6,10 +6,5 @@ releases:
   # https://github.com/actions-runner-controller/actions-runner-controller/blob/master/charts/actions-runner-controller/README.md
   - name: actions-runner-controller
     namespace: actions-runner-system
-    installed: false
+    installed: true
     chart: actions-runner-controller/actions-runner-controller
-    values:
-      - authSecret:
-          github_token: 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
-
-
