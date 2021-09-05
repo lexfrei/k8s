@@ -1,6 +1,19 @@
 apiVersion: actions.summerwind.dev/v1alpha1
-kind: Runner
+kind: RunnerDeployment
 metadata:
   name: vk2tg-runner
+  namespace: actions-runner-system
 spec:
-  repository: lexfrei/vk2tg
+  replicas: 1
+  template:
+    spec:
+      repository: lexfrei/vk2tg
+      imagePullPolicy: Always
+      resources:
+        limits:
+          cpu: "4.0"
+          memory: "2Gi"
+        requests:
+          cpu: "2.0"
+          memory: "1Gi"
+      dockerRegistryMirror: https://mirror.gcr.io/
