@@ -1,5 +1,5 @@
 repositories:
-  - name: jetstack 
+  - name: jetstack
     url: https://charts.jetstack.io
 
 releases:

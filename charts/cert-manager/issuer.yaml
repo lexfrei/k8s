@@ -10,9 +10,9 @@ spec:
     privateKeySecretRef:
       name: cf-issuer-secret
     solvers:
-    - dns01:
-        cloudflare:
-          email: f@lex.la
-          apiTokenSecretRef:
-            name: cf-token
-            key: token
+      - dns01:
+          cloudflare:
+            email: f@lex.la
+            apiTokenSecretRef:
+              name: cf-token
+              key: token

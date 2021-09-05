@@ -17,8 +17,8 @@ spec:
         - name: vk2tg
           image: ghcr.io/lexfrei/vk2tg/vk2tg:sha-97eea0c
           envFrom:
-          - secretRef:
-              name: vk2tg
+            - secretRef:
+                name: vk2tg
           resources:
             limits:
               cpu: 100m

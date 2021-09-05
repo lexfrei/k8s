@@ -1,5 +1,5 @@
 repositories:
-  - name: actions-runner-controller 
+  - name: actions-runner-controller
     url: https://actions-runner-controller.github.io/actions-runner-controller
 
 releases:
