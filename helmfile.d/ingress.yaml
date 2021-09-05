@@ -1,7 +1,7 @@
 repositories:
   - name: traefik
     url: https://helm.traefik.io/traefik
-  - name:  metallb
+  - name: metallb
     url: https://metallb.github.io/metallb
 
 releases:
@@ -13,14 +13,14 @@ releases:
     values:
       - configInline:
           address-pools:
-          - name: default
-            protocol: layer2
-            addresses:
-            - 192.168.6.0/24
-          - name: traefik
-            protocol: layer2
-            addresses:
-            - 192.168.5.200/32
+            - name: default
+              protocol: layer2
+              addresses:
+                - 192.168.6.0/24
+            - name: traefik
+              protocol: layer2
+              addresses:
+                - 192.168.5.200/32
 
   # https://artifacthub.io/packages/helm/traefik/traefik
   #
