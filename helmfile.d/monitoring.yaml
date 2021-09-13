@@ -5,7 +5,7 @@ repositories:
     url: https://victoriametrics.github.io/helm-charts/
 
 releases:
-  # https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-k8s-stack
+  # https://artifacthub.io/packages/helm/victoriametrics/victoria-metrics-k8s-stack
   - name: victoria-metrics-k8s-stack
     namespace: monitoring
     chart: victoria-metrics/victoria-metrics-k8s-stack
@@ -88,12 +88,13 @@ releases:
         persistence:
           enabled: true
           size: 1Gi
-          storageClassName: "longhorn-main"
+          storageClassName: "longhorn-ssd"
         # plugins:
         #   - grafana-image-renderer
         deploymentStrategy:
           type: Recreate
 
+  # https://artifacthub.io/packages/helm/grafana/loki-stack
   - name: loki-stack
     namespace: monitoring
     chart: grafana/loki-stack
