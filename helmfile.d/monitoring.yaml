@@ -17,6 +17,8 @@ releases:
           spec:
             persistentVolume:
               storageClass: "longhorn-ssd"
+        victoria-metrics-operator:
+          createCRD: true
 
   # https://artifacthub.io/packages/helm/grafana/grafana
   - name: grafana
