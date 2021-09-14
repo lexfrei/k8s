@@ -14,11 +14,9 @@ releases:
       - grafana:
           enabled: false
         vmsingle:
-          spec:
+          server:
             persistentVolume:
               storageClass: "longhorn-ssd"
-        victoria-metrics-operator:
-          createCRD: true
 
   # https://artifacthub.io/packages/helm/grafana/grafana
   - name: grafana
