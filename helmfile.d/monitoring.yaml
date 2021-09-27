@@ -16,7 +16,7 @@ releases:
         vmsingle:
           server:
             persistentVolume:
-              storageClass: "longhorn-ssd"
+              storageClassName: "longhorn-ssd"
 
   # https://artifacthub.io/packages/helm/grafana/grafana
   - name: grafana
@@ -98,21 +98,13 @@ releases:
   - name: loki-stack
     namespace: monitoring
     chart: grafana/loki-stack
-    installed: true
+    installed: false
     values:
       - loki:
           persistence:
             enabled: true
             size: 20Gi
             storageClassName: "longhorn-ssd"
-          ingress:
-            enabled: true
-            annotations:
-              traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-            hosts:
-              - host: loki.k8s.home.lex.la
-                paths:
-                  - /loki
         promtail:
           extraScrapeConfigs:
             - job_name: journal
