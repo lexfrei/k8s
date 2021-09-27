@@ -9,7 +9,7 @@ stringData:
   upgrade.sh: |
     #!/bin/sh
     dpkg --configure -a
-    apt-get update && apt-get --with-new-pkgs dist-upgrade -y
+    apt-get update && apt-get dist-upgrade -y
     apt-get autoremove -y
     apt-get autoclean
     if [ -f /var/run/reboot-required ]; then
