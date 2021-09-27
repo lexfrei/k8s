@@ -8,6 +8,7 @@ type: Opaque
 stringData:
   upgrade.sh: |
     #!/bin/sh
+    dpkg --configure -a
     apt-get update && apt-get --with-new-pkgs upgrade -y
     apt-get autoremove -y
     apt-get autoclean
@@ -18,39 +19,10 @@ stringData:
 apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
-  name: system-upgrade-server-plan
+  name: system-upgrade-plan
   namespace: system-upgrade
 spec:
   concurrency: 1
-  cordon: true
-  nodeSelector:
-    matchExpressions:
-      - key: node-role.kubernetes.io/control-plane
-        operator: In
-        values:
-          - "true"
-  serviceAccountName: system-upgrade
-  secrets:
-    - name: system-upgrade-secret-plan
-      path: /host/run/system-upgrade/secrets
-  version: focal
-  upgrade:
-    image: ubuntu:focal
-    command: ["chroot", "/host"]
-    args: ["sh", "/run/system-upgrade/secrets/upgrade.sh"]
----
-apiVersion: upgrade.cattle.io/v1
-kind: Plan
-metadata:
-  name: system-upgrade-agent
-  namespace: system-upgrade
-spec:
-  concurrency: 1
-  cordon: true
-  nodeSelector:
-    matchExpressions:
-      - key: node-role.kubernetes.io/control-plane
-        operator: DoesNotExist
   serviceAccountName: system-upgrade
   secrets:
     - name: system-upgrade-secret
