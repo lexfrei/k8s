@@ -9,9 +9,8 @@ stringData:
   upgrade.sh: |
     #!/bin/sh
     dpkg --configure -a
-    apt-get update && apt-get dist-upgrade -y
-    apt-get autoremove -y
-    apt-get autoclean
+    apt-get -q update
+    apt-get -qy dist-upgrade --auto-remove --purge
     if [ -f /var/run/reboot-required ]; then
       echo 'reboot' | at midnight + 5hours
     fi
@@ -42,7 +41,7 @@ metadata:
   name: system-upgrade-agent-plan
   namespace: system-upgrade
 spec:
-  concurrency: 1
+  concurrency: 3
   nodeSelector:
     matchExpressions:
       - { key: node-role.kubernetes.io/control-plane, operator: DoesNotExist }
