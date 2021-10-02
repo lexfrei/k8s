@@ -9,8 +9,8 @@ stringData:
   upgrade.sh: |
     #!/bin/sh
     dpkg --configure -a
-    apt-get -q update
-    apt-get -qy dist-upgrade --auto-remove --purge
+    apt-get --quiet update
+    apt-get --quiet --assume-yes dist-upgrade --auto-remove --purge
     if [ -f /var/run/reboot-required ]; then
       echo 'reboot' | at midnight + 5hours
     fi
