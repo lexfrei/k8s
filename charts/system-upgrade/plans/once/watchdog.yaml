@@ -17,7 +17,6 @@ stringData:
     realtime                = yes
     priority                = 1
     temperature-sensor      = /sys/class/thermal/thermal_zone0/temp
-    temperature-device      = /sys/class/thermal/thermal_zone0/temp
     max-temperature         = 85
     ' > /etc/watchdog.conf
     systemctl enable --now watchdog
