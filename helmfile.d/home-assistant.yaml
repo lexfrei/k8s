@@ -6,7 +6,7 @@ releases:
   # https://artifacthub.io/packages/helm/k8s-at-home/home-assistant
   - name: home-assistant
     namespace: home-assistant
-    installed: true
+    installed: false
     chart: k8s-at-home/home-assistant
     values:
       - ingress:
