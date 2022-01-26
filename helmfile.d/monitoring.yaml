@@ -9,7 +9,7 @@ releases:
   - name: victoria-metrics-k8s-stack
     namespace: monitoring
     chart: victoria-metrics/victoria-metrics-k8s-stack
-    installed: true
+    installed: false
     values:
       - grafana:
           enabled: false
@@ -98,7 +98,7 @@ releases:
   - name: loki-stack
     namespace: monitoring
     chart: grafana/loki-stack
-    installed: false
+    installed: true
     values:
       - loki:
           persistence:

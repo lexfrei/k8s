@@ -21,7 +21,7 @@ metadata:
   name: system-upgrade-server-plan
   namespace: system-upgrade
 spec:
-  concurrency: 1
+  # concurrency: 1
   nodeSelector:
     matchExpressions:
       - { key: node-role.kubernetes.io/control-plane, operator: Exists }
@@ -41,7 +41,7 @@ metadata:
   name: system-upgrade-agent-plan
   namespace: system-upgrade
 spec:
-  concurrency: 3
+  # concurrency: 3
   nodeSelector:
     matchExpressions:
       - { key: node-role.kubernetes.io/control-plane, operator: DoesNotExist }
