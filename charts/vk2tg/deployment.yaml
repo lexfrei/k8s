@@ -5,6 +5,8 @@ metadata:
   namespace: default
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: vk2tg
@@ -15,14 +17,53 @@ spec:
     spec:
       containers:
         - name: vk2tg
-          image: ghcr.io/lexfrei/vk2tg:latest@sha256:4afa13a67d97ec1aac0fe2821774ff598da315c4f002f8e36b34f7de1fbc0d1c
+          image: ghcr.io/lexfrei/vk2tg:sha-0f0d8ac
           envFrom:
             - secretRef:
                 name: vk2tg
+          imagePullPolicy: Always
           resources:
             limits:
               cpu: 100m
               memory: 50Mi
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            capabilities:
+              drop:
+                - all
+            readOnlyRootFilesystem: true
+        - name: redis
+          image: redis:6.2.6-alpine
+          command:
+            - redis-server
+          env:
+            - name: MASTER
+              value: "true"
+          ports:
+            - containerPort: 6379
+          resources:
+            limits:
+              cpu: "0.1"
+              memory: 100Mi
+          volumeMounts:
+            - mountPath: /data
+              name: redis-storage
+      volumes:
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: redis-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-main
+  resources:
+    requests:
+      storage: 500Mi
