@@ -1,0 +1,15 @@
+apiVersion: tor.k8s.torproject.org/v1alpha2
+kind: OnionService
+metadata:
+  name: example-onion-service
+  namespace: kubernetes-dashboard
+spec:
+  version: 3
+  rules:
+    - port:
+        number: 80
+      backend:
+        service:
+          name: kubernetes-dashboard
+          port:
+            number: 443

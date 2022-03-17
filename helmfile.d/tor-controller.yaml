@@ -1,0 +1,10 @@
+repositories:
+  - name: bugfest
+    url: https://bugfest.github.io/tor-controller
+
+releases:
+  # https://github.com/bugfest/tor-controller/tree/master/charts/tor-controller
+  - name: tor-controller
+    namespace: tor-controller
+    installed: true
+    chart: bugfest/tor-controller

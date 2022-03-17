@@ -6,7 +6,7 @@ releases:
   # https://artifacthub.io/packages/helm/cert-manager/cert-manager
   - name: cert-manager
     namespace: cert-manager
-    installed: true
+    installed: false
     chart: jetstack/cert-manager
     # values:
     #   - installCRDs: true
