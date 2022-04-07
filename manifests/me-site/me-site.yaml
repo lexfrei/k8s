@@ -1,48 +1,69 @@
-apiVersion: apps/v1
 kind: Deployment
+apiVersion: apps/v1
 metadata:
-  name: http-app
+  name: me-site
+  namespace: default
+  labels:
+    app: me-site
 spec:
-  replicas: 2
+  replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
-      app: http-app
+      app: me-site
   template:
     metadata:
       labels:
-        app: http-app
+        app: me-site
     spec:
       containers:
-      - name: http-app
-        image: quay.io/bugfest/echoserver:2.5
-        ports:
-        - containerPort: 8080
+        - name: me-site
+          image: ghcr.io/lexfrei/me-site:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 100m
+              memory: 50Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            capabilities:
+              drop:
+                - all
+            readOnlyRootFilesystem: true
+          ports:
+            - name: web
+              containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: http-app
+  namespace: default
+  name: me-site
   labels:
-    app: http-app
+    app: me-site
 spec:
   ports:
-  - port: 8080
-    protocol: TCP
-    targetPort: 8080
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
   selector:
-    app: http-app
+    app: me-site
 ---
-apiVersion: tor.k8s.torproject.org/v1alpha2
-kind: OnionService
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
-  name: example-onion-service
+  namespace: default
+  name: me-site
 spec:
-  version: 3
-  rules:
-    - port:
-        number: 80
-      backend:
-        service:
-          name: http-app
-          port:
-            number: 8080
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`me.k8s.home.lex.la`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: me-site
+          port: 8080
