@@ -1,4 +1,4 @@
-version: v0.140.0
+version: v0.142.0
 dependencies:
 - name: tor-controller
   repository: https://bugfest.github.io/tor-controller

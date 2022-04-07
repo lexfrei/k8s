@@ -1,10 +1,10 @@
-version: v0.140.0
+version: v0.142.0
 dependencies:
 - name: metallb
   repository: https://metallb.github.io/metallb
   version: 0.12.1
 - name: traefik
   repository: https://helm.traefik.io/traefik
-  version: 10.15.0
-digest: sha256:8069a6b92ea3c5619960e7c4101801c9d4f382c52c984ff95d7fe72a064bced0
-generated: "2022-03-11T20:04:50.4925719+03:00"
+  version: 10.19.4
+digest: sha256:7c92ec59ec09f96a7eaaf2267a77cc72a4c481ffe7fbd204c8e94f52e42611e2
+generated: "2022-04-08T00:08:30.11172+03:00"
