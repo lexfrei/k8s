@@ -5,13 +5,19 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-    - 192.168.6.0/24
+    - 192.168.16.0/24
 ---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: traefik
+  name: ingress-pool
   namespace: metallb-system
 spec:
   addresses:
-    - 192.168.5.200/32
+    - 192.168.1.200/32
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: advertisement
+  namespace: metallb-system

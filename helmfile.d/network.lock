@@ -1,0 +1,16 @@
+version: v0.151.0
+dependencies:
+- name: coredns
+  repository: https://coredns.github.io/helm
+  version: 1.19.7
+- name: metallb
+  repository: https://metallb.github.io/metallb
+  version: 0.13.9
+- name: tor-controller
+  repository: https://bugfest.github.io/tor-controller
+  version: 0.1.10
+- name: traefik
+  repository: https://helm.traefik.io/traefik
+  version: 21.2.0
+digest: sha256:b6b65739c4402c9b1454fbb9e050fb6eed5cc4ebf6a24d2791b542a16b35eb8b
+generated: "2023-03-11T01:50:19.513726+03:00"

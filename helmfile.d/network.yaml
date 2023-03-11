@@ -3,12 +3,39 @@ repositories:
     url: https://helm.traefik.io/traefik
   - name: metallb
     url: https://metallb.github.io/metallb
+  - name: bugfest
+    url: https://bugfest.github.io/tor-controller
+  - name: coredns
+    url: https://coredns.github.io/helm
 
 releases:
+  # Currently disabled due bug
+  # It's not possible to install via helmfile
+  # Error: namespaces "kube-flannel" already exists
+  - name: flannel
+    namespace: kube-flannel
+    chart: "https://github.com/flannel-io/flannel/releases/download/v0.21.3/flannel.tgz"
+    installed: false
+    values:
+      - podCidr: "10.244.0.0/16"
+        flannel:
+          backend: "wireguard"
+
+  - name: coredns
+    namespace: kube-system
+    chart: coredns/coredns
+    installed: true
+
+  # https://github.com/bugfest/tor-controller/tree/master/charts/tor-controller
+  - name: tor-controller
+    namespace: tor-controller
+    installed: false
+    chart: bugfest/tor-controller
+
   # https://github.com/metallb/metallb/tree/main/charts/metallb
   - name: metallb
     namespace: metallb-system
-    installed: true
+    installed: false
     chart: metallb/metallb
 
   # https://artifacthub.io/packages/helm/traefik/traefik
@@ -19,11 +46,11 @@ releases:
   - name: traefik
     namespace: traefik-system
     chart: traefik/traefik
-    installed: true
+    installed: false
     values:
       - service:
           annotations:
-            metallb.universe.tf/address-pool: traefik
+            metallb.universe.tf/address-pool: ingress-pool
         additionalArguments:
           # Disable internal ssl check
           - "--serversTransport.insecureSkipVerify=true"
@@ -35,9 +62,8 @@ releases:
           - "--entrypoints.websecure.http.tls.certresolver=prodssl"
         globalArguments:
           - "--global.checknewversion"
-        persistence:
-          enabled: true
-          storageClass: "longhorn-main"
+        # persistence:
+        #   enabled: true
         deployment:
           initContainers:
             # The "volume-permissions" init container is required if you run into permission issues.

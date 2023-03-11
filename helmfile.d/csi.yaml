@@ -9,10 +9,10 @@ releases:
     installed: true
     chart: longhorn/longhorn
     values:
-      - defaultSettings:
-          defaultDataPath: "/mnt/storage"
-        ingress:
+      - ingress:
           enabled: true
           host: longhorn.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        # defaultSettings:
+        #   defaultDataPath: "/mnt/storage"
