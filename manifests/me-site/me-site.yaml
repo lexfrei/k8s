@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: me-site
-          image: ghcr.io/lexfrei/me-site:latest
+          image: ghcr.io/lexfrei/me-site:sha-7cb10cc
           imagePullPolicy: Always
           resources:
             limits:
@@ -53,17 +53,20 @@ spec:
   selector:
     app: me-site
 ---
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+apiVersion: tor.k8s.torproject.org/v1alpha2
+kind: OnionService
 metadata:
+  name: me-site-onion-service
   namespace: default
-  name: me-site
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`me.k8s.home.lex.la`) && PathPrefix(`/`)
-      kind: Rule
-      services:
-        - name: me-site
-          port: 8080
+  version: 3
+  rules:
+    - port:
+        number: 80
+      backend:
+        service:
+          name: me-site
+          port:
+            number: 8080
+  privateKeySecret:
+    name: me-site-onion-secret

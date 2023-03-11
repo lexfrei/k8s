@@ -1,7 +1,0 @@
-version: v0.147.0
-dependencies:
-  - name: tor-controller
-    repository: https://bugfest.github.io/tor-controller
-    version: 0.1.7
-digest: sha256:2bad3256d75a0d27791cf66d9dc6ffb1ed0850d24a32408fd781e1d8808f647c
-generated: "2022-10-15T22:15:06.092196+03:00"

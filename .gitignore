@@ -1,1 +1,3 @@
 manifests/vk2tg/deployment-test.yaml
+inventory/*/artifacts/**
+inventory/*/credentials/**

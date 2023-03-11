@@ -22,7 +22,7 @@ releases:
   - name: grafana
     namespace: monitoring
     chart: grafana/grafana
-    installed: true
+    installed: false
     values:
       - ingress:
           enabled: true
@@ -98,7 +98,7 @@ releases:
   - name: loki-stack
     namespace: monitoring
     chart: grafana/loki-stack
-    installed: true
+    installed: false
     values:
       - loki:
           persistence:
@@ -126,3 +126,13 @@ releases:
             - name: journal
               mountPath: /run/log/journal
               readOnly: true
+
+  # https://artifacthub.io/packages/helm/metrics-server/metrics-server
+  - name: metrics-server
+    namespace: kube-system
+    chart: metrics-server/metrics-server
+    installed: true
+    values:
+      - args:
+          - --kubelet-insecure-tls
+          - --kubelet-preferred-address-types=InternalIP
