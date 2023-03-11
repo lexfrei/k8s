@@ -12,6 +12,7 @@ releases:
   # Currently disabled due bug
   # It's not possible to install via helmfile
   # Error: namespaces "kube-flannel" already exists
+  # https://github.com/flannel-io/flannel/issues/1740
   - name: flannel
     namespace: kube-flannel
     chart: "https://github.com/flannel-io/flannel/releases/download/v0.21.3/flannel.tgz"
