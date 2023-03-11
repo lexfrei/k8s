@@ -14,5 +14,5 @@ releases:
           host: longhorn.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        # defaultSettings:
-        #   defaultDataPath: "/mnt/storage"
+        defaultSetting:
+          defaultReplicaCount: 1
