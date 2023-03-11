@@ -27,7 +27,8 @@ Kubernetes cluster ready for use on RPis or any other arm64 systems
 9. Run `systemctl disable --now firewalld` to disable firewall
 10. Run `nmcli radio all off` to disable wifi (you can't use it with MetalLB)
 11. Set hostname with `hostnamectl hostname node01`
-12. Reboot
+12. Resize root partition with `growpart /dev/sda 3` and `resize2fs /dev/sda3`
+13. Reboot
 
 On your host:
 
