@@ -9,16 +9,25 @@ repositories:
     url: https://coredns.github.io/helm
 
 releases:
-  # Currently disabled due bug
-  # It's not possible to install via helmfile
-  # Error: namespaces "kube-flannel" already exists
-  # https://github.com/flannel-io/flannel/issues/1740
+  # Currently using forked flannel chart
+  # Waiting for PR
+  # https://github.com/flannel-io/flannel/pull/1741/files
+  #
+  # Pre-install:
+  # Note: Flannel requires CNI plugins to be installed in /opt/cni/bin
+  # Check arch in the link below 
+  #
+  # mkdir -p /opt/cni/bin
+  # curl -O -L https://github.com/containernetworking/plugins/releases/download/v1.2.0/cni-plugins-linux-arm64-v1.2.0.tgz
+  # tar -C /opt/cni/bin -xzf cni-plugins-linux-arm64-v1.2.0.tgz
+  # rm cni-plugins-linux-arm64-v1.2.0.tgz
   - name: flannel
     namespace: kube-flannel
-    chart: "https://github.com/flannel-io/flannel/releases/download/v0.21.3/flannel.tgz"
-    installed: false
+    # chart: "https://github.com/flannel-io/flannel/releases/download/v0.21.3/flannel.tgz"
+    chart: ../flannel
+    installed: true
     values:
-      - podCidr: "10.244.0.0/16"
+      - podCidr: "10.42.0.0/16"
         flannel:
           backend: "wireguard"
 
@@ -41,39 +50,39 @@ releases:
         #   monitor:
         #     enabled: true
         servers:
-        - zones:
-          - zone: .
-          port: 53
-          plugins:
-          - name: errors
-          # Serves a /health endpoint on :8080, required for livenessProbe
-          - name: health
-            configBlock: |-
-              lameduck 5s
-          # Serves a /ready endpoint on :8181, required for readinessProbe
-          - name: ready
-          # Required to query kubernetes API for data
-          - name: kubernetes
-            parameters: k8s.home.lex.la in-addr.arpa ip6.arpa
-            configBlock: |-
-              pods insecure
-              fallthrough in-addr.arpa ip6.arpa
-              ttl 30
-          # Serves a /metrics endpoint on :9153, required for serviceMonitor
-          - name: prometheus
-            parameters: 0.0.0.0:9153
-          - name: forward
-            parameters: . /etc/resolv.conf
-          - name: cache
-            parameters: 30
-          - name: loop
-          - name: reload
-          - name: loadbalance
+          - zones:
+              - zone: .
+            port: 53
+            plugins:
+              - name: errors
+              # Serves a /health endpoint on :8080, required for livenessProbe
+              - name: health
+                configBlock: |-
+                  lameduck 5s
+              # Serves a /ready endpoint on :8181, required for readinessProbe
+              - name: ready
+              # Required to query kubernetes API for data
+              - name: kubernetes
+                parameters: k8s.home.lex.la in-addr.arpa ip6.arpa
+                configBlock: |-
+                  pods insecure
+                  fallthrough in-addr.arpa ip6.arpa
+                  ttl 30
+              # Serves a /metrics endpoint on :9153, required for serviceMonitor
+              - name: prometheus
+                parameters: 0.0.0.0:9153
+              - name: forward
+                parameters: . /etc/resolv.conf
+              - name: cache
+                parameters: 30
+              - name: loop
+              - name: reload
+              - name: loadbalance
 
   # https://github.com/bugfest/tor-controller/tree/master/charts/tor-controller
   - name: tor-controller
     namespace: tor-controller
-    installed: false
+    installed: true
     chart: bugfest/tor-controller
 
   # https://github.com/metallb/metallb/tree/main/charts/metallb
