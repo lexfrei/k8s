@@ -11,7 +11,7 @@ repositories:
 releases:
   # Currently using forked flannel chart
   # Waiting for PR
-  # https://github.com/flannel-io/flannel/pull/1741/files
+  # https://github.com/flannel-io/flannel/pull/1741/
   #
   # Pre-install:
   # Note: Flannel requires CNI plugins to be installed in /opt/cni/bin
