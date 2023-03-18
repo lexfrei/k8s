@@ -6,7 +6,7 @@ releases:
   # https://artifacthub.io/packages/helm/k8s-at-home/heimdall
   - name: heimdall
     namespace: heimdall
-    installed: false
+    installed: true
     chart: k8s-at-home/heimdall
     values:
       - ingress:
@@ -15,7 +15,7 @@ releases:
             annotations:
               traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
             hosts:
-              - host: start.k8s.home.lex.la
+              - host: start.home.lex.la
                 paths:
                   - path: /
         persistence:
