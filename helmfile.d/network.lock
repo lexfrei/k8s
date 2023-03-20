@@ -12,5 +12,5 @@ dependencies:
 - name: traefik
   repository: https://helm.traefik.io/traefik
   version: 21.2.0
-digest: sha256:db6bd22ea0f1c08d56d40846c3ff171451f99d2217dd3718ca3914b8c1a87cc7
-generated: "2023-03-19T21:14:11.602543+03:00"
+digest: sha256:b193d149c2c7e9456c19d97426b200d48eae68e3857304416593486e8c3c9b40
+generated: "2023-03-20T20:33:45.071427+03:00"
