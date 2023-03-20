@@ -16,8 +16,24 @@ releases:
           host: longhorn.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+
+        # Minimize the number of replicas to reduce the resource usage.
+        # This is not safe for production.
         defaultSetting:
           defaultReplicaCount: 1
+        longhornUI:
+          replicas: 1
+        longhornConversionWebhook:
+          replicas: 1
+        longhornAdmissionWebhook:
+          replicas: 1
+        longhornRecoveryBackend:
+          replicas: 1
+        csi:
+          attacherReplicaCount: 1
+          provisionerReplicaCount: 1
+          resizerReplicaCount: 1
+          snapshotterReplicaCount: 1
 
   - name: nfs-subdir-external-provisioner
     namespace: nfs-subdir-external-provisioner
