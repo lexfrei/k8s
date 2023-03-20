@@ -25,10 +25,11 @@ Kubernetes cluster ready for use on RPis or any other arm64 systems
 7. Add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to `/boot/cmdline.txt`
 8. Set `Storage=volatile` in `/etc/systemd/journald.conf` to prevent filling up your SD card
 9. Run `systemctl disable --now firewalld` to disable firewall
-10. Run `nmcli radio all off` to disable wifi (you can't use it with MetalLB)
-11. Set hostname with `hostnamectl hostname node01`
-12. Resize root partition with `growpart /dev/sda 3` and `resize2fs /dev/sda3`
-13. Reboot
+10. Run `swapoff -a` to disable swap
+11. Run `nmcli radio all off` to disable wifi (you can't use it with MetalLB)
+12. Set hostname with `hostnamectl hostname node01`
+13. Resize root partition with `growpart /dev/sda 3` and `resize2fs /dev/sda3`
+14. Reboot
 
 On your host:
 
