@@ -21,7 +21,7 @@ Kubernetes cluster ready for use on RPis or any other arm64 systems
 3. Change all DNSs in the repo. You can find it with `lex.la` substring
 4. Add DNS wildcard to your DNS-server (ex.: `*.k8s.home.lex.la`)
 5. Install Rocky Linux 9 as your system
-6. `dnf install wireguard-tools iscsi-initiator-utils`
+6. `dnf install wireguard-tools iscsi-initiator-utils nfs-utils`
 7. Add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to `/boot/cmdline.txt`
 8. Set `Storage=volatile` in `/etc/systemd/journald.conf` to prevent filling up your SD card
 9. Run `systemctl disable --now firewalld` to disable firewall
