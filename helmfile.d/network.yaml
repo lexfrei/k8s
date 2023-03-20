@@ -81,7 +81,7 @@ releases:
 
   # https://github.com/bugfest/tor-controller/tree/master/charts/tor-controller
   - name: tor-controller
-    version: 0.1.10
+    version: 0.1.11
     namespace: tor-controller
     installed: true
     chart: bugfest/tor-controller
