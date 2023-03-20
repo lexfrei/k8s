@@ -1,5 +1,5 @@
 repositories:
-  - name: nfd
+  - name: kubernetes-sigs
     url: https://kubernetes-sigs.github.io/node-feature-discovery/charts
 
 releases:
@@ -7,4 +7,4 @@ releases:
   - name: node-feature-discovery
     namespace: node-feature-discovery
     installed: true
-    chart: nfd/node-feature-discovery
+    chart: kubernetes-sigs/node-feature-discovery
