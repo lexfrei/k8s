@@ -6,23 +6,21 @@ repositories:
 
 releases:
   # https://artifacthub.io/packages/helm/victoriametrics/victoria-metrics-k8s-stack
+  # To avoid the CRD conflict, we need to install the chart with bare helm command.
+  # helm upgrade --install victoria-metrics-k8s-stack victoria-metrics/victoria-metrics-k8s-stack --namespace monitoring --create-namespace --set grafana.enabled=false
   - name: victoria-metrics-k8s-stack
     namespace: monitoring
     chart: victoria-metrics/victoria-metrics-k8s-stack
-    installed: false
+    installed: true
     values:
       - grafana:
           enabled: false
-        vmsingle:
-          server:
-            persistentVolume:
-              storageClassName: "longhorn-ssd"
 
   # https://artifacthub.io/packages/helm/grafana/grafana
   - name: grafana
     namespace: monitoring
     chart: grafana/grafana
-    installed: false
+    installed: true
     values:
       - ingress:
           enabled: true
@@ -88,7 +86,9 @@ releases:
         persistence:
           enabled: true
           size: 1Gi
-          storageClassName: "longhorn-ssd"
+          storageClassName: "nfs-client"
+        initChownData:
+          enabled: false
         # plugins:
         #   - grafana-image-renderer
         deploymentStrategy:
@@ -98,13 +98,12 @@ releases:
   - name: loki-stack
     namespace: monitoring
     chart: grafana/loki-stack
-    installed: false
+    installed: true
     values:
       - loki:
           persistence:
             enabled: true
             size: 20Gi
-            storageClassName: "longhorn-ssd"
         promtail:
           extraScrapeConfigs:
             - job_name: journal
