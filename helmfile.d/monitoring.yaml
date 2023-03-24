@@ -22,13 +22,27 @@ releases:
     chart: grafana/grafana
     installed: true
     values:
-      - ingress:
+      - # Disabled because of removed psp in k8s 1.25
+        # Remove this when this will be fixed in the chart
+        rbac:
+          pspEnabled: false
+
+        # Enable ingress
+        ingress:
           enabled: true
           hosts:
             - grafana.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        adminPassword: admin
+
+        # Not really appliable, just to suppress the diff
+        # Real password is set in the secret
+        adminPassword: strongpassword
+
+        # Enable image renderer plugin
+        imageRenderer:
+          enabled: true
+
         ## Dashboards
         dashboards:
           default:
@@ -64,20 +78,20 @@ releases:
                 editable: true
                 options:
                   path: /var/lib/grafana/dashboards/default
-        #
-        datasources:
-          datasources.yaml:
-            apiVersion: 1
-            datasources:
-              - name: VictoriaMetrics
-                type: prometheus
-                url: "http://vmsingle-victoria-metrics-k8s-stack.monitoring.svc:8429"
-                access: proxy
-                isDefault: true
-              - name: Loki
-                type: loki
-                access: proxy
-                url: "http://loki-stack.monitoring.svc:3100"
+
+        # datasources:
+        #   datasources.yaml:
+        #     apiVersion: 1
+        #     datasources:
+        #       - name: VictoriaMetrics
+        #         type: prometheus
+        #         url: "http://vmsingle-victoria-metrics-k8s-stack.monitoring.svc:8429"
+        #         access: proxy
+        #         isDefault: true
+        #       - name: Loki
+        #         type: loki
+        #         access: proxy
+        #         url: "http://loki-stack.monitoring.svc:3100"
         sidecar:
           datasources:
             enabled: true
