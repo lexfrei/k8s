@@ -23,7 +23,6 @@ releases:
   # Also you have to create a privileged namespace for flannel manually
   # kubectl create ns kube-flannel
   # kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
-  #
   - name: flannel
     namespace: kube-flannel
     installed: true
@@ -42,15 +41,6 @@ releases:
           create: true
         service:
           clusterIP: 10.43.0.10
-        # Enable after prometheus-operator installed
-        # prometheus:
-        #   service:
-        #     enabled: true
-        #     annotations:
-        #       prometheus.io/scrape: "true"
-        #       prometheus.io/port: "9153"
-        #   monitor:
-        #     enabled: true
         servers:
           - zones:
               - zone: .
@@ -86,6 +76,8 @@ releases:
     namespace: tor-controller
     installed: true
     chart: bugfest/tor-controller
+    values:
+      - upgradeRollout: false
 
   # https://github.com/metallb/metallb/tree/main/charts/metallb
   - name: metallb
