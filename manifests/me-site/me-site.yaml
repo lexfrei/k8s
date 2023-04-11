@@ -54,19 +54,22 @@ spec:
     app: me-site
 ---
 apiVersion: tor.k8s.torproject.org/v1alpha2
-kind: OnionService
+kind: OnionBalancedService
 metadata:
   name: me-site-onion-service
   namespace: default
 spec:
   version: 3
-  rules:
-    - port:
-        number: 80
-      backend:
-        service:
-          name: me-site
-          port:
-            number: 8080
-  privateKeySecret:
-    name: me-site-onion-secret
+  backends: 1
+  template:
+    spec:
+      rules:
+        - port:
+            number: 80
+          backend:
+            service:
+              name: me-site
+              port:
+                number: 8080
+      privateKeySecret:
+        name: me-site-onion-secret

@@ -2,7 +2,7 @@ version: v0.152.0
 dependencies:
 - name: coredns
   repository: https://coredns.github.io/helm
-  version: 1.20.1
+  version: 1.21.0
 - name: flannel
   repository: https://flannel-io.github.io/flannel
   version: v0.21.4
@@ -14,6 +14,6 @@ dependencies:
   version: 0.1.11
 - name: traefik
   repository: https://helm.traefik.io/traefik
-  version: 22.0.0
-digest: sha256:3a4934a1d4f8454ea7d06b9dfff0e0e0cc8755e4372b5d25fd694488aeb4e633
-generated: "2023-03-31T21:12:04.878727+03:00"
+  version: 22.1.0
+digest: sha256:fc8a14e1a62dc25f1d09c060618bcf9aa6a0e4e79cbbbe62b1f57fbe7f37371d
+generated: "2023-04-11T19:24:06.576804+03:00"
