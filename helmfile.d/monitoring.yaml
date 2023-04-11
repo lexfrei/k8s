@@ -39,10 +39,6 @@ releases:
         # Real password is set in the secret
         adminPassword: strongpassword
 
-        # Enable image renderer plugin
-        imageRenderer:
-          enabled: true
-
         ## Dashboards
         dashboards:
           default:
@@ -149,3 +145,19 @@ releases:
       - args:
           - --kubelet-insecure-tls
           - --kubelet-preferred-address-types=InternalIP
+
+  # - name: snmp-exporter
+  #   namespace: monitoring
+  #   chart: prometheus-community/prometheus-snmp-exporter
+  #   installed: true
+  #   values:
+  #     - serviceMonitor:
+  #         enabled: true
+  #         relabelings:
+  #           - sourceLabels: [__param_target]
+  #             targetLabel: instance
+  #         params:
+  #           - module:
+  #               - fortigate_snmp
+  #             name: device1
+  #             target: 192.168.100.1

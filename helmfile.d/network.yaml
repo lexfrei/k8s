@@ -77,7 +77,11 @@ releases:
     installed: true
     chart: bugfest/tor-controller
     values:
-      - upgradeRollout: false
+      - upgradeRollout: true
+        onionbalance:
+          image:
+            repository: lexfrei/tor-onionbalance-manager
+            tag: latest
 
   # https://github.com/metallb/metallb/tree/main/charts/metallb
   - name: metallb
@@ -113,21 +117,6 @@ releases:
           - "--global.checknewversion"
         persistence:
           enabled: true
-        deployment:
-          initContainers:
-            # The "volume-permissions" init container is required if you run into permission issues.
-            # Related issue: https://github.com/traefik/traefik/issues/6825
-            - name: volume-permissions
-              image: busybox:1.36.0
-              command:
-                [
-                  "sh",
-                  "-c",
-                  "touch /data/acme.json && chmod -Rv 600 /data/* && chown 65532:65532 /data/acme.json",
-                ]
-              volumeMounts:
-                - name: data
-                  mountPath: /data
         env:
           - name: CF_DNS_API_TOKEN
             valueFrom:
