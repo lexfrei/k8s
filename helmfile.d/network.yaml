@@ -76,12 +76,6 @@ releases:
     namespace: tor-controller
     installed: true
     chart: bugfest/tor-controller
-    values:
-      - upgradeRollout: true
-        onionbalance:
-          image:
-            repository: lexfrei/tor-onionbalance-manager
-            tag: latest
 
   # https://github.com/metallb/metallb/tree/main/charts/metallb
   - name: metallb
