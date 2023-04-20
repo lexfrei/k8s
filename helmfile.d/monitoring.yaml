@@ -3,6 +3,9 @@ repositories:
     url: https://grafana.github.io/helm-charts
   - name: victoria-metrics
     url: https://victoriametrics.github.io/helm-charts/
+  - name: metrics-server
+    url: https://kubernetes-sigs.github.io/metrics-server/
+
 
 releases:
   # https://artifacthub.io/packages/helm/victoriametrics/victoria-metrics-k8s-stack
