@@ -120,3 +120,9 @@ releases:
         ports:
           web:
             redirectTo: websecure
+        ingressRoute:
+          dashboard:
+            enabled: false
+            matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+            entryPoints:
+              - websecure

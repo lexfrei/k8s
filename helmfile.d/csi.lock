@@ -1,10 +1,10 @@
-version: v0.152.0
+version: v0.154.0
 dependencies:
 - name: longhorn
   repository: https://charts.longhorn.io
-  version: 1.4.1
+  version: 1.4.2
 - name: nfs-subdir-external-provisioner
   repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
   version: 4.0.18
-digest: sha256:7113bb16cff7bf9902ff97044ab197a20d882bb9286c8b85413cc1f653694107
-generated: "2023-04-11T19:22:13.931955+03:00"
+digest: sha256:384ba00577f2c375ff6226a994db568b5ff5679247b3e51b20eea01e2c8fc28d
+generated: "2023-06-12T00:23:40.316745+03:00"
