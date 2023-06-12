@@ -1,4 +1,4 @@
-version: v0.152.0
+version: v0.154.0
 dependencies:
 - name: home-assistant
   repository: https://k8s-at-home.com/charts/
