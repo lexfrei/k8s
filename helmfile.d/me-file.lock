@@ -1,0 +1,10 @@
+version: v0.162.0
+dependencies:
+- name: cloudflare-tunnel
+  repository: https://cloudflare.github.io/helm-charts
+  version: 0.3.0
+- name: me-site
+  repository: https://lexfrei.github.io/charts
+  version: 0.1.0
+digest: sha256:5c5fb1c26295411cb1455a6d10cd312ab6754646b3e4ad09038142c8272d2977
+generated: "2024-02-29T05:46:24.828122+04:00"

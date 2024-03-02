@@ -1,0 +1,29 @@
+repositories:
+  - name: lexfrei-carts
+    url: https://lexfrei.github.io/charts
+  - name: cloudflare
+    url: https://cloudflare.github.io/helm-charts
+
+releases:
+  - name: me-site
+    chart: lexfrei-carts/me-site
+    namespace: default
+    installed: true
+    values:
+      - onionService:
+          enabled: false
+
+  - name: cloudflared
+    chart: cloudflare/cloudflare-tunnel
+    namespace: default
+    installed: true
+    values:
+      - cloudflare:
+          secretName: tunnel-credentials
+          tunnelName: d8cfc026-0fa9-4474-bcbf-f80433593b8a
+          ingress:
+            - hostname: "me.k8s-expose.lex.la"
+              service: http://me-site:8080
+        replicaCount: 1
+        image:
+          tag: 2024.2.1

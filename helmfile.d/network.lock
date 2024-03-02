@@ -1,19 +1,19 @@
-version: v0.154.0
+version: v0.162.0
 dependencies:
 - name: coredns
   repository: https://coredns.github.io/helm
-  version: 1.24.1
+  version: 1.29.0
 - name: flannel
   repository: https://flannel-io.github.io/flannel
-  version: v0.22.0
+  version: v0.24.2
 - name: metallb
   repository: https://metallb.github.io/metallb
-  version: 0.13.10
+  version: 0.14.3
 - name: tor-controller
   repository: https://bugfest.github.io/tor-controller
-  version: 0.1.11
+  version: 0.1.15
 - name: traefik
   repository: https://helm.traefik.io/traefik
-  version: 23.1.0
-digest: sha256:8b459ef170b69fe44e7a6ac5ba4721791977df9de70b3ec2e8cde0d32402babb
-generated: "2023-06-12T00:27:54.026385+03:00"
+  version: 26.1.0
+digest: sha256:ddbefbec5f8fdc00ff2526e614e7fcce0caea61984c6afc15dd94bea75bc7c35
+generated: "2024-02-29T05:13:17.871333+04:00"
