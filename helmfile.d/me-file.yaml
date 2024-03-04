@@ -9,9 +9,6 @@ releases:
     chart: lexfrei-carts/me-site
     namespace: default
     installed: true
-    values:
-      - onionService:
-          enabled: false
 
   - name: cloudflared
     chart: cloudflare/cloudflare-tunnel
@@ -20,9 +17,9 @@ releases:
     values:
       - cloudflare:
           secretName: tunnel-credentials
-          tunnelName: d8cfc026-0fa9-4474-bcbf-f80433593b8a
+          tunnelName: k8s-expose
           ingress:
-            - hostname: "me.k8s-expose.lex.la"
+            - hostname: "not-me.lex.la"
               service: http://me-site:8080
         replicaCount: 1
         image:

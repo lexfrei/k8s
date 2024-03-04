@@ -6,7 +6,6 @@ repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
 
-
 releases:
   # https://artifacthub.io/packages/helm/victoriametrics/victoria-metrics-k8s-stack
   # To avoid the CRD conflict, we need to install the chart with bare helm command.
@@ -14,7 +13,7 @@ releases:
   - name: victoria-metrics-k8s-stack
     namespace: monitoring
     chart: victoria-metrics/victoria-metrics-k8s-stack
-    installed: true
+    installed: false
     values:
       - grafana:
           enabled: false
@@ -23,7 +22,7 @@ releases:
   - name: grafana
     namespace: monitoring
     chart: grafana/grafana
-    installed: true
+    installed: false
     values:
       - # Disabled because of removed psp in k8s 1.25
         # Remove this when this will be fixed in the chart
@@ -111,7 +110,7 @@ releases:
   - name: loki-stack
     namespace: monitoring
     chart: grafana/loki-stack
-    installed: true
+    installed: false
     values:
       - loki:
           persistence:
@@ -148,19 +147,3 @@ releases:
       - args:
           - --kubelet-insecure-tls
           - --kubelet-preferred-address-types=InternalIP
-
-  # - name: snmp-exporter
-  #   namespace: monitoring
-  #   chart: prometheus-community/prometheus-snmp-exporter
-  #   installed: true
-  #   values:
-  #     - serviceMonitor:
-  #         enabled: true
-  #         relabelings:
-  #           - sourceLabels: [__param_target]
-  #             targetLabel: instance
-  #         params:
-  #           - module:
-  #               - fortigate_snmp
-  #             name: device1
-  #             target: 192.168.100.1
