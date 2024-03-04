@@ -16,9 +16,9 @@ releases:
   # Check arch in the link below
   #
   # mkdir -p /opt/cni/bin
-  # curl -O -L https://github.com/containernetworking/plugins/releases/download/v1.2.0/cni-plugins-linux-arm64-v1.2.0.tgz
-  # tar -C /opt/cni/bin -xzf cni-plugins-linux-arm64-v1.2.0.tgz
-  # rm cni-plugins-linux-arm64-v1.2.0.tgz
+  # curl -O -L https://github.com/containernetworking/plugins/releases/download/v1.4.0/cni-plugins-linux-arm-v1.4.0.tgz
+  # tar -C /opt/cni/bin -xzf cni-plugins-linux-arm-v1.4.0.tgz
+  # rm -rf cni-plugins-linux-arm-v1.4.0.tgz
   #
   # Also you have to create a privileged namespace for flannel manually
   # kubectl create ns kube-flannel
@@ -109,8 +109,6 @@ releases:
           - "--entrypoints.websecure.http.tls.certresolver=prodssl"
         globalArguments:
           - "--global.checknewversion"
-        persistence:
-          enabled: true
         env:
           - name: CF_DNS_API_TOKEN
             valueFrom:
@@ -119,7 +117,8 @@ releases:
                 key: token
         ports:
           web:
-            redirectTo: websecure
+            redirectTo:
+              port: websecure
         ingressRoute:
           dashboard:
             enabled: false
