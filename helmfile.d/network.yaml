@@ -7,31 +7,15 @@ repositories:
     url: https://bugfest.github.io/tor-controller
   - name: coredns
     url: https://coredns.github.io/helm
-  - name: flannel
-    url: https://flannel-io.github.io/flannel
+  - name: projectcalico
+    url: https://docs.tigera.io/calico/charts
+  - name: lexfrei-charts
+    url: https://lexfrei.github.io/charts
+  - name: jetstack
+    url: https://charts.jetstack.io
 
 releases:
-  # Pre-install:
-  # Flannel requires CNI plugins to be installed in /opt/cni/bin
-  # Check arch in the link below
-  #
-  # mkdir -p /opt/cni/bin
-  # curl -O -L https://github.com/containernetworking/plugins/releases/download/v1.4.0/cni-plugins-linux-arm-v1.4.0.tgz
-  # tar -C /opt/cni/bin -xzf cni-plugins-linux-arm-v1.4.0.tgz
-  # rm -rf cni-plugins-linux-arm-v1.4.0.tgz
-  #
-  # Also you have to create a privileged namespace for flannel manually
-  # kubectl create ns kube-flannel
-  # kubectl label --overwrite ns kube-flannel pod-security.kubernetes.io/enforce=privileged
-  - name: flannel
-    namespace: kube-flannel
-    installed: true
-    chart: flannel/flannel
-    values:
-      - podCidr: "10.42.0.0/16"
-        flannel:
-          backend: "wireguard"
-
+  # https://artifacthub.io/packages/helm/coredns/coredns
   - name: coredns
     namespace: kube-system
     chart: coredns/coredns
@@ -76,6 +60,8 @@ releases:
     namespace: tor-controller
     installed: true
     chart: bugfest/tor-controller
+    values:
+      - upgradeRollout: false
 
   # https://github.com/metallb/metallb/tree/main/charts/metallb
   - name: metallb
@@ -101,27 +87,62 @@ releases:
         additionalArguments:
           # Disable internal ssl check
           - "--serversTransport.insecureSkipVerify=true"
-          # SSL for prod
-          - "--certificatesresolvers.prodssl.acme.dnschallenge.provider=cloudflare"
-          - "--certificatesresolvers.prodssl.acme.storage=/data/acme.json"
-          - "--certificatesresolvers.prodssl.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
-          - "--entrypoints.websecure.http.tls=true"
-          - "--entrypoints.websecure.http.tls.certresolver=prodssl"
+          # entrypoint for cloudflared
+          - "--entrypoints.tunnel.address=:8080"
         globalArguments:
           - "--global.checknewversion"
-        env:
-          - name: CF_DNS_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: cf-token
-                key: token
         ports:
           web:
             redirectTo:
               port: websecure
+          tunnel:
+            port: 8080
+            expose: true
+            exposedPort: 8080
         ingressRoute:
           dashboard:
-            enabled: false
+            enabled: true
             matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
             entryPoints:
               - websecure
+
+  # https://docs.tigera.io/calico/charts
+  - name: calico
+    namespace: tigera-operator
+    installed: true
+    chart: projectcalico/tigera-operator
+    values:
+      - calicoNetwork:
+          ipPools:
+            - cidr: "10.42.0.0/16"
+              natOutgoing: true
+              encapsulation: "VXLAN"
+
+  - name: cloudflared
+    chart: lexfrei-charts/cloudflare-tunnel
+    namespace: cloudflared-system
+    installed: true
+    values:
+      - cloudflare:
+          secretName: tunnel-credentials
+          tunnelName: k8s-expose
+          ingress:
+            - service: http://traefik.traefik-system.svc.k8s.home.lex.la:8080
+          enableDefault404: false
+        replicaCount: 1
+
+  # https://artifacthub.io/packages/helm/jetstack/cert-manager
+  #
+  # Cert-manager configred to use Cloudflare DNS challenge
+  - name: cert-manager
+    namespace: cert-manager
+    installed: true
+    chart: jetstack/cert-manager
+    values:
+      - installCRDs: true
+        podDnsConfig:
+          nameservers:
+            - "1.1.1.1"
+            - "8.8.8.8"
+        dns01RecursiveNameserversOnly: true
+        dns01RecursiveNameservers: "8.8.8.8:53,1.1.1.1:53"
