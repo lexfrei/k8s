@@ -1,0 +1,7 @@
+version: v0.163.0
+dependencies:
+- name: me-site
+  repository: https://lexfrei.github.io/charts
+  version: 0.1.0
+digest: sha256:935a06a97f59b97b1ada8506be8c86cad088eb76e7ae728ab17b5c5622f1858c
+generated: "2024-03-22T13:18:59.301484+04:00"

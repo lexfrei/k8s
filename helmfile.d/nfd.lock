@@ -1,7 +1,7 @@
-version: v0.162.0
+version: v0.163.0
 dependencies:
 - name: node-feature-discovery
   repository: https://kubernetes-sigs.github.io/node-feature-discovery/charts
-  version: 0.15.1
-digest: sha256:9b772136b9637f556eb31d80b73740e7c55df6a09f63b2038207ca2f975950c2
-generated: "2024-02-27T20:37:57.051385+04:00"
+  version: 0.15.3
+digest: sha256:0ebc28410124d56ae7576892a6f5d2afc330f392540203599d843584600626e2
+generated: "2024-03-21T16:43:59.660436+04:00"
