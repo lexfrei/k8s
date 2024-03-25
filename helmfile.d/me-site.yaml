@@ -23,7 +23,3 @@ releases:
                       name: me-site
                       port:
                         number: 8080
-          tls:
-            - secretName: aleksei-sviridk-in-tls
-              hosts:
-                - aleksei.sviridk.in
