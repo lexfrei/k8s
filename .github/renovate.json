@@ -1,5 +1,7 @@
 {
-    "extends": [":pinDependencies"],
+    "extends": [
+        ":pinDependencies"
+    ],
     "major": {
         "stabilityDays": 3
     },
@@ -10,5 +12,10 @@
     "timezone": "Europe/Moscow",
     "helmfile": {
         "fileMatch": "(^|/)helmfile.d\/.*\\.yaml$"
+    },
+    "argocd": {
+        "fileMatch": [
+            "argocd/.+\\.yaml$"
+        ]
     }
 }
