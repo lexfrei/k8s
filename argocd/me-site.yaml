@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: me-site
+  namespace: argocd
+spec:
+  destination:
+    name: ""
+    namespace: me-site
+    server: "https://kubernetes.default.svc"
+  source:
+    path: ""
+    repoURL: "https://lexfrei.github.io/charts"
+    targetRevision: "0.1.0"
+    chart: me-site
+    helm:
+      values: |
+        ingress:
+          enabled: true
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+          hosts:
+            - host: aleksei.sviridk.in
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: me-site
+                      port:
+                        number: 8080
+
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
