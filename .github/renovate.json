@@ -22,9 +22,6 @@
     "github-actions": {
         "fileMatch": [
             "^\\.github/workflows/[^/]+\\.ya?ml$"
-        ],
-        "matchStrings": [
-            "uses: (?<depName>[\\w-]+/[\\w-]+)(?<currentDigest>@sha256:[a-f0-9]{64})?"
         ]
     },
     "automerge": true
