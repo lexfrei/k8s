@@ -42,7 +42,7 @@ On your host:
 On 1st master:
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest INSTALL_K3S_EXEC="--disable traefik,local-storage,servicelb,metrics-server,coredns --cluster-domain k8s.home.lex.la --flannel-backend=wireguard-native --cluster-init" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest INSTALL_K3S_EXEC="--disable traefik,local-storage,servicelb,metrics-server,coredns --cluster-domain k8s.home.lex.la --disable-network-policy --flannel-backend=none --cluster-init" sh -
 # copy content to ~/.kube/config and change address
 cat /etc/rancher/k3s/k3s.yaml
 # copy token for slave
