@@ -5,8 +5,6 @@ repositories:
     url: https://metallb.github.io/metallb
   - name: bugfest
     url: https://bugfest.github.io/tor-controller
-  - name: coredns
-    url: https://coredns.github.io/helm
   - name: projectcalico
     url: https://docs.tigera.io/calico/charts
   - name: lexfrei-charts
@@ -15,46 +13,6 @@ repositories:
     url: https://charts.jetstack.io
 
 releases:
-  # https://artifacthub.io/packages/helm/coredns/coredns
-  - name: coredns
-    namespace: kube-system
-    chart: coredns/coredns
-    installed: true
-    values:
-      - rbac:
-          create: true
-        service:
-          clusterIP: 10.43.0.10
-        servers:
-          - zones:
-              - zone: .
-            port: 53
-            plugins:
-              - name: errors
-              # Serves a /health endpoint on :8080, required for livenessProbe
-              - name: health
-                configBlock: |-
-                  lameduck 5s
-              # Serves a /ready endpoint on :8181, required for readinessProbe
-              - name: ready
-              # Required to query kubernetes API for data
-              - name: kubernetes
-                parameters: k8s.home.lex.la in-addr.arpa ip6.arpa
-                configBlock: |-
-                  pods insecure
-                  fallthrough in-addr.arpa ip6.arpa
-                  ttl 30
-              # Serves a /metrics endpoint on :9153, required for serviceMonitor
-              - name: prometheus
-                parameters: 0.0.0.0:9153
-              - name: forward
-                parameters: . /etc/resolv.conf
-              - name: cache
-                parameters: 30
-              - name: loop
-              - name: reload
-              - name: loadbalance
-
   # https://github.com/bugfest/tor-controller/tree/master/charts/tor-controller
   - name: tor-controller
     namespace: tor-controller

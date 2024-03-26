@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metrics-server
+  namespace: argocd
+spec:
+  destination:
+    name: ""
+    namespace: kube-system
+    server: "https://kubernetes.default.svc"
+  source:
+    path: ""
+    repoURL: "https://lexfrei.github.io/charts"
+    targetRevision: "3.12.0"
+    chart: metrics-server
+    helm:
+      values: |
+        args:
+          - --kubelet-insecure-tls
+          - --kubelet-preferred-address-types=InternalIP
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
