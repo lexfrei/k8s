@@ -12,7 +12,7 @@ spec:
     path: ""
     repoURL: "https://lexfrei.github.io/charts"
     targetRevision: "0.4.1"
-    chart: cloudflared
+    chart: cloudflare-tunnel
     helm:
       values: |
         cloudflare:
