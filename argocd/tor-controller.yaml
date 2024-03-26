@@ -13,9 +13,6 @@ spec:
     repoURL: "https://bugfest.github.io/tor-controller"
     targetRevision: "0.1.15"
     chart: tor-controller
-    helm:
-      values: |
-        upgradeRollout: false
   sources: []
   project: default
   syncPolicy:
