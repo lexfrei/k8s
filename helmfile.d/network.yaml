@@ -105,6 +105,11 @@ releases:
             matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
             entryPoints:
               - websecure
+        # Ugly hack to avoid the infinite progress on ingresses in argocd
+        providers:
+          kubernetesIngress:
+            publishedService:
+              enabled: true
 
   # https://docs.tigera.io/calico/charts
   - name: calico
