@@ -1,7 +1,0 @@
-version: v0.163.0
-dependencies:
-- name: kubernetes-dashboard
-  repository: https://kubernetes.github.io/dashboard/
-  version: 7.1.2
-digest: sha256:55c8f2e08bcc2176aad562e7748f1e077c17c3d26e51f13b102bbdbf6ab5cc42
-generated: "2024-03-24T02:21:24.614448+04:00"
