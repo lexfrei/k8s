@@ -3,8 +3,6 @@ repositories:
     url: https://helm.traefik.io/traefik
   - name: metallb
     url: https://metallb.github.io/metallb
-  - name: bugfest
-    url: https://bugfest.github.io/tor-controller
   - name: projectcalico
     url: https://docs.tigera.io/calico/charts
   - name: lexfrei-charts
@@ -13,14 +11,6 @@ repositories:
     url: https://charts.jetstack.io
 
 releases:
-  # https://github.com/bugfest/tor-controller/tree/master/charts/tor-controller
-  - name: tor-controller
-    namespace: tor-controller
-    installed: true
-    chart: bugfest/tor-controller
-    values:
-      - upgradeRollout: false
-
   # https://github.com/metallb/metallb/tree/main/charts/metallb
   - name: metallb
     namespace: metallb-system
