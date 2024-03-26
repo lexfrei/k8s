@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  destination:
+    name: ""
+    namespace: traefik-system
+    server: "https://kubernetes.default.svc"
+  source:
+    path: ""
+    repoURL: "https://helm.traefik.io/traefik"
+    targetRevision: "26.1.0"
+    chart: traefik
+    helm:
+      values: |
+        service:
+          annotations:
+            traefik.universe.tf/address-pool: ingress-pool
+        additionalArguments:
+          # Disable internal ssl check
+          - "--serversTransport.insecureSkipVerify=true"
+          # entrypoint for cloudflared
+          - "--entrypoints.tunnel.address=:8080"
+        globalArguments:
+          - "--global.checknewversion"
+        ports:
+          web:
+            redirectTo:
+              port: websecure
+          tunnel:
+            port: 8080
+            expose: true
+            exposedPort: 8080
+        ingressRoute:
+          dashboard:
+            enabled: true
+            matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+            entryPoints:
+              - websecure
+        # Ugly hack to avoid the infinite progress on ingresses in argocd
+        providers:
+          kubernetesIngress:
+            publishedService:
+              enabled: true
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
