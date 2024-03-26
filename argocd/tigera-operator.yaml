@@ -20,6 +20,7 @@ spec:
             - cidr: "10.42.0.0/16"
               natOutgoing: true
               encapsulation: "VXLAN"
+          containerIPForwarding: "Enabled"
   sources: []
   project: default
   syncPolicy:
