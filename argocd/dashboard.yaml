@@ -13,19 +13,19 @@ spec:
     repoURL: "https://kubernetes.github.io/dashboard/"
     targetRevision: "7.1.2"
     chart: kubernetes-dashboard
-  helm:
-    values: |
-      ingress:
-        enabled: true
-        hosts:
-          - dashboard.k8s.home.lex.la
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          cert-manager.io/cluster-issuer: "cloudflare-issuer"
-        tls:
-          - secretName: dashboard-k8s-home-lex-la-tls
-            hosts:
-              - dashboard.k8s.home.lex.la
+    helm:
+      values: |
+        ingress:
+          enabled: true
+          hosts:
+            - dashboard.k8s.home.lex.la
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+            cert-manager.io/cluster-issuer: "cloudflare-issuer"
+          tls:
+            - secretName: dashboard-k8s-home-lex-la-tls
+              hosts:
+                - dashboard.k8s.home.lex.la
   sources: []
   project: default
   syncPolicy:
