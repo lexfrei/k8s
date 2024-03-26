@@ -13,7 +13,6 @@ spec:
     repoURL: "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
     targetRevision: "0.15.3"
     chart: node-feature-discovery
-    helm: {}
   sources: []
   project: default
   syncPolicy:
