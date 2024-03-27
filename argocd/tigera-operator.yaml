@@ -10,7 +10,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     path: ""
-    repoURL: "https://docs.tigera.io/calico/charts"
+    repoURL: "https://projectcalico.docs.tigera.io/charts"
     targetRevision: "v3.27.2"
     chart: tigera-operator
     helm:
