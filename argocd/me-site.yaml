@@ -5,11 +5,9 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: me-site
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://lexfrei.github.io/charts"
     targetRevision: "0.1.0"
     chart: me-site
@@ -29,11 +27,9 @@ spec:
                       name: me-site
                       port:
                         number: 8080
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

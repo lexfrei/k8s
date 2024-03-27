@@ -5,11 +5,9 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: tigera-operator
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://projectcalico.docs.tigera.io/charts"
     targetRevision: "v3.27.0"
     chart: tigera-operator
@@ -22,11 +20,9 @@ spec:
                 natOutgoing: "Enabled"
                 encapsulation: "VXLAN"
             containerIPForwarding: "Enabled"
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - ServerSideApply=true

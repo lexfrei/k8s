@@ -5,19 +5,15 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: node-feature-discovery
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
     targetRevision: "0.15.3"
     chart: node-feature-discovery
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

@@ -5,11 +5,9 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: argocd
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://argoproj.github.io/argo-helm"
     targetRevision: "6.7.3"
     chart: argo-cd
@@ -41,9 +39,7 @@ spec:
               - secretName: argocd-k8s-home-lex-la-tls
                 hosts:
                   - argocd.k8s.home.lex.la
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true

@@ -20,22 +20,18 @@ Kubernetes cluster ready for use on RPis or any other arm64 systems
 2. Add Traefik's IP to your DNS
 3. Change all DNSs in the repo. You can find it with `lex.la` substring
 4. Add DNS wildcard to your DNS-server (ex.: `*.k8s.home.lex.la`)
-5. Install Rocky Linux 9 as your system
-6. `dnf install wireguard-tools iscsi-initiator-utils nfs-utils`
-7. Add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to `/boot/cmdline.txt`
-8. Set `Storage=volatile` in `/etc/systemd/journald.conf` to prevent filling up your SD card
-9. Run `systemctl disable --now firewalld` to disable firewall
-10. Run `swapoff -a` to disable swap
-11. Run `nmcli radio all off` to disable wifi (you can't use it with MetalLB)
-12. Set hostname with `hostnamectl hostname node01`
-13. Resize root partition with `growpart /dev/sda 3` and `resize2fs /dev/sda3`
-14. Reboot
+5. Add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to `/boot/cmdline.txt`
+6. Set `Storage=volatile` in `/etc/systemd/journald.conf` to prevent filling up your SD card
+7. Run `systemctl disable --now firewalld` to disable firewall
+8. Run `swapoff -a` to disable swap
+9. Run `nmcli radio all off` to disable wifi (you can't use it with MetalLB)
+10. Set hostname with `hostnamectl hostname node01`
+11. Resize root partition with `growpart /dev/sda 3` and `resize2fs /dev/sda3`
+12. Reboot
 
 On your host:
 
 1. [Helm](https://helm.sh/docs/intro/install/)
-2. [Helm diff plugin](https://github.com/databus23/helm-diff#install)
-3. [helmfile](https://github.com/roboll/helmfile)
 
 ## Install k3s
 
@@ -61,10 +57,13 @@ On slave:
 curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL='https://master01:6443' K3S_TOKEN={{TOKEN-FROM-MASTER}} sh -
 ```
 
-## Install all charts
+## Install all
 
 ```shell
-helmfile apply
+helm install coredns coredns/coredns --namespace kube-system -f values/coredns.yaml
+helm install tigera-operator projectcalico/tigera-operator --version v3.27.0 --namespace tigera-operator -f values/tigera-operator.yaml --create-namespace
+helm install argocd argo/argo-cd --namespace argocd -f values/argocd.yaml --create-namespace
+kubectl apply -f argocd/meta.yaml
 ```
 
 ## Dashboards

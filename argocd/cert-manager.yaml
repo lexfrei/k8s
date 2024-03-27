@@ -5,11 +5,9 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: cert-manager
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://charts.jetstack.io"
     targetRevision: "v1.14.4"
     chart: cert-manager
@@ -22,11 +20,9 @@ spec:
             - "8.8.8.8"
         dns01RecursiveNameserversOnly: true
         dns01RecursiveNameservers: "8.8.8.8:53,1.1.1.1:53"
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

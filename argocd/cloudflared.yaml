@@ -5,11 +5,9 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: cloudflared-system
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://lexfrei.github.io/charts"
     targetRevision: "0.4.1"
     chart: cloudflare-tunnel
@@ -22,11 +20,9 @@ spec:
             - service: http://traefik.traefik-system.svc.k8s.home.lex.la:8080
           enableDefault404: false
         replicaCount: 1
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
