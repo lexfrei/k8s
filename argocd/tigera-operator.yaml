@@ -15,12 +15,13 @@ spec:
     chart: tigera-operator
     helm:
       values: |
-        calicoNetwork:
-          ipPools:
-            - cidr: "10.42.0.0/16"
-              natOutgoing: true
-              encapsulation: "VXLAN"
-          containerIPForwarding: "Enabled"
+        installation:
+          calicoNetwork:
+            ipPools:
+              - cidr: "10.42.0.0/16"
+                natOutgoing: true
+                encapsulation: "VXLAN"
+            containerIPForwarding: "Enabled"
   sources: []
   project: default
   syncPolicy:
