@@ -5,11 +5,9 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: kube-system
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://coredns.github.io/helm"
     targetRevision: "1.29.0"
     chart: coredns
@@ -49,11 +47,9 @@ spec:
               - name: reload
               - name: loadbalance
 
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

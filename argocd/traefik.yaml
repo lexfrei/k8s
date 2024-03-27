@@ -5,11 +5,9 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: traefik-system
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://helm.traefik.io/traefik"
     targetRevision: "26.1.0"
     chart: traefik
@@ -44,11 +42,9 @@ spec:
           kubernetesIngress:
             publishedService:
               enabled: true
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

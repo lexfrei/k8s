@@ -5,19 +5,15 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: metallb-system
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://metallb.github.io/metallb"
     targetRevision: "0.14.4"
     chart: metallb
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - ServerSideApply=true

@@ -5,19 +5,15 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: tor-controller
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://bugfest.github.io/tor-controller"
     targetRevision: "0.1.15"
     chart: tor-controller
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

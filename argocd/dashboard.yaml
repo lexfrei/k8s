@@ -5,11 +5,9 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: ""
     namespace: kubernetes-dashboard
     server: "https://kubernetes.default.svc"
   source:
-    path: ""
     repoURL: "https://kubernetes.github.io/dashboard/"
     targetRevision: "7.1.2"
     chart: kubernetes-dashboard
@@ -26,11 +24,9 @@ spec:
             - secretName: dashboard-k8s-home-lex-la-tls
               hosts:
                 - dashboard.k8s.home.lex.la
-  sources: []
   project: default
   syncPolicy:
     automated:
-      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
