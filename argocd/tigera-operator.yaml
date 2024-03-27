@@ -16,9 +16,12 @@ spec:
         installation:
           calicoNetwork:
             ipPools:
-              - cidr: "10.42.0.0/16"
-                natOutgoing: "Enabled"
-                encapsulation: "VXLAN"
+              - blockSize: 26
+                cidr: 10.42.0.0/16
+                disableBGPExport: false
+                encapsulation: VXLAN
+                natOutgoing: Enabled
+                nodeSelector: all()
             containerIPForwarding: "Enabled"
   project: default
   syncPolicy:
