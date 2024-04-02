@@ -12,7 +12,7 @@ spec:
     targetRevision: "1.29.0"
     chart: coredns
     helm:
-      values: |
+      valuesObject:
         rbac:
           create: true
         service:
@@ -46,7 +46,6 @@ spec:
               - name: loop
               - name: reload
               - name: loadbalance
-
   project: default
   syncPolicy:
     automated:

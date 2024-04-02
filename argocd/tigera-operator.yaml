@@ -12,7 +12,7 @@ spec:
     targetRevision: "v3.27.0"
     chart: tigera-operator
     helm:
-      values: |
+      valuesObject:
         installation:
           calicoNetwork:
             ipPools:

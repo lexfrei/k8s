@@ -12,7 +12,7 @@ spec:
     targetRevision: "26.1.0"
     chart: traefik
     helm:
-      values: |
+      valuesObject:
         service:
           annotations:
             traefik.universe.tf/address-pool: ingress-pool
