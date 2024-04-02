@@ -12,7 +12,7 @@ spec:
     targetRevision: "0.1.0"
     chart: me-site
     helm:
-      values: |
+      valuesObject:
         ingress:
           enabled: true
           annotations:
