@@ -9,7 +9,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://helm.releases.hashicorp.com"
-    targetRevision: "0.27 .0"
+    targetRevision: "0.27.0"
     chart: vault
   helm:
     valuesObject:
