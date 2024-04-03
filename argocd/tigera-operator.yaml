@@ -9,7 +9,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://projectcalico.docs.tigera.io/charts"
-    targetRevision: "v3.27.0"
+    targetRevision: "v3.27.3"
     chart: tigera-operator
     helm:
       valuesObject:
