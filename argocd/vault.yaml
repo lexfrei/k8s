@@ -21,13 +21,7 @@ spec:
             hosts:
               - host: vault.k8s.home.lex.la
                 paths:
-                  - path: "/"
-                    pathType: Prefix
-                    backend:
-                      service:
-                        name: vault
-                        port:
-                          number: 8200
+                  - /
             annotations:
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
               cert-manager.io/cluster-issuer: cloudflare-issuer
