@@ -32,7 +32,7 @@ jobs:
       actions: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run Snyk to check configuration files for security issues
         continue-on-error: true
         uses: snyk/actions/iac@14818c4695ecc4045f33c9cee9e795a788711ca4
