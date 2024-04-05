@@ -10,7 +10,7 @@
         "before 2am"
     ],
     "dependencyDashboard": true,
-    "timezone": "Europe/Moscow",
+    "timezone": "Asia/Tbilisi",
     "helmfile": {
         "fileMatch": "(^|/)helmfile.d\/.*\\.yaml$"
     },
