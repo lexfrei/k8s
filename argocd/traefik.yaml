@@ -37,9 +37,6 @@ spec:
             matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
             entryPoints:
               - websecure
-            tls:
-              certResolver: cloudflare-issuer
-              secretName: traefik-cert
         # Ugly hack to avoid the infinite progress on ingresses in argocd
         providers:
           kubernetesIngress:
