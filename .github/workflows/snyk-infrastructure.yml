@@ -14,12 +14,12 @@ name: Snyk Infrastructure as Code
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "master" ]
+    branches: ["master"]
   schedule:
-    - cron: '20 14 * * 2'
+    - cron: "20 14 * * 2"
 
 permissions:
   contents: read
@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run Snyk to check configuration files for security issues
         continue-on-error: true
-        uses: snyk/actions/iac@14818c4695ecc4045f33c9cee9e795a788711ca4
+        uses: snyk/actions/iac@0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Upload result to GitHub Code Scanning
