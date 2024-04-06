@@ -9,7 +9,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
-    targetRevision: "0.15.3"
+    targetRevision: "0.15.4"
     chart: node-feature-discovery
   project: default
   syncPolicy:
