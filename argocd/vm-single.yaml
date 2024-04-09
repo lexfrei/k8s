@@ -13,6 +13,9 @@ spec:
     chart: victoria-metrics-single
     helm:
       valuesObject:
+        server:
+          persistentVolume:
+            storageClass: "longhorn"
         ingress:
           enabled: true
           hosts:
@@ -24,9 +27,6 @@ spec:
             - secretName: vm-k8s-home-lex-la-tls
               hosts:
                 - vm.k8s.home.lex.la
-        server:
-          persistentVolume:
-            storageClass: "longhorn"
   project: default
   syncPolicy:
     automated:
