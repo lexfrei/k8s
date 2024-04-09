@@ -12,3 +12,7 @@ spec:
     path: argocd
     repoURL: https://github.com/lexfrei/k8s.git
     targetRevision: HEAD
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
