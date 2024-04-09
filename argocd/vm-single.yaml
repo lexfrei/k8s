@@ -19,7 +19,9 @@ spec:
           ingress:
             enabled: true
             hosts:
-              - vm.k8s.home.lex.la
+              - name: vm.k8s.home.lex.la
+                path: /
+                port: http
             annotations:
               traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
               cert-manager.io/cluster-issuer: "cloudflare-issuer"
