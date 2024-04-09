@@ -21,6 +21,9 @@ spec:
           cert-manager.io/cluster-issuer: "cloudflare-issuer"
         tls: true
 
+      helmPreUpgradeCheckerJob:
+        enabled: false
+
       # Minimize the number of replicas to reduce the resource usage.
       # This is not safe for production.
       defaultSetting:
