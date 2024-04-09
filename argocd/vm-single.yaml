@@ -16,17 +16,17 @@ spec:
         server:
           persistentVolume:
             storageClass: "longhorn"
-        ingress:
-          enabled: true
-          hosts:
-            - vm.k8s.home.lex.la
-          annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-            cert-manager.io/cluster-issuer: "cloudflare-issuer"
-          tls:
-            - secretName: vm-k8s-home-lex-la-tls
-              hosts:
-                - vm.k8s.home.lex.la
+          ingress:
+            enabled: true
+            hosts:
+              - vm.k8s.home.lex.la
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+              cert-manager.io/cluster-issuer: "cloudflare-issuer"
+            tls:
+              - secretName: vm-k8s-home-lex-la-tls
+                hosts:
+                  - vm.k8s.home.lex.la
   project: default
   syncPolicy:
     automated:
