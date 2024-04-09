@@ -43,5 +43,5 @@ spec:
   syncPolicy:
     automated:
       selfHeal: true
-  syncOptions:
-    - CreateNamespace=true
+    syncOptions:
+      - CreateNamespace=true
