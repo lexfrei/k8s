@@ -24,6 +24,9 @@ spec:
             - secretName: vm-k8s-home-lex-la-tls
               hosts:
                 - vm.k8s.home.lex.la
+        server:
+          persistentVolume:
+            storageClass: "longhorn"
   project: default
   syncPolicy:
     automated:
