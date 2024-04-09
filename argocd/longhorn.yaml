@@ -13,6 +13,8 @@ spec:
     chart: longhorn
     helm:
       valuesObject:
+        persistence:
+          defaultClassReplicaCount: 1
         ingress:
           enabled: true
           host: longhorn.k8s.home.lex.la
