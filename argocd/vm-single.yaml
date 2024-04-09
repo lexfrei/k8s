@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vm-single
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://victoriametrics.github.io/helm-charts/"
+    targetRevision: "v0.1.0"
+    chart: vm-single
+    helm:
+      valuesObject:
+        ingress:
+          enabled: true
+          hosts:
+            - vm.k8s.home.lex.la
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+            cert-manager.io/cluster-issuer: "cloudflare-issuer"
+          tls:
+            - secretName: vm-k8s-home-lex-la-tls
+              hosts:
+                - vm.k8s.home.lex.la
+  project: default
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
