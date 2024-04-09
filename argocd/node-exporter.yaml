@@ -23,8 +23,6 @@ spec:
         service:
           type: ClusterIP
           port: 9100
-        podSecurityPolicy:
-          enabled: true
         rbac:
           create: true
         nodeSelector:
