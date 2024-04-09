@@ -11,36 +11,36 @@ spec:
     repoURL: "https://charts.longhorn.io"
     targetRevision: "1.6.1"
     chart: longhorn
-  helm:
-    valuesObject:
-      ingress:
-        enabled: true
-        host: longhorn.k8s.home.lex.la
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          cert-manager.io/cluster-issuer: "cloudflare-issuer"
-        tls: true
+    helm:
+      valuesObject:
+        ingress:
+          enabled: true
+          host: longhorn.k8s.home.lex.la
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+            cert-manager.io/cluster-issuer: "cloudflare-issuer"
+          tls: true
 
-      helmPreUpgradeCheckerJob:
-        enabled: false
+        helmPreUpgradeCheckerJob:
+          enabled: false
 
-      # Minimize the number of replicas to reduce the resource usage.
-      # This is not safe for production.
-      defaultSetting:
-        defaultReplicaCount: 1
-      longhornUI:
-        replicas: 1
-      longhornConversionWebhook:
-        replicas: 1
-      longhornAdmissionWebhook:
-        replicas: 1
-      longhornRecoveryBackend:
-        replicas: 1
-      csi:
-        attacherReplicaCount: 1
-        provisionerReplicaCount: 1
-        resizerReplicaCount: 1
-        snapshotterReplicaCount: 1
+        # Minimize the number of replicas to reduce the resource usage.
+        # This is not safe for production.
+        defaultSetting:
+          defaultReplicaCount: 1
+        longhornUI:
+          replicas: 1
+        longhornConversionWebhook:
+          replicas: 1
+        longhornAdmissionWebhook:
+          replicas: 1
+        longhornRecoveryBackend:
+          replicas: 1
+        csi:
+          attacherReplicaCount: 1
+          provisionerReplicaCount: 1
+          resizerReplicaCount: 1
+          snapshotterReplicaCount: 1
 
   project: default
   syncPolicy:
