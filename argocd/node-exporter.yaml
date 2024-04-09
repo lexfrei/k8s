@@ -9,7 +9,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://prometheus-community.github.io/helm-charts"
-    targetRevision: "1.7.0"
+    targetRevision: "4.32.0"
     chart: prometheus-node-exporter
     helm:
       valuesObject:
