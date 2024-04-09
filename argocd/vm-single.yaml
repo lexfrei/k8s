@@ -9,8 +9,8 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://victoriametrics.github.io/helm-charts/"
-    targetRevision: "v0.1.0"
-    chart: vm-single
+    targetRevision: "0.9.17"
+    chart: victoria-metrics-single
     helm:
       valuesObject:
         ingress:
