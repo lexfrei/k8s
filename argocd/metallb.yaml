@@ -9,10 +9,13 @@ spec:
   destination:
     namespace: metallb-system
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://metallb.github.io/metallb"
-    targetRevision: "0.14.4"
-    chart: metallb
+  sources:
+    - repoURL: "https://metallb.github.io/metallb"
+      targetRevision: "0.14.4"
+      chart: metallb
+    - path: manifests/metallb
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
   project: default
   ignoreDifferences:
     - group: "apiextensions.k8s.io"
