@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: kubernetes-dashboard
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
     namespace: kubernetes-dashboard
@@ -27,6 +29,7 @@ spec:
   project: default
   syncPolicy:
     automated:
+      prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: traefik
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
     namespace: traefik-system
@@ -45,6 +47,7 @@ spec:
   project: default
   syncPolicy:
     automated:
+      prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

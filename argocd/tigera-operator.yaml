@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: tigera-operator
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
     namespace: tigera-operator
@@ -26,6 +28,7 @@ spec:
   project: default
   syncPolicy:
     automated:
+      prune: true
       selfHeal: true
     syncOptions:
       - ServerSideApply=true
