@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: metallb
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
     namespace: metallb-system
@@ -25,6 +27,7 @@ spec:
         - /spec/conversion/webhook/clientConfig/caBundle
   syncPolicy:
     automated:
+      prune: true
       selfHeal: true
     syncOptions:
       - ServerSideApply=true
