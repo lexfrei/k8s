@@ -10,9 +10,9 @@ spec:
     server: "https://kubernetes.default.svc"
   project: default
   source:
-    chart: victoria-metrics-k8s-stack
     repoURL: "https://victoriametrics.github.io/helm-charts/"
     targetRevision: "0.20.0"
+    chart: victoria-metrics-k8s-stack
     helm:
       valuesObject:
         ingress:
