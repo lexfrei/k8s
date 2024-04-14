@@ -21,6 +21,10 @@ spec:
           params:
             server:
               insecure: true
+          cm:
+            resource.compareoptions: |
+              # disables status field diffing in specified resource types
+              ignoreAggregatedRoles: true
         server:
           # extensions:
           #   enabled: true
