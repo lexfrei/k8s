@@ -40,6 +40,9 @@ spec:
                 url: "http://vmsingle-victoria-metrics-k8s-stack.monitoring.svc:8429"
                 access: proxy
                 isDefault: true
+        sidecar:
+          datasources:
+            enabled: true
   project: default
   syncPolicy:
     automated:
