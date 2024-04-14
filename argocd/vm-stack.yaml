@@ -30,7 +30,9 @@ spec:
         grafana:
           enabled: false
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
