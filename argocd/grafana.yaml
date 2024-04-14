@@ -31,6 +31,15 @@ spec:
             - secretName: grafana-tls
               hosts:
                 - grafana.k8s.home.lex.la
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: VictoriaMetrics
+                type: prometheus
+                url: "http://vmsingle-victoria-metrics-k8s-stack.monitoring.svc:8429"
+                access: proxy
+                isDefault: true
   project: default
   syncPolicy:
     automated:

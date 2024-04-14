@@ -1,0 +1,39 @@
+# victoria-metrics-k8s-stack
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoria-metrics-k8s-stack
+  namespace: argocd
+spec:
+  destination:
+    namespace: default
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    path: victoria-metrics-k8s-stack
+    repoURL: "https://victoriametrics.github.io/helm-charts/"
+    targetRevision: 0.1.0
+    helm:
+      valuesObject:
+        ingress:
+          enabled: true
+          hosts:
+            - host: vm.k8s.home.lex.la
+              paths:
+                - path: /
+                  pathType: Prefix
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          tls:
+            - secretName: vm-tls
+              hosts:
+                - vm.k8s.home.lex.la
+        grafana:
+          enabled: true
+          adminPassword: admin
+          ingress:
+            enabled: false
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
