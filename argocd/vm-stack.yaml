@@ -28,10 +28,7 @@ spec:
               hosts:
                 - vm.k8s.home.lex.la
         grafana:
-          enabled: true
-          adminPassword: admin
-          ingress:
-            enabled: false
+          enabled: false
   syncPolicy:
     automated: {}
     syncOptions:
