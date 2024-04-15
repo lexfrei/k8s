@@ -16,19 +16,6 @@ spec:
     chart: victoria-metrics-k8s-stack
     helm:
       valuesObject:
-        ingress:
-          enabled: true
-          hosts:
-            - host: vm.k8s.home.lex.la
-              paths:
-                - path: /
-                  pathType: Prefix
-          annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          tls:
-            - secretName: vm-tls
-              hosts:
-                - vm.k8s.home.lex.la
         grafana:
           enabled: false
   syncPolicy:
