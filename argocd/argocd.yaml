@@ -14,7 +14,7 @@ spec:
     targetRevision: "6.7.12"
     chart: argo-cd
     helm:
-      valuesObject:
+      values: |
         global:
           domain: argocd.lex.la
           logging:
