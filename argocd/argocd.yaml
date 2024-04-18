@@ -17,6 +17,8 @@ spec:
       valuesObject:
         global:
           domain: argocd.lex.la
+          logging:
+            level: debug
         configs:
           params:
             server:
