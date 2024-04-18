@@ -42,7 +42,7 @@ spec:
               traefik.ingress.kubernetes.io/router.entrypoints: websecure,tunnel
               cert-manager.io/cluster-issuer: cloudflare-issuer
             tls:
-              - secretName: argocd-k8s-home-lex-la-tls
+              - secretName: argocd-lex-la-tls
                 hosts:
                   - argocd.lex.la
   project: default
