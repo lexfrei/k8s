@@ -15,6 +15,9 @@ spec:
     chart: grafana
     helm:
       values: |
+        global:
+          deploymentStrategy:
+            type: Recreate
         persistence:
           enabled: true
           type: pvc
