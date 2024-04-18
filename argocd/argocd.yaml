@@ -26,17 +26,6 @@ spec:
               # disables status field diffing in specified resource types
               ignoreAggregatedRoles: true
         server:
-          # extensions:
-          #   enabled: true
-          #   image:
-          #     tag: v0.0.4
-          #   extensionList:
-          #     - name: extension-trivy
-          #       env:
-          #         - name: EXTENSION_URL
-          #           value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.1.0/extension-trivy.tar
-          #         - name: EXTENSION_CHECKSUM_URL
-          #           value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.1.0/extension-trivy_checksums.txt
           ingress:
             enabled: true
             hosts:
@@ -50,7 +39,7 @@ spec:
                         port:
                           number: 80
             annotations:
-              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure,tunnel
               cert-manager.io/cluster-issuer: cloudflare-issuer
             tls:
               - secretName: argocd-k8s-home-lex-la-tls
