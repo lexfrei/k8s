@@ -16,7 +16,7 @@ spec:
     helm:
       valuesObject:
         global:
-          domain: argocd.k8s.home.lex.la
+          domain: argocd.lex.la
         configs:
           params:
             server:
@@ -29,7 +29,7 @@ spec:
           ingress:
             enabled: true
             hosts:
-              - host: argocd.k8s.home.lex.la
+              - host: argocd.lex.la
                 paths:
                   - path: /
                     pathType: Prefix
@@ -44,7 +44,7 @@ spec:
             tls:
               - secretName: argocd-k8s-home-lex-la-tls
                 hosts:
-                  - argocd.k8s.home.lex.la
+                  - argocd.lex.la
   project: default
   syncPolicy:
     automated:
