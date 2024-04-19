@@ -20,6 +20,21 @@ spec:
           enabled: false
         node-exporter:
           enabled: false
+        vmsingle:
+          ingress:
+            enabled: true
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              cert-manager.io/cluster-issuer: cloudflare-issuer
+            hosts:
+              - host: "vm.k8s.home.lex.la"
+                paths:
+                  - path: /
+                    pathType: Prefix
+            tls:
+              - secretName: vm-tls
+                hosts:
+                  - vm.k8s.home.lex.la
   syncPolicy:
     automated:
       prune: true
