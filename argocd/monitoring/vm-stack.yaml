@@ -19,7 +19,7 @@ spec:
         grafana:
           enabled: false
         prometheus-node-exporter:
-          enabled: true
+          enabled: false
         vmsingle:
           ingress:
             enabled: true
