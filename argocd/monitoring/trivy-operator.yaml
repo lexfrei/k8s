@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: monitoring
   source:
     chart: trivy-operator
     repoURL: https://aquasecurity.github.io/helm-charts/
