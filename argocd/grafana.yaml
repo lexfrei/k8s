@@ -14,7 +14,10 @@ spec:
     targetRevision: "7.3.8"
     chart: grafana
     helm:
-      valuesObject:
+      values: |
+        global:
+          deploymentStrategy:
+            type: Recreate
         persistence:
           enabled: true
           type: pvc
