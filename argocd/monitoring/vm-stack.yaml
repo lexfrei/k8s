@@ -18,7 +18,7 @@ spec:
       valuesObject:
         grafana:
           enabled: false
-        node-exporter:
+        prometheus-node-exporter:
           enabled: false
         vmsingle:
           ingress:
