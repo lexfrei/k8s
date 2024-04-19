@@ -7,9 +7,6 @@
     "major": {
         "stabilityDays": 3
     },
-    "schedule": [
-        "before 2am"
-    ],
     "dependencyDashboard": true,
     "timezone": "Asia/Tbilisi",
     "helmfile": {
