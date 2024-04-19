@@ -5,22 +5,35 @@
         ":semanticCommits"
     ],
     "major": {
-        "stabilityDays": 3
+        "stabilityDays": 3,
+        "labels": [
+            "major"
+        ]
+    },
+    "minor": {
+        "labels": [
+            "minor"
+        ]
     },
     "dependencyDashboard": true,
     "timezone": "Asia/Tbilisi",
-    "helmfile": {
-        "fileMatch": "(^|/)helmfile.d\/.*\\.yaml$"
-    },
     "argocd": {
         "fileMatch": [
             "argocd/.+\\.yaml$"
+        ],
+        "labels": [
+            "argocd"
         ]
     },
     "github-actions": {
         "fileMatch": [
             "^\\.github/workflows/[^/]+\\.ya?ml$"
+        ],
+        "labels": [
+            "github-actions"
         ]
     },
-    "automerge": true
+    "automerge": true,
+    "prHourlyLimit": 5,
+    "prConcurrentLimit": 10
 }
