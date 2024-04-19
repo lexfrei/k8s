@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: infra
   destination:
     namespace: tor-controller
     server: "https://kubernetes.default.svc"
@@ -13,7 +14,6 @@ spec:
     repoURL: "https://bugfest.github.io/tor-controller"
     targetRevision: "0.1.15"
     chart: tor-controller
-  project: default
   syncPolicy:
     automated:
       prune: true

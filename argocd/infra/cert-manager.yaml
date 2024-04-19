@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: infra
   destination:
     namespace: cert-manager
     server: "https://kubernetes.default.svc"
@@ -25,7 +26,6 @@ spec:
     - path: manifests/cert-manager
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
-  project: default
   syncPolicy:
     automated:
       prune: true

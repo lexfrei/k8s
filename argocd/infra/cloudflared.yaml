@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: infra
   destination:
     namespace: cloudflared-system
     server: "https://kubernetes.default.svc"
@@ -22,7 +23,6 @@ spec:
             - service: http://traefik.traefik-system.svc.k8s.home.lex.la:8080
           enableDefault404: false
         replicaCount: 1
-  project: default
   syncPolicy:
     automated:
       prune: true
