@@ -29,7 +29,7 @@ spec:
                       name: me-site
                       port:
                         number: 8080
-  project: default
+  project: workloads
   syncPolicy:
     automated:
       prune: true
