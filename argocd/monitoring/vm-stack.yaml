@@ -27,10 +27,7 @@ spec:
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
               cert-manager.io/cluster-issuer: cloudflare-issuer
             hosts:
-              - host: "vm.k8s.home.lex.la"
-                paths:
-                  - path: /
-                    pathType: Prefix
+              - "vm.k8s.home.lex.la"
             tls:
               - secretName: vm-tls
                 hosts:
