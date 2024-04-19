@@ -11,7 +11,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://grafana.github.io/helm-charts"
-    targetRevision: "7.3.8"
+    targetRevision: "7.3.9"
     chart: grafana
     helm:
       values: |
