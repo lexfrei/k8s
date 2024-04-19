@@ -1,27 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: victoria-metrics-k8s-stack
+  name: metrics-server
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: monitoring
   destination:
-    namespace: monitoring
+    namespace: kube-system
     server: "https://kubernetes.default.svc"
-  project: default
   source:
-    repoURL: "https://victoriametrics.github.io/helm-charts/"
-    targetRevision: "0.21.1"
-    chart: victoria-metrics-k8s-stack
+    repoURL: "https://kubernetes-sigs.github.io/metrics-server"
+    targetRevision: "3.12.1"
+    chart: metrics-server
     helm:
       valuesObject:
-        grafana:
-          enabled: false
+        args:
+          - --kubelet-insecure-tls
+          - --kubelet-preferred-address-types=InternalIP
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true

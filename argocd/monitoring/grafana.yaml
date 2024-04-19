@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: monitoring
   destination:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
@@ -47,7 +48,6 @@ spec:
         sidecar:
           datasources:
             enabled: true
-  project: default
   syncPolicy:
     automated:
       prune: true
