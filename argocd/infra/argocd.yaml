@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: infra
   destination:
     namespace: argocd
     server: "https://kubernetes.default.svc"
@@ -47,7 +48,6 @@ spec:
               - secretName: argocd-lex-la-tls
                 hosts:
                   - argocd.lex.la
-  project: default
   syncPolicy:
     automated:
       prune: true

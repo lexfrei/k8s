@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: infra
   destination:
     namespace: traefik-system
     server: "https://kubernetes.default.svc"
@@ -44,7 +45,6 @@ spec:
           kubernetesIngress:
             publishedService:
               enabled: true
-  project: default
   syncPolicy:
     automated:
       prune: true

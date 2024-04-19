@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: infra
   destination:
     namespace: metallb-system
     server: "https://kubernetes.default.svc"
@@ -16,7 +17,6 @@ spec:
     - path: manifests/metallb
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
-  project: default
   ignoreDifferences:
     - group: "apiextensions.k8s.io"
       kind: CustomResourceDefinition

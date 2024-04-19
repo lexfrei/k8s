@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: infra
   destination:
     namespace: longhorn-system
     server: "https://kubernetes.default.svc"
@@ -24,10 +25,8 @@ spec:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
             cert-manager.io/cluster-issuer: "cloudflare-issuer"
           tls: true
-
         preUpgradeChecker:
           jobEnabled: false
-
         # Minimize the number of replicas to reduce the resource usage.
         # This is not safe for production.
         defaultSetting:
@@ -45,8 +44,6 @@ spec:
           provisionerReplicaCount: 1
           resizerReplicaCount: 1
           snapshotterReplicaCount: 1
-
-  project: default
   syncPolicy:
     automated:
       prune: true

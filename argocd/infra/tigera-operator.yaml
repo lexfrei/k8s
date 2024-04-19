@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: infra
   destination:
     namespace: tigera-operator
     server: "https://kubernetes.default.svc"
@@ -25,7 +26,6 @@ spec:
                 natOutgoing: Enabled
                 nodeSelector: all()
             containerIPForwarding: "Enabled"
-  project: default
   syncPolicy:
     automated:
       prune: true
