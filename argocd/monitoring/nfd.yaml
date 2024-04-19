@@ -6,6 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: monitoring
   destination:
     namespace: node-feature-discovery
     server: "https://kubernetes.default.svc"
@@ -13,7 +14,6 @@ spec:
     repoURL: "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
     targetRevision: "0.15.4"
     chart: node-feature-discovery
-  project: default
   syncPolicy:
     automated:
       prune: true
