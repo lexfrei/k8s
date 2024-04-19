@@ -18,6 +18,8 @@ spec:
       valuesObject:
         grafana:
           enabled: false
+        prometheus-node-exporter:
+          enabled: false
   syncPolicy:
     automated:
       prune: true
