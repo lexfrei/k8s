@@ -27,6 +27,15 @@ spec:
               # disables status field diffing in specified resource types
               ignoreAggregatedRoles: true
         server:
+          extensions:
+            enabled: true
+            extensionList:
+              - name: extension-trivy
+                env:
+                  - name: EXTENSION_URL
+                    value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy.tar
+                  - name: EXTENSION_CHECKSUM_URL
+                    value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy_checksums.txt
           ingress:
             enabled: true
             hostname: argocd.lex.la
