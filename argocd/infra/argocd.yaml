@@ -36,6 +36,13 @@ spec:
                     value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy.tar
                   - name: EXTENSION_CHECKSUM_URL
                     value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy_checksums.txt
+            resources:
+              limits:
+                cpu: 50m
+                memory: 128Mi
+              requests:
+                cpu: 10m
+                memory: 64Mi
           ingress:
             enabled: true
             hostname: argocd.lex.la
