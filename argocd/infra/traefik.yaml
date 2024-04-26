@@ -10,41 +10,46 @@ spec:
   destination:
     namespace: traefik-system
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://helm.traefik.io/traefik"
-    targetRevision: "27.0.2"
-    chart: traefik
-    helm:
-      values: |
-        service:
-          annotations:
-            traefik.universe.tf/address-pool: ingress-pool
-        additionalArguments:
-          # Disable internal ssl check
-          - "--serversTransport.insecureSkipVerify=true"
-          # entrypoint for cloudflared
-          - "--entrypoints.tunnel.address=:8080"
-        globalArguments:
-          - "--global.checknewversion"
-        ports:
-          web:
-            redirectTo:
-              port: websecure
-          tunnel:
-            port: 8080
-            exposedPort: 8080
-            expose:
-              default: true
-        ingressRoute:
-          dashboard:
-            enabled: true
-            matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
-            entryPoints:
-              - websecure
-        providers:
-          kubernetesIngress:
-            publishedService:
+  sources:
+    - repoURL: "https://helm.traefik.io/traefik"
+      targetRevision: "27.0.2"
+      chart: traefik
+      helm:
+        values: |
+          service:
+            annotations:
+              traefik.universe.tf/address-pool: ingress-pool
+          additionalArguments:
+            # Disable internal ssl check
+            - "--serversTransport.insecureSkipVerify=true"
+            # entrypoint for cloudflared
+            - "--entrypoints.tunnel.address=:8080"
+          globalArguments:
+            - "--global.checknewversion"
+          ports:
+            web:
+              redirectTo:
+                port: websecure
+            tunnel:
+              port: 8080
+              exposedPort: 8080
+              expose:
+                default: true
+          ingressRoute:
+            dashboard:
               enabled: true
+              matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+              entryPoints:
+                - websecure
+              tls:
+                secretName: traefik-tls-secret 
+          providers:
+            kubernetesIngress:
+              publishedService:
+                enabled: true
+    - path: manifests/traefik
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
   syncPolicy:
     automated:
       prune: true
