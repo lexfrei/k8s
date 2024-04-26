@@ -1,26 +1,20 @@
 global:
-  domain: argocd.k8s.home.lex.la
+  domain: argocd.lex.la
 configs:
   params:
     server:
       insecure: true
+  cm:
+    resource.compareoptions: |
+      ignoreAggregatedRoles: true
 server:
   ingress:
     enabled: true
-    hosts:
-      - host: argocd.k8s.home.lex.la
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: argocd-server
-                port:
-                  number: 80
+    hostname: argocd.lex.la
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.entrypoints: tunnel
       cert-manager.io/cluster-issuer: cloudflare-issuer
     tls:
-      - secretName: argocd-k8s-home-lex-la-tls
+      - secretName: argocd-lex-la-tls
         hosts:
-          - argocd.k8s.home.lex.la
+          - argocd.lex.la

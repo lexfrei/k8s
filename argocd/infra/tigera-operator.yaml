@@ -10,22 +10,16 @@ spec:
   destination:
     namespace: tigera-operator
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://projectcalico.docs.tigera.io/charts"
-    targetRevision: "v3.27.3"
-    chart: tigera-operator
-    helm:
-      valuesObject:
-        installation:
-          calicoNetwork:
-            ipPools:
-              - blockSize: 26
-                cidr: 10.42.0.0/16
-                disableBGPExport: false
-                encapsulation: VXLAN
-                natOutgoing: Enabled
-                nodeSelector: all()
-            containerIPForwarding: "Enabled"
+  sources:
+    - repoURL: "https://projectcalico.docs.tigera.io/charts"
+      targetRevision: "v3.27.3"
+      chart: tigera-operator
+      helm:
+        valueFiles:
+          - $values/values/tigera-operator.yaml
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      ref: values
   syncPolicy:
     automated:
       prune: true
