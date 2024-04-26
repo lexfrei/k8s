@@ -10,49 +10,16 @@ spec:
   destination:
     namespace: argocd
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://argoproj.github.io/argo-helm"
-    targetRevision: "6.7.15"
-    chart: argo-cd
-    helm:
-      values: |
-        global:
-          domain: argocd.lex.la
-        configs:
-          params:
-            server:
-              insecure: true
-          cm:
-            resource.compareoptions: |
-              # disables status field diffing in specified resource types
-              ignoreAggregatedRoles: true
-        server:
-          # extensions:
-          #   enabled: true
-          #   extensionList:
-          #     - name: extension-trivy
-          #       env:
-          #         - name: EXTENSION_URL
-          #           value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy.tar
-          #         - name: EXTENSION_CHECKSUM_URL
-          #           value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy_checksums.txt
-            resources:
-              limits:
-                cpu: 50m
-                memory: 128Mi
-              requests:
-                cpu: 10m
-                memory: 64Mi
-          ingress:
-            enabled: true
-            hostname: argocd.lex.la
-            annotations:
-              traefik.ingress.kubernetes.io/router.entrypoints: tunnel
-              cert-manager.io/cluster-issuer: cloudflare-issuer
-            tls:
-              - secretName: argocd-lex-la-tls
-                hosts:
-                  - argocd.lex.la
+  sources:
+    - repoURL: "https://argoproj.github.io/argo-helm"
+      targetRevision: "6.7.15"
+      chart: argo-cd
+      helm:
+        valueFiles:
+          - $values/values/argocd.yaml
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      ref: values
   syncPolicy:
     automated:
       prune: true
