@@ -16,10 +16,21 @@ spec:
     chart: victoria-metrics-k8s-stack
     helm:
       valuesObject:
+        # Dependencies
         grafana:
           enabled: false
         prometheus-node-exporter:
           enabled: false
+        kube-state-metrics:
+          enabled: false
+        # VictoriaMetrics components
+        victoria-metrics-operator:
+          cleanupCRD: false
+        vmalert:
+          enabled: false
+        vmagent:
+          spec:
+            scrapeInterval: 90s
         vmsingle:
           ingress:
             enabled: true
