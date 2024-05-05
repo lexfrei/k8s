@@ -22,8 +22,6 @@ spec:
         prometheus-node-exporter:
           enabled: false
         # VictoriaMetrics components
-        victoria-metrics-operator:
-          cleanupCRD: false
         vmsingle:
           ingress:
             enabled: true
