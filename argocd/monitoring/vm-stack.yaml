@@ -21,16 +21,9 @@ spec:
           enabled: false
         prometheus-node-exporter:
           enabled: false
-        kube-state-metrics:
-          enabled: false
         # VictoriaMetrics components
         victoria-metrics-operator:
           cleanupCRD: false
-        vmalert:
-          enabled: false
-        vmagent:
-          spec:
-            scrapeInterval: 90s
         vmsingle:
           ingress:
             enabled: true
