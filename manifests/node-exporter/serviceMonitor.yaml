@@ -1,0 +1,17 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: my-release-victoria-metrics-k8s-stack-node-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-node-exporter
+  endpoints:
+    - metricRelabelConfigs:
+        - action: drop
+          regex: /var/lib/kubelet/pods.+
+          source_labels:
+            - mountpoint
+      port: metrics
+  jobLabel: jobLabel
