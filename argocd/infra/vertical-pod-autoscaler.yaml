@@ -13,6 +13,7 @@ spec:
   source:
     repoURL: "https://cowboysysop.github.io/charts/"
     targetRevision: "9.8.1"
+    chart: vertical-pod-autoscaler
   syncPolicy:
     automated:
       prune: true
