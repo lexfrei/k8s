@@ -11,7 +11,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://lexfrei.github.io/charts"
-    targetRevision: "0.2.0"
+    targetRevision: "0.3.0"
     chart: me-site
     helm:
       valuesObject:
