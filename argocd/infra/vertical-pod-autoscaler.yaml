@@ -14,10 +14,11 @@ spec:
     repoURL: "https://cowboysysop.github.io/charts/"
     targetRevision: "9.8.1"
     chart: vertical-pod-autoscaler
-    valuesObject:
-      updater:
-        extraArgs:
-          min-replicas: 1
+    helm:
+      valuesObject:
+        updater:
+          extraArgs:
+            min-replicas: 1
   syncPolicy:
     automated:
       prune: true
