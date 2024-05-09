@@ -11,7 +11,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://charts.crossplane.io/stable"
-    targetRevision: "1.82.2"
+    targetRevision: "1.15.2"
     chart: crossplane
   project: infra
   syncPolicy:
