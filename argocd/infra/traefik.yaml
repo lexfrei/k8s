@@ -15,7 +15,7 @@ spec:
       targetRevision: "28.0.0"
       chart: traefik
       helm:
-        values: |
+        valuesObject:
           service:
             annotations:
               traefik.universe.tf/address-pool: ingress-pool
@@ -42,7 +42,7 @@ spec:
               entryPoints:
                 - websecure
               tls:
-                secretName: traefik-tls-secret 
+                secretName: traefik-tls-secret
           providers:
             kubernetesIngress:
               publishedService:

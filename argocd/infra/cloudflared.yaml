@@ -15,7 +15,7 @@ spec:
     targetRevision: "0.4.2"
     chart: cloudflare-tunnel
     helm:
-      values: |
+      valuesObject:
         cloudflare:
           secretName: tunnel-credentials
           tunnelName: k8s-expose
