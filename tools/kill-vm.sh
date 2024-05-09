@@ -1,0 +1,10 @@
+kubectl patch secret vmagent-victoria-metrics-k8s-stack vmalertmanager-victoria-metrics-k8s-stack-config tls-assets-vmagent-victoria-metrics-k8s-stack tls-assets-vmalert-victoria-metrics-k8s-stack --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl patch service vmagent-victoria-metrics-k8s-stack vmalert-victoria-metrics-k8s-stack --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl patch deployment vmagent-victoria-metrics-k8s-stack vmalert-victoria-metrics-k8s-stack vmsingle-victoria-metrics-k8s-stack --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl patch sa vmsingle-victoria-metrics-k8s-stack vmagent-victoria-metrics-k8s-stack vmalert-victoria-metrics-k8s-stack vmalertmanager-victoria-metrics-k8s-stack --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl patch cm vm-victoria-metrics-k8s-stack-rulefiles-0 --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+
+kubectl patch VMAgent victoria-metrics-k8s-stack --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl patch VMAlert victoria-metrics-k8s-stack --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl patch VMAlertmanager victoria-metrics-k8s-stack --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl patch VMSingle victoria-metrics-k8s-stack --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
