@@ -15,7 +15,7 @@ spec:
     targetRevision: "7.3.9"
     chart: grafana
     helm:
-      values: |
+      valuesObject:
         global:
           deploymentStrategy:
             type: Recreate
