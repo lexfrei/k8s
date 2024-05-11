@@ -161,6 +161,6 @@ server:
       - name: extension-trivy
         env:
           - name: EXTENSION_URL
-            value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy.tar
+            value: https://github.com/lexfrei/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy.tar
           - name: EXTENSION_CHECKSUM_URL
-            value: https://github.com/mziyabo/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy_checksums.txt
+            value: https://github.com/lexfrei/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy_checksums.txt
