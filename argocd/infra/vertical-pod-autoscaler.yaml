@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://cowboysysop.github.io/charts/"
-    targetRevision: "9.8.1"
+    targetRevision: "9.8.2"
     chart: vertical-pod-autoscaler
     helm:
       valuesObject:
