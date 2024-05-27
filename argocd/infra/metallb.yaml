@@ -34,9 +34,8 @@ spec:
         - ".webhooks[]?.clientConfig.caBundle"
     - group: "apps/v1"
       kind: Deployment
-      name: metallb-controller
-      jsonPointers:
-        - /spec/template/spec/containers/0/resources
+      jqPathExpressions:
+        - .spec.template.spec.containers[]?.resources
   syncPolicy:
     automated:
       prune: true
