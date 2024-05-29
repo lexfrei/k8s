@@ -16,4 +16,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: json-yaml-validate
-        uses: GrantBirki/json-yaml-validate@v2.7.1
+        uses: GrantBirki/json-yaml-validate@v3.0.0
