@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
-    targetRevision: "0.16.0"
+    targetRevision: "0.16.1"
     chart: node-feature-discovery
   syncPolicy:
     automated:
