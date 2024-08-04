@@ -28,14 +28,9 @@ spec:
         ingress:
           enabled: true
           hosts:
-            - grafana.k8s.home.lex.la
+            - grafana.lex.la
           annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-            cert-manager.io/cluster-issuer: cloudflare-issuer
-          tls:
-            - secretName: grafana-tls
-              hosts:
-                - grafana.k8s.home.lex.la
+            traefik.ingress.kubernetes.io/router.entrypoints: tunnel
         datasources:
           datasources.yaml:
             apiVersion: 1
