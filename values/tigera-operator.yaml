@@ -1,10 +1,14 @@
 installation:
   calicoNetwork:
     ipPools:
-      - blockSize: 26
+      - allowedUses:
+          - Workload
+          - Tunnel
+        blockSize: 26
         cidr: 10.42.0.0/16
         disableBGPExport: false
         encapsulation: VXLAN
+        name: default-ipv4-ippool
         natOutgoing: Enabled
         nodeSelector: all()
     containerIPForwarding: "Enabled"
