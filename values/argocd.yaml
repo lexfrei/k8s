@@ -151,7 +151,6 @@ server:
     hostname: argocd.lex.la
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: tunnel
-      cert-manager.io/cluster-issuer: cloudflare-issuer
     tls:
       - secretName: argocd-lex-la-tls
         hosts:
