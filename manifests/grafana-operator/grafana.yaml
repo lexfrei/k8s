@@ -20,8 +20,6 @@ spec:
       disable_login_form: "false"
   deployment:
     spec:
-      deploymentStrategy:
-        type: Recreate
       template:
         spec:
           containers:
