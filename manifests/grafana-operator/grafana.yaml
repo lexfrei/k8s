@@ -19,9 +19,9 @@ spec:
     auth:
       disable_login_form: "false"
   deployment:
-    deploymentStrategy:
-      type: Recreate
     spec:
+      deploymentStrategy:
+        type: Recreate
       template:
         spec:
           containers:
@@ -38,9 +38,10 @@ spec:
                       key: GF_SECURITY_ADMIN_PASSWORD
                       name: grafana-credentials
   ingress:
-    spec:
+    metadata:
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+    spec:
       rules:
         - host: grafana.lex.la
           http:
