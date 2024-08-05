@@ -1,0 +1,7 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: grafana-env
+  namespace: monitoring
+stringData:
+  GF_INSTALL_PLUGINS: grafana-image-renderer
