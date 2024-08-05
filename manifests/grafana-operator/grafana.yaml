@@ -35,11 +35,6 @@ spec:
                     secretKeyRef:
                       key: GF_SECURITY_ADMIN_PASSWORD
                       name: grafana-credentials
-                - name: GF_INSTALL_PLUGINS
-                  valueFrom:
-                    secretKeyRef:
-                      key: GF_INSTALL_PLUGINS
-                      name: grafana-env
   ingress:
     metadata:
       annotations:
