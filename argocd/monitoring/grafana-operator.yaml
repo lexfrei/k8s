@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: monitoring
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "ghcr.io/grafana/helm-charts"
+      targetRevision: "v5.11.0"
+      chart: grafana-operator
+    - path: manifests/grafana-operator
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
