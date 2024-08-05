@@ -11,7 +11,7 @@ spec:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: "oci://ghcr.io/grafana/helm-charts"
+    repoURL: "https://grafana.github.io/helm-charts"
     targetRevision: "v5.11.0"
     chart: grafana-operator
   syncPolicy:
