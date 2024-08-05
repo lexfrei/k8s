@@ -19,14 +19,14 @@ spec:
     auth:
       disable_login_form: "false"
   deployment:
-    envFrom:
-      - secretRef:
-        name: grafana-env
     spec:
       template:
         spec:
           containers:
             - name: grafana
+              envFrom:
+                - secretRef:
+                  name: grafana-env
               env:
                 - name: GF_SECURITY_ADMIN_USER
                   valueFrom:
