@@ -4,7 +4,7 @@ metadata:
   name: nfs-csi
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: nas.home.lex.la
+  server: nas.cali.lex.la
   share: /nfs/k8s
 reclaimPolicy: Delete
 volumeBindingMode: Immediate

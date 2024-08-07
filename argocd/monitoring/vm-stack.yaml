@@ -29,11 +29,11 @@ spec:
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
               cert-manager.io/cluster-issuer: cloudflare-issuer
             hosts:
-              - "vm.k8s.home.lex.la"
+              - "vm.k8s.cali.lex.la"
             tls:
               - secretName: vm-tls
                 hosts:
-                  - vm.k8s.home.lex.la
+                  - vm.k8s.cali.lex.la
   syncPolicy:
     automated:
       prune: true

@@ -6,7 +6,7 @@ metadata:
 spec:
   secretName: traefik-tls-secret
   dnsNames:
-    - traefik.k8s.home.lex.la
+    - traefik.k8s.cali.lex.la
   issuerRef:
     name: cloudflare-issuer
     kind: ClusterIssuer
