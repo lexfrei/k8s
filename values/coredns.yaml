@@ -16,7 +16,7 @@ servers:
       - name: ready
       # Required to query kubernetes API for data
       - name: kubernetes
-        parameters: k8s.home.lex.la in-addr.arpa ip6.arpa
+        parameters: k8s.cali.lex.la in-addr.arpa ip6.arpa
         configBlock: |-
           pods insecure
           fallthrough in-addr.arpa ip6.arpa
