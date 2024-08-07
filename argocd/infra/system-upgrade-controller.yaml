@@ -16,6 +16,9 @@ spec:
       path: "manifests"
       directory:
         include: system-upgrade-controller.yaml
+    - path: manifests/system-upgrade-controller
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
   syncPolicy:
     automated:
       prune: true
