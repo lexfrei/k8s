@@ -6,14 +6,6 @@ metadata:
   labels:
     dashboards: "grafana"
 spec:
-  persistentVolumeClaim:
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      resources:
-        requests:
-          storage: 10Gi
-      storageClassName: "longhorn"
   config:
     log:
       mode: "console"
@@ -25,12 +17,6 @@ spec:
         spec:
           containers:
             - name: grafana
-              image: docker.io/grafana/grafana:10.4.3
-              securityContext:
-                allowPrivilegeEscalation: true
-                readOnlyRootFilesystem: false
-              readinessProbe:
-                failureThreshold: 3
               env:
                 - name: GF_SECURITY_ADMIN_USER
                   valueFrom:
