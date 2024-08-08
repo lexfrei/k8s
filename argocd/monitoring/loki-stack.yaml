@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: loki
+  name: loki-stack
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -12,8 +12,8 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: https://grafana.github.io/helm-charts
-    targetRevision: "6.9.0"
-    chart: loki
+    targetRevision: "2.10.2"
+    chart: loki-stack
   syncPolicy:
     automated:
       prune: true
