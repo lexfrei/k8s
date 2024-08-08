@@ -14,6 +14,48 @@ spec:
     repoURL: https://grafana.github.io/helm-charts
     targetRevision: "2.10.2"
     chart: loki-stack
+    helm:
+      values: |
+        loki:
+          rbac:
+            pspEnabled: false
+          persistence:
+            enabled: true
+            size: 30Gi
+            storageClassName: "longhorn"
+          config:
+            chunk_store_config:
+              max_look_back_period: 72h
+            compactor:
+              retention_enabled: true
+              retention_delete_delay: 1h
+              delete_request_cancel_period: 10m
+            limits_config:
+              retention_period: 72h
+        promtail:
+          # Security context needed to read the journal on the host
+          securityContext:
+            privileged: true
+          extraScrapeConfigs:
+            - job_name: journal
+              journal:
+                path: /run/log/journal
+                max_age: 24h
+                labels:
+                  job: systemd-journal
+              relabel_configs:
+                - source_labels: ["__journal__systemd_unit"]
+                  target_label: "unit"
+                - source_labels: ["__journal__hostname"]
+                  target_label: "hostname"
+          extraVolumes:
+            - name: journal
+              hostPath:
+                path: /run/log/journal
+          extraVolumeMounts:
+            - name: journal
+              mountPath: /run/log/journal
+              readOnly: true
   syncPolicy:
     automated:
       prune: true
