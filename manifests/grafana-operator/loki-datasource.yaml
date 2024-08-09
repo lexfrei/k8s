@@ -11,4 +11,4 @@ spec:
     name: Loki
     type: loki
     access: proxy
-    url: "http://loki-stack.monitoring.svc.k8s.cali.lex.la:3100"
+    url: "http://loki-stack.monitoring.svc:3100"
