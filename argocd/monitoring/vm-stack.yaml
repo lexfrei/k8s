@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://victoriametrics.github.io/helm-charts/"
-    targetRevision: "0.24.5"
+    targetRevision: "0.25.0"
     chart: victoria-metrics-k8s-stack
     helm:
       valuesObject:
