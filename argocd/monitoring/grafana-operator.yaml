@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "ghcr.io/grafana/helm-charts"
-      targetRevision: "v5.14.0"
+      targetRevision: "v5.15.1"
       chart: grafana-operator
     - path: manifests/grafana-operator
       repoURL: https://github.com/lexfrei/k8s.git
