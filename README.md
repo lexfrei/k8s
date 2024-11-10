@@ -60,10 +60,16 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL='https://maste
 ## Install all
 
 ```shell
+# Add helm repos
+helm repo add coredns https://coredns.github.io/helm
+helm repo add projectcalico https://projectcalico.docs.tigera.io/charts
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+# Install all
 helm install coredns coredns/coredns --namespace kube-system -f values/coredns.yaml
 helm install tigera-operator projectcalico/tigera-operator --version v3.27.0 --namespace tigera-operator -f values/tigera-operator.yaml --create-namespace
 helm install argocd argo/argo-cd --namespace argocd -f values/argocd.yaml --create-namespace
-kubectl apply -f argocd/meta.yaml
+kubectl apply -f argocd/meta/meta.yaml
 ```
 
 ## Dashboards
