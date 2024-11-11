@@ -1,3 +1,5 @@
-manifests/vk2tg/deployment-test.yaml
-inventory/*/artifacts/**
-inventory/*/credentials/**
+# Ignore all files in the secrets directory
+secrets/*
+
+# Exclude (unignore) all .asc files in the secrets directory
+!secrets/*.asc
