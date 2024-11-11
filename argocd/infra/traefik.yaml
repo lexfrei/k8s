@@ -23,7 +23,7 @@ spec:
             # Disable internal ssl check
             - "--serversTransport.insecureSkipVerify=true"
             # entrypoint for cloudflared
-            - "--entrypoints.tunnel.address=:8080"
+            - "--entrypoints.tunnel.address=:9090"
           globalArguments:
             - "--global.checknewversion"
           ports:
@@ -31,8 +31,8 @@ spec:
               redirectTo:
                 port: websecure
             tunnel:
-              port: 8080
-              exposedPort: 8080
+              port: 9090
+              exposedPort: 9090
               expose:
                 default: true
           ingressRoute:
