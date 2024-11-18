@@ -27,3 +27,11 @@ spec:
     syncOptions:
       - ServerSideApply=true
       - CreateNamespace=true
+  # Ignore differences in the Installation CR
+  # IDK why this field is dropped after the sync, but it is
+  ignoreDifferences:
+    - group: operator.tigera.io
+      kind: Installation
+      name: default
+      jsonPointers:
+        - /spec/calicoNetwork/ipPools/0/disableNewAllocations
