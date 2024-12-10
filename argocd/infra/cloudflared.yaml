@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://lexfrei.github.io/charts"
-    targetRevision: "0.4.3"
+    targetRevision: "0.4.4"
     chart: cloudflare-tunnel
     helm:
       valuesObject:
