@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://metallb.github.io/metallb"
-      targetRevision: "0.14.8"
+      targetRevision: "0.14.9"
       chart: metallb
     - path: manifests/metallb
       repoURL: https://github.com/lexfrei/k8s.git
