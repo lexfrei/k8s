@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://bugfest.github.io/tor-controller"
-    targetRevision: "0.1.15"
+    targetRevision: "0.1.17"
     chart: tor-controller
     helm:
       values: |
