@@ -16,3 +16,7 @@ spec:
                 name: ha-service
                 port:
                   number: 8123
+  tls:
+    - hosts:
+        - ha.lex.la
+      secretName: ha-tls
