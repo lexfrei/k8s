@@ -15,7 +15,7 @@ spec:
               service:
                 name: ha-service
                 port:
-                  number: 8123
+                  number: 80
   tls:
     - hosts:
         - ha.lex.la
