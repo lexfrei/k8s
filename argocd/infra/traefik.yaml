@@ -18,7 +18,7 @@ spec:
         valuesObject:
           service:
             annotations:
-              traefik.universe.tf/address-pool: ingress-pool
+              metallb.io/ip-allocated-from-pool: ingress-pool
           additionalArguments:
             # Disable internal ssl check
             - "--serversTransport.insecureSkipVerify=true"
