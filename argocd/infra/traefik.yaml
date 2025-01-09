@@ -38,7 +38,7 @@ spec:
           ingressRoute:
             dashboard:
               enabled: true
-              matchRule: Host(`traefik.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+              matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
               entryPoints:
                 - websecure
               tls:
