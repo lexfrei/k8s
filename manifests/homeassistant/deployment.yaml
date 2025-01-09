@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homeassistant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homeassistant
+  template:
+    metadata:
+      labels:
+        app: homeassistant
+    spec:
+      nodeSelector:
+        homeassistant: "enabled"
+
+      hostNetwork: true
+
+      containers:
+        - name: homeassistant
+          image: ghcr.io/home-assistant/home-assistant:stable
+          securityContext:
+            privileged: true
+          env:
+            - name: TZ
+              value: "Europe/Moscow"
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: dbus
+              mountPath: /run/dbus
+              readOnly: true
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "1000m"
+              memory: 2Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: homeassistant-config-pvc
+        - name: dbus
+          hostPath:
+            path: /run/dbus
+            type: Directory
