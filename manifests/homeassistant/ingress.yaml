@@ -15,7 +15,7 @@ spec:
               service:
                 name: ha-service
                 port:
-                  number: 80
+                  number: 443
   tls:
     - hosts:
         - ha.lex.la
