@@ -14,6 +14,6 @@ spec:
               service:
                 name: ha-service
                 port:
-                  number: 8123
+                  name: http
             path: /
             pathType: Prefix
