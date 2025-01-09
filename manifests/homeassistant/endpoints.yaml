@@ -6,4 +6,5 @@ subsets:
   - addresses:
       - ip: 72.16.113.46
     ports:
-      - port: 8123
+      - name: http
+        port: 8123
