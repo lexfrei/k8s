@@ -5,7 +5,7 @@
         ":semanticCommits"
     ],
     "major": {
-        "stabilityDays": 3,
+        "minimumReleaseAge": "3 days",
         "labels": [
             "major"
         ]
