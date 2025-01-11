@@ -21,7 +21,7 @@ spec:
           defaultClass: true
         ingress:
           enabled: true
-          host: longhorn.k8s.cali.lex.la
+          host: longhorn.k8s.home.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
             cert-manager.io/cluster-issuer: "cloudflare-issuer"
