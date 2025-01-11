@@ -151,10 +151,6 @@ server:
     hostname: argocd.lex.la
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: tunnel
-    tls:
-      - secretName: argocd-lex-la-tls
-        hosts:
-          - argocd.lex.la
   # extensions:
   #   enabled: true
   #   extensionList:
