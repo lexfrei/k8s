@@ -44,9 +44,7 @@ spec:
               entryPoints:
                 - websecure
               tls:
-                - secretName: traefik-tls-secret
-                  hosts:
-                    - traefik.k8s.home.lex.la
+                secretName: traefik-tls-secret
           providers:
             kubernetesIngress:
               publishedService:
