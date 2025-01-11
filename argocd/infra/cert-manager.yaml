@@ -23,10 +23,10 @@ spec:
               - "8.8.8.8"
           dns01RecursiveNameserversOnly: true
           dns01RecursiveNameservers: "8.8.8.8:53,1.1.1.1:53"
-        config:
-          apiVersion: controller.config.cert-manager.io/v1alpha1
-          kind: ControllerConfiguration
-          enableGatewayAPI: true
+          config:
+            apiVersion: controller.config.cert-manager.io/v1alpha1
+            kind: ControllerConfiguration
+            enableGatewayAPI: true
     - path: manifests/cert-manager
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
