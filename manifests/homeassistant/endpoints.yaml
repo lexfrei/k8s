@@ -4,7 +4,7 @@ metadata:
   name: ha-service
 subsets:
   - addresses:
-      - ip: 72.16.113.46
+      - ip: 172.16.113.46
     ports:
       - name: http
         port: 8123
