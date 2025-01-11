@@ -26,8 +26,14 @@ spec:
             - name: TZ
               value: "Europe/Moscow"
           volumeMounts:
-            - name: config
+            - name: config-dir
               mountPath: /config
+
+            - name: ha-config
+              subPath: configuration.yaml
+              mountPath: /config/configuration.yaml
+              readOnly: true
+
             - name: dbus
               mountPath: /run/dbus
               readOnly: true
@@ -39,7 +45,10 @@ spec:
               cpu: "1000m"
               memory: 2Gi
       volumes:
-        - name: config
+        - name: ha-config
+          configMap:
+            name: homeassistant-config
+        - name: config-dir
           persistentVolumeClaim:
             claimName: homeassistant-config-pvc
         - name: dbus
