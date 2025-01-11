@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: ha-home-service
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     cert-manager.io/cluster-issuer: "cloudflare-issuer"
 spec:
   ingressClassName: traefik
