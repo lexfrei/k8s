@@ -38,11 +38,15 @@ spec:
           ingressRoute:
             dashboard:
               enabled: true
+              annotations:
+                cert-manager.io/cluster-issuer: "cloudflare-issuer"
               matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
               entryPoints:
                 - websecure
               tls:
-                secretName: traefik-tls-secret
+                - secretName: traefik-tls-secret
+                  hosts:
+                    - traefik.k8s.home.lex.la
           providers:
             kubernetesIngress:
               publishedService:
