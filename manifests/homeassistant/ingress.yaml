@@ -7,7 +7,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: ha.lex.la
+    - host: ha.home.lex.la
       http:
         paths:
           - backend:
