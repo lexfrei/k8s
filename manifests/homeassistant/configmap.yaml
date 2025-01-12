@@ -7,16 +7,6 @@ data:
     # Loads default set of integrations. Do not remove.
     default_config:
 
-    homeassistant:
-      name: "My Home"
-      latitude: 43.5855
-      longitude: 39.7218
-      elevation: 144
-      time_zone: "Europe/Moscow"
-      unit_system: metric
-      currency: RUB
-      external_url: "https://ha.lex.la"
-
     # Enable the frontend and load themes from 'themes' directory
     frontend:
       themes: !include_dir_merge_named themes
@@ -28,10 +18,5 @@ data:
 
     http:
       use_x_forwarded_for: true
-      trusted_proxies: 10.42.0.0/16
-
-    logger:
-      default: info
-      logs:
-        homeassistant.components.http: warning
-        custom_components.my_custom: debug
+      trusted_proxies:
+        - 10.42.0.0/16
