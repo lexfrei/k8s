@@ -1,8 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: homeassistant
 spec:
+  serviceName: homeassistant
   replicas: 1
   selector:
     matchLabels:
