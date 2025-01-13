@@ -33,6 +33,11 @@
             "github-actions"
         ]
     },
+    "kubernetes": {
+        "fileMatch": [
+            "\\.yaml$"
+        ]
+    },
     "automerge": true,
     "prHourlyLimit": 5,
     "prConcurrentLimit": 10
