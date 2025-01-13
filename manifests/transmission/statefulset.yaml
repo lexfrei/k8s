@@ -18,10 +18,13 @@ spec:
           image: linuxserver/transmission:4.0.6
           ports:
             - containerPort: 9091
+              name: http
             - containerPort: 51413
               protocol: UDP
+              name: torrent-udp
             - containerPort: 51413
               protocol: TCP
+              name: torrent-tcp
           volumeMounts:
             - name: config
               mountPath: /config
