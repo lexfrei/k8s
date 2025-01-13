@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: transmission
   annotations:
-    metallb.universe.tf/address-pool: transmission-pool
+    metallb.io/address-pool: transmission-pool
 spec:
   type: LoadBalancer
   selector:
