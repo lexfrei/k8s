@@ -1,10 +1,9 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: transmission
   namespace: default
 spec:
-  serviceName: "transmission"
   replicas: 1
   selector:
     matchLabels:
@@ -16,7 +15,7 @@ spec:
     spec:
       containers:
         - name: transmission
-          image: linuxserver/transmission:latest
+          image: linuxserver/transmission:4.0.6
           ports:
             - containerPort: 9091
           volumeMounts:
@@ -31,17 +30,11 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "200m"
-  volumeClaimTemplates:
-    - metadata:
-        name: config
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 1Gi
-    - metadata:
-        name: downloads
-      spec:
-        nfs:
-          server: nas.home.lex.la
-          path: /nfs/Transmission
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: transmission-config-pvc
+        - name: downloads
+          nfs:
+            server: 172.16.69.3
+            path: /nfs/Transmission
