@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: transmission
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    cert-manager.io/cluster-issuer: "cloudflare-issuer"
+spec:
+  rules:
+    - host: transmission.k8s.home.lex.la
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: transmission
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - transmission.k8s.home.lex.la
+      secretName: transmission-tls
