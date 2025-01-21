@@ -11,9 +11,9 @@ spec:
     namespace: plex-system
     server: "https://kubernetes.default.svc"
   sources:
-    - path: manifests/plex
-      repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
+    - chart: plex
+      repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
+      targetRevision: 0.8.0
       helm:
         valuesObject:
           ingress:
