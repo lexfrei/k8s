@@ -49,9 +49,6 @@ spec:
               nfs:
                 server: nas.home.lex.la
                 path: /nfs/Transmission
-
-          service:
-            externalTrafficPolicy: Local
   syncPolicy:
     automated:
       prune: true
