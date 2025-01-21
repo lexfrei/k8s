@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: plex
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: smarthome
+  destination:
+    namespace: plex-system
+    server: "https://kubernetes.default.svc"
+  sources:
+    - path: manifests/plex
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      helm:
+        valuesObject:
+          ingress:
+            enabled: true
+            ingressClassName: "traefik"
+            url: "plex.lex.la"
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+
+          pms:
+            storageClassName: nfs-csi
+            configStorage: 2Gi
+            resources:
+              limits:
+                cpu: "1"
+                memory: "2Gi"
+              requests:
+                cpu: "500m"
+                memory: "1Gi"
+
+          extraEnv:
+            TZ: "Europe/Moscow"
+            PLEX_UID: "1000"
+            PLEX_GID: "1000"
+
+          extraVolumeMounts:
+            - name: downloads
+              mountPath: /downloads
+              readOnly: true
+
+          extraVolumes:
+            - name: downloads
+              nfs:
+                server: nas.home.lex.la
+                path: /nfs/Transmission
+
+          service:
+            externalTrafficPolicy: Local
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
