@@ -7,7 +7,7 @@ metadata:
     cert-manager.io/cluster-issuer: "cloudflare-issuer"
 spec:
   rules:
-    - host: transmission.k8s.home.lex.la
+    - host: transmission.home.lex.la
       http:
         paths:
           - path: /
