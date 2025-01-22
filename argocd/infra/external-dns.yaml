@@ -24,7 +24,7 @@ spec:
             - ingress
             - traefik-proxy
           extraArgs:
-            - "–traefik-disable-legacy"
+            - "--traefik-disable-legacy"
           env:
             - name: CF_API_TOKEN
               valueFrom:
