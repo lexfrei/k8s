@@ -26,18 +26,18 @@ spec:
             - "--entrypoints.tunnel.address=:9090"
           globalArguments:
             - "--global.checknewversion"
-        ports:
-          web:
-            redirections:
-              entryPoint:
-                to: websecure
-                scheme: https
-                permanent: true
-            tunnel:
-              port: 9090
-              exposedPort: 9090
-              expose:
-                default: true
+          ports:
+            web:
+              redirections:
+                entryPoint:
+                  to: websecure
+                  scheme: https
+                  permanent: true
+              tunnel:
+                port: 9090
+                exposedPort: 9090
+                expose:
+                  default: true
           ingressRoute:
             dashboard:
               enabled: true
