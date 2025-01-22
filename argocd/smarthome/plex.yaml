@@ -19,13 +19,11 @@ spec:
           ingress:
             enabled: true
             ingressClassName: "traefik"
-            url: "plex.lex.la"
+            url: "plex.home.lex.la"
+            certificateSecret: "plex-home-lex-la-tls"
             annotations:
-              traefik.ingress.kubernetes.io/router.entrypoints: tunnel
-
-              external-dns.alpha.kubernetes.io/target: "fe8f0ad1-3ace-4f89-b904-ed17fe7e0eeb.cfargotunnel.com"
-              external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              cert-manager.io/cluster-issuer: "cloudflare-issuer"
           pms:
             storageClassName: nfs-csi
             configStorage: 2Gi

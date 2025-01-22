@@ -19,5 +19,5 @@ spec:
                   name: http
   tls:
     - hosts:
-        - transmission.k8s.home.lex.la
+        - transmission.home.lex.la
       secretName: transmission-tls
