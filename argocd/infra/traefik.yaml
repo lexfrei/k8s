@@ -49,8 +49,6 @@ spec:
             kubernetesIngress:
               publishedService:
                 enabled: true
-            kubernetesGateway:
-              enabled: true
 
     - path: manifests/traefik
       repoURL: https://github.com/lexfrei/k8s.git
