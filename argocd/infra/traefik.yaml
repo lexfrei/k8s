@@ -43,6 +43,7 @@ spec:
               enabled: true
               annotations:
                 cert-manager.io/cluster-issuer: "cloudflare-issuer"
+                external-dns.alpha.kubernetes.io/target: 172.16.10.251
               matchRule: Host(`traefik.k8s.home.lex.la`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
               entryPoints:
                 - websecure
