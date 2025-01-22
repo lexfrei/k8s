@@ -20,7 +20,7 @@ spec:
           secretName: tunnel-credentials
           tunnelName: k8s-expose
           ingress:
-            - service: http://traefik.traefik-system.svc.k8s.home.lex.la:9090
+            - service: http://traefik.traefik-system.svc:9090
           enableDefault404: false
         replicaCount: 2
   syncPolicy:
