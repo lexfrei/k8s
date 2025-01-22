@@ -33,11 +33,11 @@ spec:
                   to: websecure
                   scheme: https
                   permanent: true
-              tunnel:
-                port: 9090
-                exposedPort: 9090
-                expose:
-                  default: true
+            tunnel:
+              port: 9090
+              exposedPort: 9090
+              expose:
+                default: true
           ingressRoute:
             dashboard:
               enabled: true
