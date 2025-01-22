@@ -18,6 +18,7 @@ spec:
         valuesObject:
           provider:
             name: cloudflare
+          policy: sync
           env:
             - name: CF_API_TOKEN
               valueFrom:
