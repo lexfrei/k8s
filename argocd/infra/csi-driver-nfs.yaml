@@ -11,8 +11,13 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"
-      targetRevision: "v4.9.0"
+      targetRevision: "v4.10.0"
       chart: csi-driver-nfs
+      helm:
+        valuesObject:
+          image:
+            nfs:
+              repository: gcr.io/k8s-staging-sig-storage/nfsplugin
     - path: manifests/csi-driver-nfs
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
