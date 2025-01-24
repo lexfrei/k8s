@@ -5,12 +5,13 @@
         ":semanticCommits"
     ],
     "major": {
-        "minimumReleaseAge": "3 days",
+        "minimumReleaseAge": "5 days",
         "labels": [
             "major"
         ]
     },
     "minor": {
+        "minimumReleaseAge": "3 days",
         "labels": [
             "minor"
         ]
