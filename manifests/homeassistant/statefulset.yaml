@@ -35,6 +35,10 @@ spec:
               mountPath: /config/configuration.yaml
               readOnly: true
 
+            - name: backups
+              mountPath: /config/backups
+              readOnly: false
+
             - name: dbus
               mountPath: /run/dbus
               readOnly: true
@@ -56,3 +60,7 @@ spec:
           hostPath:
             path: /run/dbus
             type: Directory
+        - name: backups
+          nfs:
+            server: nas.home.lex.la
+            path: nfs/ha-backup
