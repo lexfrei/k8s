@@ -68,4 +68,4 @@ spec:
         - name: backups
           nfs:
             server: nas.home.lex.la
-            path: nfs/ha-backup
+            path: /nfs/ha-backup
