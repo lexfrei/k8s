@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://kubernetes-sigs.github.io/external-dns/"
-      targetRevision: "1.15.0"
+      targetRevision: "1.15.1"
       chart: external-dns
       helm:
         valuesObject:
