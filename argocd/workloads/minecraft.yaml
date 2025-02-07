@@ -17,7 +17,6 @@ spec:
       valuesObject:
         minecraftServer:
           eula: true
-        workloadAsStatefulSet: true
   project: workloads
   syncPolicy:
     automated:
