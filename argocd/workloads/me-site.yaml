@@ -20,7 +20,7 @@ spec:
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: tunnel
 
-            external-dns.alpha.kubernetes.io/target: "3d3f167c-e42d-48ac-90bd-49185b6f50fb.cfargotunnel.com"
+            external-dns.alpha.kubernetes.io/target: "4a0cf464-58f0-4d24-87cd-e87ad3c0a136.cfargotunnel.com"
             external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           hosts:
             - host: aleksei.sviridk.in
