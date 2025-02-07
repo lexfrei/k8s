@@ -152,7 +152,7 @@ server:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: tunnel
 
-      external-dns.alpha.kubernetes.io/target: "fe8f0ad1-3ace-4f89-b904-ed17fe7e0eeb.cfargotunnel.com"
+      external-dns.alpha.kubernetes.io/target: "3d3f167c-e42d-48ac-90bd-49185b6f50fb.cfargotunnel.com"
       external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
   # extensions:
   #   enabled: true

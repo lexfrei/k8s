@@ -4,16 +4,6 @@
 
 Kubernetes cluster ready for use on RPis or any other arm64 systems
 
-### Included
-
-* kubernetes-dashboard
-* longhorn
-* Metallb
-* Traefik
-* node-exporter
-* victoria-metrics
-* ...
-
 ## Pre-requirement
 
 1. Exclude some ip's from your dhcp-pool. Put them to metallb config
