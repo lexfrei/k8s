@@ -18,7 +18,7 @@ spec:
         minecraftServer:
           eula: true
         serviceAnnotations:
-          external-dns.alpha.kubernetes.io/host: "minecraft.lex.la"
+          external-dns.alpha.kubernetes.io/hostname: "minecraft.lex.la"
           external-dns.alpha.kubernetes.io/target: "4a0cf464-58f0-4d24-87cd-e87ad3c0a136.cfargotunnel.com"
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
   project: workloads
