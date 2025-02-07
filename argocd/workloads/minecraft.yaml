@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minecraft
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: minecraft-server
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://itzg.github.io/minecraft-server-charts/"
+    targetRevision: "4.23.7"
+    chart: minecraft
+    helm:
+      valuesObject:
+        minecraftServer:
+          eula: true
+        workloadAsStatefulSet: true
+  project: workloads
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
