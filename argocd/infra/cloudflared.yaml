@@ -24,7 +24,7 @@ spec:
               service: tcp://minecraft-minecraft.minecraft-server.svc:25565
             - service: http://traefik.traefik-system.svc:9090
           enableDefault404: false
-        replicaCount: 2
+        replicaCount: 1
   syncPolicy:
     automated:
       prune: true
