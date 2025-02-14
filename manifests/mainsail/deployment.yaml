@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mainsail
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mainsail
+  template:
+    metadata:
+      labels:
+        app: mainsail
+    spec:
+      containers:
+        - name: mainsail
+          image: ghcr.io/mainsail-crew/mainsail:latest
+          ports:
+            - containerPort: 8888
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: mainsail-config
+        - name: nginx-config
+          configMap:
+            name: mainsail-nginx-config
