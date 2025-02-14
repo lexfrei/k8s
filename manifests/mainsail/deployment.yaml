@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: mainsail
-          image: ghcr.io/mainsail-crew/mainsail:latest
+          image: ghcr.io/mainsail-crew/mainsail:v2.13.2
           ports:
             - containerPort: 8888
           volumeMounts:
@@ -24,6 +24,13 @@ spec:
             - name: nginx-config
               mountPath: /etc/nginx/conf.d/default.conf
               subPath: default.conf
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
       volumes:
         - name: nginx-config
           configMap:
