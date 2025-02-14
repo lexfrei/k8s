@@ -21,7 +21,7 @@ spec:
             - name: config
               mountPath: /config
             - name: mainsail-config
-              mountPath: /usr/share/nginx/html/
+              mountPath: /usr/share/nginx/html/config.json
               subPath: config.json
             - name: nginx-config
               mountPath: /etc/nginx/conf.d/default.conf
