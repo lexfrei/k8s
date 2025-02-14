@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mainsail-nginx-config
+data:
+  default.conf: |
+    server {
+        listen 8888;
+        server_name _;
+
+        root /usr/share/caddy;
+        index index.html;
+
+        location / {
+            try_files $uri /index.html;
+        }
+    }
