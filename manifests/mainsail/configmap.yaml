@@ -5,13 +5,13 @@ metadata:
 data:
   default.conf: |
     server {
-        listen 8888;
-        server_name mainsail.home.lex.la;  # Указываем правильный домен
+      listen 8888;
+      
+      location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html =404;
+      }
 
-        root /usr/share/caddy;
-        index index.html;
-
-        location / {
-            try_files $uri /index.html;
-        }
+      include /etc/nginx/extra-conf.d/*.conf;
     }
