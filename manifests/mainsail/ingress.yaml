@@ -19,5 +19,5 @@ spec:
                   number: 8888
   tls:
     - hosts:
-        - transmission.home.lex.la
-      secretName: transmission-tls
+        - mainsail.home.lex.la
+      secretName: mainsail-tls
