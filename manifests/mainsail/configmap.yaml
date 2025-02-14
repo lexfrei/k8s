@@ -6,7 +6,7 @@ data:
   default.conf: |
     server {
         listen 8888;
-        server_name _;
+        server_name mainsail.home.lex.la;  # Указываем правильный домен
 
         root /usr/share/caddy;
         index index.html;
