@@ -20,6 +20,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: mainsail-config
+              mountPath: /usr/share/nginx/html/
+              subPath: config.json
             - name: nginx-config
               mountPath: /etc/nginx/conf.d/default.conf
               subPath: default.conf
@@ -30,3 +33,6 @@ spec:
         - name: nginx-config
           configMap:
             name: mainsail-nginx-config
+        - name: mainsail-config
+          configMap:
+            name: mainsail-config
