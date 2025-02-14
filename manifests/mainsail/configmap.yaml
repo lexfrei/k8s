@@ -15,3 +15,13 @@ data:
 
       include /etc/nginx/extra-conf.d/*.conf;
     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mainsail-config
+data:
+  config.json: |
+    {
+      "instancesDB": "browser"
+    }
