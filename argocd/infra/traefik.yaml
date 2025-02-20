@@ -51,7 +51,8 @@ spec:
                 secretName: traefik-tls-secret
           providers:
             kubernetesIngress:
-              allowexternalnameservices: true
+              allowEmptyServices: true
+              allowExternalNameServices: true
               publishedService:
                 enabled: true
 
