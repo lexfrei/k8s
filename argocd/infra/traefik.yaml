@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://helm.traefik.io/traefik"
-      targetRevision: "34.3.0"
+      targetRevision: "34.4.0"
       chart: traefik
       helm:
         valuesObject:
