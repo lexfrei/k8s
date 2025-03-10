@@ -43,5 +43,5 @@ spec:
             claimName: transmission-config-pvc
         - name: downloads
           nfs:
-            server: nas.home.lex.la
-            path: /nfs/Transmission
+            server: truenas.home.lex.la
+            path: /mnt/pool/Transmission
