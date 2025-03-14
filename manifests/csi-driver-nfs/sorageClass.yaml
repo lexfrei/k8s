@@ -6,8 +6,8 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: nas.home.lex.la
-  share: /nfs/k8s
+  server: truenas.home.lex.la
+  share: /mnt/pool/k8s
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 mountOptions:
