@@ -39,25 +39,6 @@
             "\\.yaml$"
         ]
     },
-    "docker": {
-        "enabled": true,
-        "fileMatch": [
-            "manifests/.+\\.ya?ml$",
-            "manifests/.+\\.yaml$"
-        ]
-    },
-    "regexManagers": [
-        {
-            "fileMatch": [
-                "manifests/.+\\.ya?ml$",
-                "manifests/.+\\.yaml$"
-            ],
-            "matchStrings": [
-                "image: (?<depName>[^:]+):(?<currentValue>[0-9.]+)"
-            ],
-            "datasourceTemplate": "docker"
-        }
-    ],
     "automerge": true,
     "prHourlyLimit": 5,
     "prConcurrentLimit": 10
