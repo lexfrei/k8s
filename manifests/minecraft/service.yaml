@@ -10,5 +10,4 @@ spec:
     - name: minecraft-tcp
       protocol: TCP
       port: 25565
-      nodePort: 25565
-      targetPort: minecraft-tcp
+      nodePort: 30000
