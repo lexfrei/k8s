@@ -9,5 +9,6 @@ spec:
   ports:
     - name: minecraft-tcp
       protocol: TCP
-      port: 51413
+      port: 25565
+      nodePort: 25565
       targetPort: minecraft-tcp
