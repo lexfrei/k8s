@@ -60,35 +60,21 @@ metadata:
   labels:
     app: papermc
     type: paper
+  annotations:
+    metallb.io/address-pool: minecraft-pool
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 25565
-      targetPort: 25565
+      targetPort: minecraft-tcp
       protocol: TCP
-      nodePort: 30001
       name: minecraft-tcp
     - port: 25565
-      targetPort: 25565
+      targetPort: minecraft-udp
       protocol: UDP
-      nodePort: 30001
       name: minecraft-udp
-  selector:
-    app: papermc
-    type: paper
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: papermc-dynmap
-  labels:
-    app: papermc
-    type: dynmap
-spec:
-  type: ClusterIP
-  ports:
     - port: 8123
-      targetPort: 8123
+      targetPort: dynmap
       protocol: TCP
       name: dynmap
   selector:
@@ -114,6 +100,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: papermc-dynmap
+                name: papermc
                 port:
                   name: dynmap
