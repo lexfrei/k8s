@@ -4,4 +4,4 @@ metadata:
   name: transmission-pool
 spec:
   addresses:
-    - 172.16.10.252/32
+    - 172.16.100.252/32
