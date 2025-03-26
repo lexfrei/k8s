@@ -37,10 +37,10 @@ spec:
               mountPath: /data
           resources:
             requests:
-              memory: "2Gi"
+              memory: "6Gi"
               cpu: "500m"
             limits:
-              memory: "2Gi"
+              memory: "6Gi"
   volumeClaimTemplates:
     - metadata:
         name: data
