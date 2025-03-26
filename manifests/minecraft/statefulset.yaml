@@ -31,7 +31,11 @@ spec:
               cpu: "100m"
             limits:
               memory: "6Gi"
-      volumes:
-        - name: app
-          persistentVolumeClaim:
-            claimName: minecraft-app-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: app
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
