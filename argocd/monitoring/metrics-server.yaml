@@ -14,12 +14,6 @@ spec:
     - repoURL: "https://kubernetes-sigs.github.io/metrics-server/"
       targetRevision: "3.12.2"
       chart: metrics-server
-      # helm:
-      #   valuesObject:
-      #     apiService:
-      #       insecureSkipTLSVerify: false
-      #     tls:
-      #       type: cert-manager
   syncPolicy:
     automated:
       prune: true
