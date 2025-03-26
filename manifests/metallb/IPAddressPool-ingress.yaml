@@ -4,4 +4,4 @@ metadata:
   name: ingress-pool
 spec:
   addresses:
-    - 172.16.10.251/32
+    - 172.16.100.251/32
