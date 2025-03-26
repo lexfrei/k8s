@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minecraft
+spec:
+  serviceName: minecraft
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: mc
+      containers:
+        - name: minecraft
+          image: docker pull ghcr.io/lexfrei/mc:sha-4dbb4e7
+          ports:
+            - containerPort: 25565
+              protocol: TCP
+              name: minecraft-tcp
+          volumeMounts:
+            - name: app
+              mountPath: /app
+          resources:
+            requests:
+              memory: "6Gi"
+              cpu: "100m"
+            limits:
+              memory: "6Gi"
+      volumes:
+        - name: app
+          persistentVolumeClaim:
+            claimName: minecraft-app-pvc
