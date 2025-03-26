@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: mc
       containers:
         - name: minecraft
-          image: docker pull ghcr.io/lexfrei/mc:sha-4dbb4e7
+          image: ghcr.io/lexfrei/mc:sha-4dbb4e7
           ports:
             - containerPort: 25565
               protocol: TCP
