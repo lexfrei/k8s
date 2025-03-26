@@ -32,6 +32,9 @@ spec:
             - containerPort: 25565
               protocol: UDP
               name: minecraft-udp
+            - containerPort: 8123
+              protocol: TCP
+              name: dynmap
           volumeMounts:
             - name: data
               mountPath: /data
@@ -73,3 +76,44 @@ spec:
   selector:
     app: papermc
     type: paper
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: papermc-dynmap
+  labels:
+    app: papermc
+    type: dynmap
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8123
+      targetPort: 8123
+      protocol: TCP
+      name: dynmap
+  selector:
+    app: papermc
+    type: paper
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: map-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+
+    external-dns.alpha.kubernetes.io/target: "4a0cf464-58f0-4d24-87cd-e87ad3c0a136.cfargotunnel.com"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: map.lex.la
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: papermc-dynmap
+                port:
+                  name: dynmap
