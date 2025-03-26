@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: papermc
+  labels:
+    app: papermc
+    type: paper
+spec:
+  serviceName: papermc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: papermc
+      type: paper
+  template:
+    metadata:
+      labels:
+        app: papermc
+        type: paper
+    spec:
+      containers:
+        - name: papermc
+          image: marctv/minecraft-papermc-server:1.21.4
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MEMORYSIZE
+              value: "1G"
+          ports:
+            - containerPort: 25565
+              protocol: TCP
+              name: minecraft-tcp
+            - containerPort: 25565
+              protocol: UDP
+              name: minecraft-udp
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: papermc
+  labels:
+    app: papermc
+    type: paper
+spec:
+  type: NodePort
+  ports:
+    - port: 25565
+      targetPort: 25565
+      protocol: TCP
+      nodePort: 30001
+      name: minecraft-tcp
+    - port: 25565
+      targetPort: 25565
+      protocol: UDP
+      nodePort: 30001
+      name: minecraft-udp
+  selector:
+    app: papermc
+    type: paper

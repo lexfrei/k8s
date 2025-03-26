@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minecraft
+  name: papermc
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: workloads
   destination:
-    namespace: minecraft
+    namespace: paper
     server: "https://kubernetes.default.svc"
   sources:
-    - path: manifests/minecraft
+    - path: manifests/papermc
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
   syncPolicy:
