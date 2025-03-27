@@ -40,7 +40,7 @@ spec:
               memory: "6G"
               cpu: "2000m"
             limits:
-              memory: "7G"
+              memory: "6G"
   volumeClaimTemplates:
     - metadata:
         name: data
