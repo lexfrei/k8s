@@ -20,11 +20,8 @@ spec:
     spec:
       containers:
         - name: papermc
-          image: marctv/minecraft-papermc-server:1.21.4
+          image: lexfrei/papermc:1.21.4
           imagePullPolicy: IfNotPresent
-          env:
-            - name: MEMORYSIZE
-              value: "5G"
           ports:
             - containerPort: 25565
               protocol: TCP
