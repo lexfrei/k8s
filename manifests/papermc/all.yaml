@@ -24,7 +24,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: MEMORYSIZE
-              value: "6G"
+              value: "5G"
           ports:
             - containerPort: 25565
               protocol: TCP
@@ -40,7 +40,7 @@ spec:
               mountPath: /data
           resources:
             requests:
-              memory: "6Gi"
+              memory: "5Gi"
               cpu: "500m"
             limits:
               memory: "6Gi"
