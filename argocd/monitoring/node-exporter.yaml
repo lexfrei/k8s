@@ -19,7 +19,7 @@ spec:
           serviceMonitor:
             enabled: true
             namespace: monitoring
-            interval: 30s
+            interval: 60s
             selector:
               matchLabels:
                 app: node-exporter

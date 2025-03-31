@@ -21,17 +21,16 @@ spec:
             pspEnabled: false
           persistence:
             enabled: true
-            size: 30Gi
-            storageClassName: "longhorn"
+            size: 10Gi
           config:
             chunk_store_config:
-              max_look_back_period: 72h
+              max_look_back_period: 24h
             compactor:
               retention_enabled: true
               retention_delete_delay: 1h
               delete_request_cancel_period: 10m
             limits_config:
-              retention_period: 72h
+              retention_period: 24h
         promtail:
           # Security context needed to read the journal on the host
           securityContext:
@@ -48,6 +47,10 @@ spec:
                   target_label: "unit"
                 - source_labels: ["__journal__hostname"]
                   target_label: "hostname"
+                # Фильтрация для игнорирования частых и малоинформативных логов
+                - source_labels: ["__journal__systemd_unit"]
+                  action: drop
+                  regex: "(systemd-timesyncd|systemd-resolved|systemd-udevd|systemd-networkd|NetworkManager|polkit-agent-helper-1).service"
           extraVolumes:
             - name: journal
               hostPath:

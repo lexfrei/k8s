@@ -22,9 +22,15 @@ spec:
         persistence:
           enabled: true
           type: pvc
-          size: 10Gi
-          storageClassName: longhorn
+          size: 5Gi
         adminPassword: admin
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
         ingress:
           enabled: true
           hosts:

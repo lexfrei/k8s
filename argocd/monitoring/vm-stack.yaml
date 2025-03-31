@@ -21,8 +21,23 @@ spec:
           enabled: false
         prometheus-node-exporter:
           enabled: false
+        # Disable unnecessary components to save resources
+        vmalert:
+          enabled: false
+        vmauth:
+          enabled: false
         # VictoriaMetrics components
         vmsingle:
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 400m
+              memory: 512Mi
+          scrape:
+            # More relaxed scrape interval to reduce resource usage
+            intervalOverride: 30s
           ingress:
             enabled: true
             annotations:
