@@ -37,15 +37,8 @@ spec:
             - grafana.lex.la
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: tunnel
-        datasources:
-          datasources.yaml:
-            apiVersion: 1
-            datasources:
-              - name: VictoriaMetrics
-                type: prometheus
-                url: "http://vmsingle-victoria-metrics-k8s-stack.monitoring.svc:8429"
-                access: proxy
-                isDefault: true
+        # Datasources будут управляться через ConfigMaps и sidecar
+        # Убрано определение datasources здесь для избежания конфликтов
         sidecar:
           datasources:
             enabled: true
