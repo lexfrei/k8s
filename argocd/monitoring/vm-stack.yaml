@@ -38,6 +38,18 @@ spec:
           scrape:
             # More relaxed scrape interval to reduce resource usage
             intervalOverride: 30s
+          extraArgs:
+            retention.period: "7d"  # Хранить данные не более 7 дней
+            dedup.minScrapeInterval: "15s"  # Дедупликация частых метрик
+            diskCache.cachePath: "/cache"  # Использовать кэш на диске для ускорения запросов
+          extraVolumes:
+            - name: cache-volume
+              emptyDir:
+                medium: Memory
+                sizeLimit: 200Mi
+          extraVolumeMounts:
+            - name: cache-volume
+              mountPath: "/cache"
           ingress:
             enabled: true
             annotations:
