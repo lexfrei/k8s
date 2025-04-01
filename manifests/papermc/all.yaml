@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: papermc
-          image: lexfrei/papermc:1.21.4
+          image: marctv/minecraft-papermc-server:1.21.4-222
           imagePullPolicy: IfNotPresent
           env:
             - name: SKIP_PERM_CHECK
