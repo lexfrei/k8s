@@ -36,7 +36,12 @@ spec:
           hosts:
             - grafana.lex.la
           annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+            traefik.ingress.kubernetes.io/router.entrypoints: websecure
+            cert-manager.io/cluster-issuer: cloudflare-issuer
+          tls:
+            - secretName: grafana-tls
+              hosts:
+                - grafana.lex.la
         # Datasources будут управляться через ConfigMaps и sidecar
         # Убрано определение datasources здесь для избежания конфликтов
         sidecar:
