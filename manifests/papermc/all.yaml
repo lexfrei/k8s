@@ -22,6 +22,9 @@ spec:
         - name: papermc
           image: lexfrei/papermc:1.21.4
           imagePullPolicy: IfNotPresent
+          env:
+            - name: SKIP_PERM_CHECK
+              value: "false"
           ports:
             - containerPort: 25565
               protocol: TCP
