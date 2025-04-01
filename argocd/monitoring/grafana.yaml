@@ -42,8 +42,6 @@ spec:
             - secretName: grafana-tls
               hosts:
                 - grafana.lex.la
-        # Datasources будут управляться через ConfigMaps и sidecar
-        # Убрано определение datasources здесь для избежания конфликтов
         sidecar:
           datasources:
             enabled: true
