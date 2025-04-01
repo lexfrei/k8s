@@ -20,11 +20,8 @@ spec:
     spec:
       containers:
         - name: papermc
-          image: marctv/minecraft-papermc-server:1.21.4-222
+          image: docker.io/lexfrei/papermc:1.21.4-222
           imagePullPolicy: IfNotPresent
-          env:
-            - name: SKIP_PERM_CHECK
-              value: "false"
           ports:
             - containerPort: 25565
               protocol: TCP
