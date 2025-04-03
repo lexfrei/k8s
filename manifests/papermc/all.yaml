@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
         - name: papermc
-          image: docker.io/lexfrei/papermc:latest
-          imagePullPolicy: Always
+          image: docker.io/lexfrei/papermc:1.21.4-222
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 25565
               protocol: TCP
