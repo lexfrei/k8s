@@ -18,7 +18,7 @@ spec:
       valuesObject:
         persistence:
           defaultClassReplicaCount: 1
-          defaultClass: true
+          defaultClass: false
         ingress:
           enabled: true
           host: longhorn.k8s.home.lex.la
