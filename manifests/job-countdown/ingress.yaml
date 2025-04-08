@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: job-countdown
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+    external-dns.alpha.kubernetes.io/target: "4a0cf464-58f0-4d24-87cd-e87ad3c0a136.cfargotunnel.com"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+spec:
+  rules:
+    - host: job.lex.la
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: job-countdown
+                port:
+                  number: 8080
