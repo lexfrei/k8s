@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: estimator
-          image: lexfrei/estimator:latest
+          image: lexfrei/estimator:1.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
