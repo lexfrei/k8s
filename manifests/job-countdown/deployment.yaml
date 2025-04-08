@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: job-countdown
-          image: lexfrei/job-countdown:latest
+          image: lexfrei/job-countdown:1.0.2
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
