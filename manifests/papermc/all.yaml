@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: papermc
-          image: docker.io/lexfrei/papermc:1.21.4-222
+          image: docker.io/lexfrei/papermc:1.21.4-224
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 25565
@@ -45,10 +45,11 @@ spec:
     - metadata:
         name: data
       spec:
+        storageClassName: longhorn
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 20Gi
+            storage: 40Gi
 ---
 apiVersion: v1
 kind: Service
