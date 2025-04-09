@@ -18,6 +18,13 @@ spec:
         app: papermc
         type: paper
     spec:
+      initContainers:
+        - name: chown-data
+          image: busybox:latest
+          command: ["chown", "-R", "9001:9001", "/data"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
       containers:
         - name: papermc
           image: docker.io/lexfrei/papermc:1.21.4-224
