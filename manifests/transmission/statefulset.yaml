@@ -19,7 +19,7 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              chown -R 1000:1000 /config /downloads
+              chown -R 911:911 /config /downloads
           volumeMounts:
             - name: config
               mountPath: /config
