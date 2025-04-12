@@ -13,6 +13,20 @@ spec:
       labels:
         app: transmission
     spec:
+      initContainers:
+        - name: init-chown-mounts
+          image: busybox:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              chown -R 1000:1000 /config /downloads
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+          securityContext:
+            runAsUser: 0
       containers:
         - name: transmission
           image: linuxserver/transmission:4.0.6
