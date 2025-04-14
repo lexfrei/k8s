@@ -8,6 +8,8 @@ metadata:
 spec:
   serviceName: papermc
   replicas: 1
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: papermc
@@ -18,22 +20,33 @@ spec:
         app: papermc
         type: paper
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - mc
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - mc
       initContainers:
         - name: chown-data
-          image: busybox:latest
+          image: busybox:1.37.0
           command: ["chown", "-R", "9001:9001", "/data"]
           volumeMounts:
             - name: data
               mountPath: /data
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
       containers:
         - name: papermc
           image: docker.io/lexfrei/papermc:1.21.5-19
@@ -57,6 +70,18 @@ spec:
               cpu: "2000m"
             limits:
               memory: "6G"
+          securityContext:
+            allowPrivilegeEscalation: false
+          livenessProbe:
+            tcpSocket:
+              port: minecraft-tcp
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: minecraft-tcp
+            initialDelaySeconds: 30
+            periodSeconds: 10
   volumeClaimTemplates:
     - metadata:
         name: data
