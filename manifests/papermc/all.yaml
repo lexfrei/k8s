@@ -18,6 +18,15 @@ spec:
         app: papermc
         type: paper
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - mc
       initContainers:
         - name: chown-data
           image: busybox:latest
