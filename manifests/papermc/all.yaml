@@ -20,9 +20,6 @@ spec:
         app: papermc
         type: paper
     spec:
-      securityContext:
-        seccompProfile:
-          type: RuntimeDefault
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -32,20 +29,6 @@ spec:
                     operator: In
                     values:
                       - mc
-      initContainers:
-        - name: chown-data
-          image: busybox:1.37.0
-          command: ["chown", "-R", "9001:9001", "/data"]
-          volumeMounts:
-            - name: data
-              mountPath: /data
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "100m"
-            limits:
-              memory: "128Mi"
-              cpu: "200m"
       containers:
         - name: papermc
           image: docker.io/lexfrei/papermc:1.21.5-19
@@ -69,8 +52,6 @@ spec:
               cpu: "2000m"
             limits:
               memory: "6G"
-          securityContext:
-            allowPrivilegeEscalation: false
           livenessProbe:
             tcpSocket:
               port: minecraft-tcp
