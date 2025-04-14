@@ -27,7 +27,7 @@ spec:
               mountPath: /data
       containers:
         - name: papermc
-          image: docker.io/lexfrei/papermc:1.21.5-4
+          image: docker.io/lexfrei/papermc:1.21.5-19
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 25565
