@@ -21,7 +21,6 @@ spec:
         type: paper
     spec:
       securityContext:
-        runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       affinity:
