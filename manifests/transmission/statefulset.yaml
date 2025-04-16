@@ -19,7 +19,8 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              chown -R 911:911 /config /downloads
+              echo "Changing ownership of mounted volumes to 1000:1000"
+              chown -R 1000:1000 /config /downloads
           volumeMounts:
             - name: config
               mountPath: /config
@@ -51,6 +52,9 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "200m"
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
       volumes:
         - name: config
           persistentVolumeClaim:
