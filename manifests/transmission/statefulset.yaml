@@ -14,32 +14,31 @@ spec:
         app: transmission
     spec:
       securityContext:
-        fsGroup: 1000
-        supplementalGroups:
-          - 1000
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
       initContainers:
-        - name: fix-permissions
+        - name: set-permissions
           image: alpine:latest
           command: ["/bin/sh", "-c"]
           args:
             - |
-              mkdir -p /config && chown -R 1000:1000 /config /downloads
+              mkdir -p /config
+              chown -R 1000:1000 /config /downloads
+              chmod -R 755 /config /downloads
+          securityContext:
+            runAsUser: 0
           volumeMounts:
             - name: config
               mountPath: /config
             - name: downloads
               mountPath: /downloads
-          securityContext:
-            runAsUser: 0
-
       containers:
         - name: transmission
           image: linuxserver/transmission:4.0.6
-          env:
-            - name: PUID
-              value: "1000"
-            - name: PGID
-              value: "1000"
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
           ports:
             - containerPort: 9091
               name: http
@@ -61,13 +60,6 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "200m"
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
       volumes:
         - name: config
           persistentVolumeClaim:
