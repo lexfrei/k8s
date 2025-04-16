@@ -18,10 +18,11 @@ spec:
       containers:
         - name: transmission
           image: linuxserver/transmission:4.0.6
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
           env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
             - name: TZ
               value: "UTC"
           ports:
