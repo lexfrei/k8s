@@ -13,9 +13,14 @@ spec:
       labels:
         app: transmission
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: transmission
           image: linuxserver/transmission:4.0.6
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
           env:
             - name: TZ
               value: "UTC"
