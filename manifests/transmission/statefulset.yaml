@@ -13,32 +13,16 @@ spec:
       labels:
         app: transmission
     spec:
-      securityContext:
-        runAsUser: 0
-        runAsGroup: 0
-        fsGroup: 0
-      initContainers:
-        - name: set-permissions
-          image: alpine:latest
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              mkdir -p /config
-              chown -R 1000:1000 /config /downloads
-              chmod -R 755 /config /downloads
-          securityContext:
-            runAsUser: 0
-          volumeMounts:
-            - name: config
-              mountPath: /config
-            - name: downloads
-              mountPath: /downloads
       containers:
         - name: transmission
           image: linuxserver/transmission:4.0.6
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "UTC"
           ports:
             - containerPort: 9091
               name: http
