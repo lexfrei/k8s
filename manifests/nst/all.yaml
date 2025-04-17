@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: nst
-          image: lexfrei/nst:1.0.13
+          image: lexfrei/nst:1.0.14
           imagePullPolicy: Always
           envFrom:
             - secretRef:
