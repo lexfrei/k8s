@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: nst
-          image: lexfrei/nst:1.0.3
+          image: lexfrei/nst:1.0.4
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
