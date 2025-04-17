@@ -17,8 +17,11 @@ spec:
     spec:
       containers:
         - name: nst
-          image: lexfrei/nst:1.0.7
+          image: lexfrei/nst:1.0.8
           imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: ne-stat-toboy-secrets
           ports:
             - containerPort: 8080
               name: http
