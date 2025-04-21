@@ -22,7 +22,7 @@ spec:
           ingress:
             - service: http://traefik.traefik-system.svc:9090
           enableDefault404: false
-        replicaCount: 1
+        replicaCount: 2
   syncPolicy:
     automated:
       prune: true
