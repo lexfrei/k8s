@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: mainsail
-          image: ghcr.io/mainsail-crew/mainsail:v2.13.2
+          image: ghcr.io/mainsail-crew/mainsail:v2.14.0
           ports:
             - containerPort: 8888
           volumeMounts:
