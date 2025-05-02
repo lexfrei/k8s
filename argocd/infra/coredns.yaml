@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://coredns.github.io/helm"
-      targetRevision: "1.40.0"
+      targetRevision: "1.41.0"
       chart: coredns
       helm:
         valueFiles:
