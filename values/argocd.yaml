@@ -150,7 +150,7 @@ server:
     enabled: true
     hostname: argocd.lex.la
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+      traefik.ingress.kubernetes.io/router.entrypoints: tunnel,websecure
 
       external-dns.alpha.kubernetes.io/target: "4a0cf464-58f0-4d24-87cd-e87ad3c0a136.cfargotunnel.com"
       external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
