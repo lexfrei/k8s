@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://charts.longhorn.io"
-    targetRevision: "1.9.1"
+    targetRevision: "1.9.2"
     chart: longhorn
     helm:
       valuesObject:
