@@ -4,19 +4,20 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 
 ## Features
 
-- **Networking**: Project Calico (via Tigera Operator) for networking with VXLAN encapsulation
-- **Load Balancing**: MetalLB for bare metal load balancing
+- **Networking**: Cilium CNI with VXLAN encapsulation and kube-proxy replacement
+- **Load Balancing**: Cilium L2 Announcements (LB IPAM) for bare metal load balancing
 - **Ingress**: Traefik as the ingress controller
 - **Storage**: Longhorn for distributed storage
 - **GitOps**: ArgoCD for declarative, Git-based application deployment
 - **Monitoring**: Node exporter and Grafana for monitoring
+- **Observability**: Hubble for network visibility and troubleshooting
 - **Applications**: Various workloads including HomeAssistant, PaperMC, Transmission, etc.
 
 ## Prerequisites
 
 ### Node Configuration
 
-1. Exclude specific IPs from your DHCP pool for MetalLB (see `manifests/metallb/*.yaml`)
+1. Exclude specific IPs from your DHCP pool for Cilium L2 LB (see `manifests/cilium/*-pool.yaml`)
 2. Add Traefik's IP to your DNS records
 3. Update all DNS references in the repo (search for the `lex.la` domain)
 4. Add a DNS wildcard record (e.g., `*.k8s.home.example.com`) pointing to your ingress IP
@@ -26,7 +27,6 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 6. System preparation:
    - Disable firewall: `systemctl disable --now firewalld`
    - Disable swap: `swapoff -a` and comment out swap in `/etc/fstab`
-   - Disable WiFi if using MetalLB: `nmcli radio all off`
    - Set unique hostname: `hostnamectl hostname node01`
    - Expand root partition if needed: `growpart /dev/sda 3` and `resize2fs /dev/sda3`
 7. Reboot the system
@@ -43,7 +43,7 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 #### On First Master Node
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest INSTALL_K3S_EXEC="--disable traefik,local-storage,servicelb,metrics-server,coredns --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none --cluster-init" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest INSTALL_K3S_EXEC="--disable traefik,local-storage,servicelb,metrics-server,coredns,kube-proxy --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none --cluster-init" sh -
 
 # Copy content to ~/.kube/config on your management machine (update server address)
 cat /etc/rancher/k3s/k3s.yaml
@@ -55,13 +55,13 @@ cat /var/lib/rancher/k3s/server/node-token
 #### On Additional Master Nodes
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_TOKEN=TOKEN-FROM-MASTER INSTALL_K3S_EXEC="server --server https://master01:6443 --disable traefik,local-storage,servicelb,metrics-server --cluster-domain k8s.home.example.com --flannel-backend=wireguard-native" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_TOKEN=TOKEN-FROM-MASTER INSTALL_K3S_EXEC="server --server https://master01:6443 --disable traefik,local-storage,servicelb,metrics-server,kube-proxy --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none" sh -
 ```
 
 #### On Worker Nodes
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL='https://master01:6443' K3S_TOKEN=TOKEN-FROM-MASTER sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL='https://master01:6443' K3S_TOKEN=TOKEN-FROM-MASTER INSTALL_K3S_EXEC="--disable kube-proxy" sh -
 ```
 
 ### Deploy Core Components
@@ -69,15 +69,20 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL='https://maste
 ```shell
 # Add helm repositories
 helm repo add coredns https://coredns.github.io/helm
-helm repo add projectcalico https://projectcalico.docs.tigera.io/charts
+helm repo add cilium https://helm.cilium.io/
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 
 # Install components
-helm install coredns coredns/coredns --namespace kube-system -f values/coredns.yaml
-helm install tigera-operator projectcalico/tigera-operator --version v3.29.0 --namespace tigera-operator -f values/tigera-operator.yaml --create-namespace
-helm install argocd argo/argo-cd --namespace argocd -f values/argocd.yaml --create-namespace
-kubectl apply -f argocd/meta/meta.yaml
+helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
+helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
+helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
+
+# Apply Cilium LB IP pools and L2 announcement policy
+kubectl apply --filename manifests/cilium/
+
+# Deploy meta application (deploys all other applications via GitOps)
+kubectl apply --filename argocd/meta/meta.yaml
 ```
 
 ## Accessing Dashboards
@@ -107,13 +112,23 @@ Access via the configured Ingress route (typically https://argocd.k8s.home.examp
 
 Access via the configured Ingress route (typically https://longhorn.k8s.home.example.com)
 
+### Hubble UI
+
+Access via the configured Ingress route for network observability and troubleshooting
+
 ## Network Architecture
 
 This cluster uses:
-- Calico (via Tigera Operator) for pod networking with VXLAN encapsulation
-- MetalLB for bare metal load balancing with dedicated IP pools
-- Traefik as the ingress controller
-- CoreDNS for internal DNS resolution
+- **Cilium CNI** for pod networking with VXLAN encapsulation (10.42.0.0/16)
+- **Cilium kube-proxy replacement** for service load balancing and NodePort
+- **Cilium L2 Announcements** for LoadBalancer IP allocation with dedicated pools:
+  - Ingress pool: 172.16.100.251
+  - Transmission pool: 172.16.100.252
+  - Minecraft pool: 172.16.100.253
+  - Default pool: 172.16.100.101-110
+- **Traefik** as the ingress controller
+- **CoreDNS** for internal DNS resolution
+- **Hubble** for network visibility and monitoring
 
 ## External Access
 
