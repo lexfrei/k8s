@@ -1,6 +1,6 @@
 # Kubernetes API Server configuration
-k8sServiceHost: "auto"
-k8sServicePort: "6443"
+k8sServiceHost: "10.43.0.1"
+k8sServicePort: "443"
 
 # Enable kube-proxy replacement
 kubeProxyReplacement: "true"
@@ -27,7 +27,7 @@ l2announcements:
 # Load Balancer configuration
 loadBalancer:
   algorithm: maglev
-  mode: dsr
+  mode: snat
 
 # Enable L2 neighbor discovery
 l2NeighDiscovery:
