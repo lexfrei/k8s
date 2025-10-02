@@ -21,6 +21,7 @@ spec:
             traefik.ingress.kubernetes.io/router.entrypoints: websecure
             external-dns.alpha.kubernetes.io/target: "217.78.182.161"
             external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+            cert-manager.io/cluster-issuer: "cloudflare-issuer"
           hosts:
             - host: aleksei.sviridk.in
               paths:
@@ -31,6 +32,10 @@ spec:
                       name: me-site
                       port:
                         number: 8080
+          tls:
+            - hosts:
+                - aleksei.sviridk.in
+              secretName: me-site-tls
   project: workloads
   syncPolicy:
     automated:
