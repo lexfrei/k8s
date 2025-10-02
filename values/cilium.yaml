@@ -6,7 +6,7 @@ k8sServicePort: "6443"
 kubeProxyReplacement: "true"
 kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 
-# Routing and tunnel configuration (matching Calico VXLAN setup)
+# Routing and tunnel configuration
 routingMode: "tunnel"
 tunnelProtocol: "vxlan"
 
@@ -14,7 +14,7 @@ tunnelProtocol: "vxlan"
 ipam:
   mode: "kubernetes"
 
-# L2 Announcements (replacement for MetalLB)
+# L2 Announcements for LoadBalancer services
 l2announcements:
   enabled: true
   leaseDuration: 15s
@@ -34,7 +34,7 @@ l2NeighDiscovery:
 operator:
   replicas: 1
 
-# Enable Hubble for observability (optional but recommended)
+# Enable Hubble for network observability
 hubble:
   enabled: true
   relay:
