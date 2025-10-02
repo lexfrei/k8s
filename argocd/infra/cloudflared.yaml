@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://lexfrei.github.io/charts"
-    targetRevision: "0.5.14"
+    targetRevision: "0.10.0"
     chart: cloudflare-tunnel
     helm:
       valuesObject:
@@ -22,6 +22,9 @@ spec:
           ingress:
             - service: http://traefik.traefik-system.svc:9090
           enableDefault404: false
+          originRequest:
+            http2Origin: true
+        protocol: http2
         replicaCount: 2
   syncPolicy:
     automated:
