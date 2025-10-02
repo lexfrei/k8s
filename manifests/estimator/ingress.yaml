@@ -5,7 +5,7 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     external-dns.alpha.kubernetes.io/target: "217.78.182.161"
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
 spec:
   rules:
     - host: eta.lex.la
