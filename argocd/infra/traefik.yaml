@@ -18,7 +18,7 @@ spec:
         valuesObject:
           service:
             annotations:
-              metallb.io/address-pool: ingress-pool
+              io.cilium/lb-ipam-ips: "172.16.100.251"
           additionalArguments:
             # Disable internal ssl check
             - "--serversTransport.insecureSkipVerify=true"

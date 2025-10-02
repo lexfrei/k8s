@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: kube-system
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: cilium
+      helm:
+        valueFiles:
+          - $values/values/cilium.yaml
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/cilium
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

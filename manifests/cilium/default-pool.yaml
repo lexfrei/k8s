@@ -1,0 +1,16 @@
+apiVersion: cilium.io/v2alpha1
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: default-pool
+spec:
+  blocks:
+    - cidr: 172.16.100.101/32
+    - cidr: 172.16.100.102/32
+    - cidr: 172.16.100.103/32
+    - cidr: 172.16.100.104/32
+    - cidr: 172.16.100.105/32
+    - cidr: 172.16.100.106/32
+    - cidr: 172.16.100.107/32
+    - cidr: 172.16.100.108/32
+    - cidr: 172.16.100.109/32
+    - cidr: 172.16.100.110/32
