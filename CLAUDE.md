@@ -65,6 +65,9 @@ The cluster runs on K3s with these core components (in deployment order):
   - Minecraft pool: 172.16.100.253
   - Default pool: 172.16.100.101-110
 - Traefik ingress controller for HTTP/HTTPS routing
+  - Public services use direct IP access: 217.78.182.161
+  - Cloudflare operates in DNS-only mode (no proxy)
+  - TLS certificates managed by cert-manager with ACME DNS-01 challenge
 - External DNS updates Cloudflare records automatically
 - Cluster domain: `k8s.home.example.com` (configured in K3s)
 - Hubble for network observability and troubleshooting
@@ -133,7 +136,22 @@ Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar
 1. Create manifests in `manifests/NEW_APP/`
 2. Create ArgoCD Application in appropriate `argocd/CATEGORY/` directory
 3. Reference the manifests directory in the Application spec
-4. Commit and push - ArgoCD meta app will auto-deploy
+4. For public ingress resources, include these annotations:
+   ```yaml
+   annotations:
+     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+     external-dns.alpha.kubernetes.io/target: "217.78.182.161"
+     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+     cert-manager.io/cluster-issuer: "cloudflare-issuer"
+   ```
+5. Add TLS configuration:
+   ```yaml
+   tls:
+     - hosts:
+         - your-domain.lex.la
+       secretName: your-app-tls
+   ```
+6. Commit and push - ArgoCD meta app will auto-deploy
 
 ### Modifying Infrastructure Components
 
@@ -152,6 +170,8 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - Designed for ARM64 architecture (Raspberry Pi)
 - All changes deploy automatically via ArgoCD (selfHeal: true, prune: true)
 - Domain references throughout use `lex.la` - must be updated for different domains
+- Public services use direct IP access without Cloudflare Tunnel due to ISP DPI blocking
+- cert-manager uses DNS-01 ACME challenge with Cloudflare API for Let's Encrypt certificates
 
 ## Renovate Configuration
 

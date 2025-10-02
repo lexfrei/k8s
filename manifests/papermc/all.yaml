@@ -108,6 +108,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     external-dns.alpha.kubernetes.io/target: "217.78.182.161"
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    cert-manager.io/cluster-issuer: "cloudflare-issuer"
 spec:
   ingressClassName: traefik
   rules:
@@ -121,3 +122,7 @@ spec:
                 name: papermc
                 port:
                   name: dynmap
+  tls:
+    - hosts:
+        - map.lex.la
+      secretName: map-tls
