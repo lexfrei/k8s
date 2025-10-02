@@ -4,8 +4,8 @@ metadata:
   name: job-countdown
   namespace: default
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: tunnel
-    external-dns.alpha.kubernetes.io/target: "4a0cf464-58f0-4d24-87cd-e87ad3c0a136.cfargotunnel.com"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    external-dns.alpha.kubernetes.io/target: "217.78.182.161"
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   rules:
