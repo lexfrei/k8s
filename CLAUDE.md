@@ -36,20 +36,20 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
 - **`values/`** - Helm chart values files for infrastructure components
   - `argocd.yaml` - ArgoCD configuration including Crossplane health checks
   - `coredns.yaml` - CoreDNS configuration
-  - `tigera-operator.yaml` - Calico networking configuration (VXLAN, 10.42.0.0/16)
+  - `cilium.yaml` - Cilium CNI configuration (VXLAN, kube-proxy replacement, L2 announcements)
 
 - **`secrets/`** - Encrypted secrets (likely using SOPS or similar)
-  - Contains CloudFlare credentials, Grafana config, tunnel credentials
+  - Contains CloudFlare credentials, Grafana config
 
 ### Core Infrastructure Stack
 
 The cluster runs on K3s with these core components (in deployment order):
 
-1. **Networking**: Calico (via Tigera Operator) with VXLAN encapsulation on 10.42.0.0/16
+1. **Networking**: Cilium CNI with VXLAN encapsulation on 10.42.0.0/16
 2. **DNS**: CoreDNS with custom configuration
 3. **Storage**: Longhorn for distributed block storage
-4. **Load Balancing**: MetalLB with multiple IP pools (ingress, default, transmission, minecraft)
-5. **Ingress**: Traefik with Cloudflare tunnel integration
+4. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
+5. **Ingress**: Traefik as the ingress controller
 6. **Certificate Management**: cert-manager with ClusterIssuer
 7. **GitOps**: ArgoCD (self-managed via the meta application)
 8. **External DNS**: external-dns for Cloudflare integration
@@ -57,11 +57,17 @@ The cluster runs on K3s with these core components (in deployment order):
 
 ### Network Configuration
 
-- Pod network: 10.42.0.0/16 (Calico VXLAN)
-- MetalLB manages multiple IP address pools for different services
-- Traefik ingress with Cloudflare tunnel (`4a0cf464-58f0-4d24-87cd-e87ad3c0a136.cfargotunnel.com`)
+- Pod network: 10.42.0.0/16 (Cilium VXLAN)
+- Cilium kube-proxy replacement for service load balancing and NodePort
+- Cilium L2 Announcements for LoadBalancer IP allocation:
+  - Ingress pool: 172.16.100.251
+  - Transmission pool: 172.16.100.252
+  - Minecraft pool: 172.16.100.253
+  - Default pool: 172.16.100.101-110
+- Traefik ingress controller for HTTP/HTTPS routing
 - External DNS updates Cloudflare records automatically
 - Cluster domain: `k8s.home.example.com` (configured in K3s)
+- Hubble for network observability and troubleshooting
 
 ## Key Commands
 
@@ -72,14 +78,17 @@ Bootstrap the cluster (run on management machine after K3s installation):
 ```bash
 # Add Helm repositories
 helm repo add coredns https://coredns.github.io/helm
-helm repo add projectcalico https://projectcalico.docs.tigera.io/charts
+helm repo add cilium https://helm.cilium.io/
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 
 # Install core components
 helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
-helm install tigera-operator projectcalico/tigera-operator --version v3.29.0 --namespace tigera-operator --values values/tigera-operator.yaml --create-namespace
+helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
 helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
+
+# Apply Cilium LB IP pools and L2 announcement policy
+kubectl apply --filename manifests/cilium/
 
 # Deploy meta application (deploys all other applications)
 kubectl apply --filename argocd/meta/meta.yaml
@@ -138,8 +147,8 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 
 ## Important Constraints
 
-- K3s cluster with specific components disabled (traefik, local-storage, servicelb, metrics-server, coredns, flannel)
-- Custom CoreDNS and Calico replace default K3s networking
+- K3s cluster with specific components disabled (traefik, local-storage, servicelb, metrics-server, coredns, kube-proxy, flannel)
+- Custom CoreDNS and Cilium replace default K3s networking
 - Designed for ARM64 architecture (Raspberry Pi)
 - All changes deploy automatically via ArgoCD (selfHeal: true, prune: true)
 - Domain references throughout use `lex.la` - must be updated for different domains
