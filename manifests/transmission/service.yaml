@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: transmission
   annotations:
-    metallb.io/address-pool: transmission-pool
+    io.cilium/lb-ipam-ips: "172.16.100.252"
 spec:
   type: LoadBalancer
   selector:

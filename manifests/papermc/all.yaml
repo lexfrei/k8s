@@ -80,7 +80,7 @@ metadata:
     app: papermc
     type: paper
   annotations:
-    metallb.io/address-pool: minecraft-pool
+    io.cilium/lb-ipam-ips: "172.16.100.253"
 spec:
   type: LoadBalancer
   ports:

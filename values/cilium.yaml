@@ -1,0 +1,46 @@
+# Kubernetes API Server configuration
+k8sServiceHost: "auto"
+k8sServicePort: "6443"
+
+# Enable kube-proxy replacement
+kubeProxyReplacement: "true"
+kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
+
+# Routing and tunnel configuration (matching Calico VXLAN setup)
+routingMode: "tunnel"
+tunnelProtocol: "vxlan"
+
+# IPAM configuration for Pod networking
+ipam:
+  mode: "cluster-pool"
+  operator:
+    clusterPoolIPv4PodCIDRList: ["10.42.0.0/16"]
+    clusterPoolIPv4MaskSize: 24
+
+# L2 Announcements (replacement for MetalLB)
+l2announcements:
+  enabled: true
+  leaseDuration: 15s
+  leaseRenewDeadline: 5s
+  leaseRetryPeriod: 2s
+
+# Load Balancer configuration
+loadBalancer:
+  algorithm: maglev
+  mode: dsr
+
+# Enable L2 neighbor discovery
+l2NeighDiscovery:
+  enabled: true
+
+# Operator configuration
+operator:
+  replicas: 1
+
+# Enable Hubble for observability (optional but recommended)
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
