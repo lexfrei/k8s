@@ -31,8 +31,7 @@ spec:
                       name: grafana-credentials
   ingress:
     metadata:
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+      annotations: {}
     spec:
       rules:
         - host: grafana.lex.la

@@ -4,23 +4,23 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 
 ## Features
 
-- **Networking**: Cilium CNI with VXLAN encapsulation and kube-proxy replacement
+- **Networking**: Cilium CNI with native routing and kube-proxy replacement
 - **Load Balancing**: Cilium L2 Announcements (LB IPAM) for bare metal load balancing
-- **Ingress**: Traefik as the ingress controller
+- **Gateway API**: Cilium Gateway API v1.3.0 for HTTP/HTTPS routing with automatic TLS
 - **Storage**: Longhorn for distributed storage
 - **GitOps**: ArgoCD for declarative, Git-based application deployment
 - **Monitoring**: Node exporter and Grafana for monitoring
 - **Observability**: Hubble for network visibility and troubleshooting
-- **Applications**: Various workloads including HomeAssistant, PaperMC, Transmission, etc.
+- **Applications**: Various workloads including PaperMC, Transmission, etc.
 
 ## Prerequisites
 
 ### Node Configuration
 
 1. Exclude specific IPs from your DHCP pool for Cilium L2 LB (see `manifests/cilium/*-pool.yaml`)
-2. Add Traefik's IP to your DNS records
+2. Configure public IP (217.78.182.161) for Gateway in external-dns
 3. Update all DNS references in the repo (search for the `lex.la` domain)
-4. Add a DNS wildcard record (e.g., `*.k8s.home.example.com`) pointing to your ingress IP
+4. Gateway API will automatically create DNS records via external-dns
 5. For Raspberry Pi or similar ARM devices:
    - Add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to `/boot/cmdline.txt`
    - Set `Storage=volatile` in `/etc/systemd/journald.conf` to prevent SD card wear
@@ -97,36 +97,31 @@ kubectl apply -f manifests/kubernetes-dashboard/account.yaml
 kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
 ```
 
-### Traefik Dashboard
-
-```shell
-# Apply IngressRoute configuration
-kubectl apply -f manifests/traefik/ingressroute.yaml
-```
-
 ### ArgoCD
 
-Access via the configured Ingress route (typically https://argocd.k8s.home.example.com)
+Access via HTTPRoute at https://argocd.lex.la
 
 ### Longhorn
 
-Access via the configured Ingress route (typically https://longhorn.k8s.home.example.com)
+Access via HTTPRoute at https://longhorn.k8s.home.lex.la
 
 ### Hubble UI
 
-Access via the configured Ingress route for network observability and troubleshooting
+Access via port-forward or HTTPRoute for network observability and troubleshooting
 
 ## Network Architecture
 
 This cluster uses:
-- **Cilium CNI** for pod networking with VXLAN encapsulation (10.42.0.0/16)
+- **Cilium CNI** for pod networking with native routing (10.42.0.0/16)
 - **Cilium kube-proxy replacement** for service load balancing and NodePort
 - **Cilium L2 Announcements** for LoadBalancer IP allocation with dedicated pools:
-  - Ingress pool: 172.16.100.251
+  - Gateway pool: 172.16.100.251
   - Transmission pool: 172.16.100.252
   - Minecraft pool: 172.16.100.253
   - Default pool: 172.16.100.101-110
-- **Traefik** as the ingress controller
+- **Cilium Gateway API** v1.3.0 for HTTP/HTTPS routing with automatic TLS
+- **cert-manager** for automatic certificate management via Gateway API integration
+- **external-dns** for automatic DNS record creation from HTTPRoute resources
 - **CoreDNS** for internal DNS resolution
 - **Hubble** for network visibility and monitoring
 

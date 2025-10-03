@@ -45,30 +45,31 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
 
 The cluster runs on K3s with these core components (in deployment order):
 
-1. **Networking**: Cilium CNI with VXLAN encapsulation on 10.42.0.0/16
+1. **Networking**: Cilium CNI with native routing on 10.42.0.0/16
 2. **DNS**: CoreDNS with custom configuration
 3. **Storage**: Longhorn for distributed block storage
 4. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
-5. **Ingress**: Traefik as the ingress controller
-6. **Certificate Management**: cert-manager with ClusterIssuer
+5. **Gateway API**: Cilium Gateway API v1.3.0 for HTTP/HTTPS routing
+6. **Certificate Management**: cert-manager with automatic Gateway API integration
 7. **GitOps**: ArgoCD (self-managed via the meta application)
-8. **External DNS**: external-dns for Cloudflare integration
+8. **External DNS**: external-dns with Gateway API HTTPRoute support
 9. **Monitoring**: Grafana operator, node-exporter, metrics-server
 
 ### Network Configuration
 
-- Pod network: 10.42.0.0/16 (Cilium VXLAN)
+- Pod network: 10.42.0.0/16 (Cilium native routing)
 - Cilium kube-proxy replacement for service load balancing and NodePort
 - Cilium L2 Announcements for LoadBalancer IP allocation:
-  - Ingress pool: 172.16.100.251
+  - Gateway pool: 172.16.100.251
   - Transmission pool: 172.16.100.252
   - Minecraft pool: 172.16.100.253
   - Default pool: 172.16.100.101-110
-- Traefik ingress controller for HTTP/HTTPS routing
+- Cilium Gateway API for HTTP/HTTPS routing
   - Public services use direct IP access: 217.78.182.161
   - Cloudflare operates in DNS-only mode (no proxy)
-  - TLS certificates managed by cert-manager with ACME DNS-01 challenge
-- External DNS updates Cloudflare records automatically
+  - TLS certificates automatically managed by cert-manager via Gateway API integration
+  - Supports wildcard certificates for *.lex.la, *.home.lex.la, *.k8s.home.lex.la, *.sviridk.in
+- External DNS automatically creates DNS records from HTTPRoute resources
 - Cluster domain: `k8s.home.example.com` (configured in K3s)
 - Hubble for network observability and troubleshooting
 
@@ -136,21 +137,31 @@ Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar
 1. Create manifests in `manifests/NEW_APP/`
 2. Create ArgoCD Application in appropriate `argocd/CATEGORY/` directory
 3. Reference the manifests directory in the Application spec
-4. For public ingress resources, include these annotations:
+4. Create HTTPRoute resource for public access:
    ```yaml
-   annotations:
-     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-     external-dns.alpha.kubernetes.io/target: "217.78.182.161"
-     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-     cert-manager.io/cluster-issuer: "cloudflare-issuer"
+   apiVersion: gateway.networking.k8s.io/v1
+   kind: HTTPRoute
+   metadata:
+     name: your-app
+     namespace: your-namespace
+     annotations: {}
+   spec:
+     parentRefs:
+       - name: cilium-gateway
+         namespace: kube-system
+         sectionName: https-lex-la  # or https-home-lex-la, https-k8s-home-lex-la, https-sviridk-in
+     hostnames:
+       - your-app.lex.la
+     rules:
+       - matches:
+           - path:
+               type: PathPrefix
+               value: /
+         backendRefs:
+           - name: your-service
+             port: 80
    ```
-5. Add TLS configuration:
-   ```yaml
-   tls:
-     - hosts:
-         - your-domain.lex.la
-       secretName: your-app-tls
-   ```
+5. Add your namespace to ReferenceGrant in `manifests/cilium/reference-grant.yaml`
 6. Commit and push - ArgoCD meta app will auto-deploy
 
 ### Modifying Infrastructure Components
@@ -165,13 +176,15 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 
 ## Important Constraints
 
-- K3s cluster with specific components disabled (traefik, local-storage, servicelb, metrics-server, coredns, kube-proxy, flannel)
+- K3s cluster with specific components disabled (local-storage, servicelb, metrics-server, coredns, kube-proxy, flannel, traefik)
 - Custom CoreDNS and Cilium replace default K3s networking
 - Designed for ARM64 architecture (Raspberry Pi)
 - All changes deploy automatically via ArgoCD (selfHeal: true, prune: true)
 - Domain references throughout use `lex.la` - must be updated for different domains
 - Public services use direct IP access without Cloudflare Tunnel due to ISP DPI blocking
-- cert-manager uses DNS-01 ACME challenge with Cloudflare API for Let's Encrypt certificates
+- cert-manager automatically manages certificates for Gateway API listeners
+- TLS certificates issued via DNS-01 ACME challenge with Cloudflare API
+- Gateway API provides modern, role-oriented routing instead of legacy Ingress
 
 ## Renovate Configuration
 
