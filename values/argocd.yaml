@@ -2,8 +2,7 @@ global:
   domain: argocd.lex.la
 configs:
   params:
-    server:
-      insecure: true
+    server.insecure: true
   cm:
     accounts.admin: apiKey, login
     application.resourceTrackingMethod: annotation
