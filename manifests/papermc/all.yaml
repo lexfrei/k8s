@@ -104,9 +104,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: papermc-map
-  annotations:
-    external-dns.alpha.kubernetes.io/target: "217.78.182.161"
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+  annotations: {}
 spec:
   parentRefs:
     - name: cilium-gateway
