@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: job-countdown
-  namespace: default
   labels:
     app: job-countdown
 spec:
