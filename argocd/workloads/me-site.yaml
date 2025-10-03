@@ -11,30 +11,26 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://lexfrei.github.io/charts"
-    targetRevision: "0.3.0"
+    targetRevision: "0.4.0"
     chart: me-site
     helm:
       valuesObject:
         ingress:
+          enabled: false
+        httpRoute:
           enabled: true
-          annotations:
-            external-dns.alpha.kubernetes.io/target: "217.78.182.161"
-            external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-            cert-manager.io/cluster-issuer: "cloudflare-issuer"
-          hosts:
-            - host: aleksei.sviridk.in
-              paths:
-                - path: /
-                  pathType: Prefix
-                  backend:
-                    service:
-                      name: me-site
-                      port:
-                        number: 8080
-          tls:
-            - hosts:
-                - aleksei.sviridk.in
-              secretName: me-site-tls
+          annotations: {}
+          parentRefs:
+            - name: cilium-gateway
+              namespace: kube-system
+              sectionName: https-sviridk-in
+          hostnames:
+            - aleksei.sviridk.in
+          rules:
+            - matches:
+                - path:
+                    type: PathPrefix
+                    value: /
   project: workloads
   syncPolicy:
     automated:

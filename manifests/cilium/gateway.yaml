@@ -4,12 +4,13 @@ metadata:
   name: cilium-gateway
   namespace: kube-system
   annotations:
-    io.cilium/lb-ipam-ips: "172.16.100.251"
-    lbipam.cilium.io/sharing-key: "web-traffic"
     cert-manager.io/cluster-issuer: "cloudflare-issuer"
     external-dns.alpha.kubernetes.io/target: "217.78.182.161"
 spec:
   gatewayClassName: cilium
+  addresses:
+    - type: IPAddress
+      value: "172.16.100.251"
   listeners:
     - name: http
       protocol: HTTP
