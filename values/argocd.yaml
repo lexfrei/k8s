@@ -147,7 +147,7 @@ configs:
           return health_status
 server:
   ingress:
-    enabled: true
+    enabled: false
     hostname: argocd.lex.la
     annotations:
       external-dns.alpha.kubernetes.io/target: "217.78.182.161"
