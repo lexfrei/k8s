@@ -18,8 +18,12 @@ spec:
     - name: https
       protocol: HTTPS
       port: 443
+      hostname: "*.lex.la"
       allowedRoutes:
         namespaces:
           from: All
       tls:
-        mode: Passthrough
+        mode: Terminate
+        certificateRefs:
+          - name: wildcard-lex-la-tls
+            kind: Secret

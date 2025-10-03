@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-lex-la
+  namespace: kube-system
+spec:
+  secretName: wildcard-lex-la-tls
+  issuerRef:
+    name: cloudflare-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.lex.la"
+    - "*.k8s.home.lex.la"
+    - "*.home.lex.la"
