@@ -17,4 +17,4 @@ spec:
             value: /
       backendRefs:
         - name: transmission
-          port: 80
+          port: 9091
