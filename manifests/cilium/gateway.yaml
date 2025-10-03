@@ -6,6 +6,7 @@ metadata:
   annotations:
     io.cilium/lb-ipam-ips: "172.16.100.251"
     lbipam.cilium.io/sharing-key: "web-traffic"
+    cert-manager.io/cluster-issuer: "cloudflare-issuer"
 spec:
   gatewayClassName: cilium
   listeners:
@@ -15,7 +16,8 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https
+    - name: https-lex-la
+      hostname: "*.lex.la"
       protocol: HTTPS
       port: 443
       allowedRoutes:
@@ -24,7 +26,41 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: wildcard-lex-la-tls
+          - name: lex-la-tls
             kind: Secret
-          - name: wildcard-sviridk-in-tls
+    - name: https-home-lex-la
+      hostname: "*.home.lex.la"
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: home-lex-la-tls
+            kind: Secret
+    - name: https-k8s-home-lex-la
+      hostname: "*.k8s.home.lex.la"
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: k8s-home-lex-la-tls
+            kind: Secret
+    - name: https-sviridk-in
+      hostname: "*.sviridk.in"
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: sviridk-in-tls
             kind: Secret
