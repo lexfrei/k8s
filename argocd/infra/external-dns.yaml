@@ -20,6 +20,7 @@ spec:
             name: cloudflare
           policy: sync
           sources:
+            - service
             - gateway-httproute
           env:
             - name: CF_API_TOKEN
