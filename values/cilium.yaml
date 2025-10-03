@@ -48,10 +48,4 @@ gatewayAPI:
 
 # Ingress Controller
 ingressController:
-  enabled: true
-  default: true
-  loadbalancerMode: shared
-  service:
-    annotations:
-      io.cilium/lb-ipam-ips: "172.16.100.251"
-      lbipam.cilium.io/sharing-key: "web-traffic"
+  enabled: false
