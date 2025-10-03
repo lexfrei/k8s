@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://github.com/kubernetes-sigs/gateway-api.git"
-    targetRevision: "v1.2.0"
+    targetRevision: "v1.3.0"
     path: "config/crd/standard"
   syncPolicy:
     automated:

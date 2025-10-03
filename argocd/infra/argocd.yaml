@@ -20,6 +20,9 @@ spec:
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       ref: values
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/argocd
   syncPolicy:
     automated:
       prune: true
