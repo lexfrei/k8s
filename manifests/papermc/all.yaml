@@ -109,7 +109,7 @@ spec:
   parentRefs:
     - name: cilium-gateway
       namespace: kube-system
-      sectionName: https-lex-la
+      sectionName: https-map-lex-la
   hostnames:
     - map.lex.la
   rules:
