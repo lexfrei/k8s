@@ -24,8 +24,8 @@ spec:
           lb_enable: "true"
           lb_port: "6443"
           vip_leaderelection: "true"
-        cp_enable: "true"
-        svc_enable: "false"
+          cp_enable: "true"
+          svc_enable: "false"
   syncPolicy:
     automated:
       prune: true
