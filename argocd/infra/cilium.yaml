@@ -11,9 +11,9 @@ spec:
     namespace: kube-system
     server: "https://kubernetes.default.svc"
   sources:
-    - repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
-      path: cilium
+    - repoURL: https://helm.cilium.io/
+      targetRevision: 1.18.2
+      chart: cilium
       helm:
         valueFiles:
           - $values/values/cilium.yaml
