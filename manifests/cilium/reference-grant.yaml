@@ -10,19 +10,22 @@ spec:
       namespace: argocd
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
+      namespace: default
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
       namespace: estimator
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: longhorn-system
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
+      namespace: me-site
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
       namespace: paper
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: transmission-system
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: default
   to:
     - group: ""
       kind: Service
