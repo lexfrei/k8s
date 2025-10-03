@@ -1,5 +1,6 @@
 # Kubernetes API Server configuration
-k8sServiceHost: "172.16.113.46"
+# Using kube-vip VIP for HA, fallback to direct node IP
+k8sServiceHost: "172.16.101.101"
 k8sServicePort: "6443"
 
 # Enable kube-proxy replacement
