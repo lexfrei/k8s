@@ -17,9 +17,6 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: default
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: mainsail
   to:
     - group: ""
       kind: Service
