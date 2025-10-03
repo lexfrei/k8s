@@ -18,7 +18,6 @@ spec:
         ingress:
           enabled: true
           annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: websecure
             external-dns.alpha.kubernetes.io/target: "217.78.182.161"
             external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
             cert-manager.io/cluster-issuer: "cloudflare-issuer"
