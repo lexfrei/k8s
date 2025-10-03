@@ -10,40 +10,39 @@ spec:
   destination:
     namespace: longhorn-system
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://charts.longhorn.io"
-    targetRevision: "1.10.0"
-    chart: longhorn
-    helm:
-      valuesObject:
-        persistence:
-          defaultClassReplicaCount: 1
-          defaultClass: false
-        ingress:
-          enabled: true
-          host: longhorn.k8s.home.lex.la
-          annotations:
-            cert-manager.io/cluster-issuer: "cloudflare-issuer"
-          tls: true
-        preUpgradeChecker:
-          jobEnabled: false
-        # Minimize the number of replicas to reduce the resource usage.
-        # This is not safe for production.
-        defaultSetting:
-          defaultReplicaCount: 1
-        longhornUI:
-          replicas: 1
-        longhornConversionWebhook:
-          replicas: 1
-        longhornAdmissionWebhook:
-          replicas: 1
-        longhornRecoveryBackend:
-          replicas: 1
-        csi:
-          attacherReplicaCount: 1
-          provisionerReplicaCount: 1
-          resizerReplicaCount: 1
-          snapshotterReplicaCount: 1
+  sources:
+    - repoURL: "https://charts.longhorn.io"
+      targetRevision: "1.10.0"
+      chart: longhorn
+      helm:
+        valuesObject:
+          persistence:
+            defaultClassReplicaCount: 1
+            defaultClass: false
+          ingress:
+            enabled: false
+          preUpgradeChecker:
+            jobEnabled: false
+          # Minimize the number of replicas to reduce the resource usage.
+          # This is not safe for production.
+          defaultSetting:
+            defaultReplicaCount: 1
+          longhornUI:
+            replicas: 1
+          longhornConversionWebhook:
+            replicas: 1
+          longhornAdmissionWebhook:
+            replicas: 1
+          longhornRecoveryBackend:
+            replicas: 1
+          csi:
+            attacherReplicaCount: 1
+            provisionerReplicaCount: 1
+            resizerReplicaCount: 1
+            snapshotterReplicaCount: 1
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/longhorn
   syncPolicy:
     automated:
       prune: true
