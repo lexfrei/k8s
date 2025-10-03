@@ -55,15 +55,3 @@ spec:
         certificateRefs:
           - name: lex-la-tls
             kind: Secret
-    - name: https-sviridk-in
-      hostname: "*.sviridk.in"
-      protocol: HTTPS
-      port: 443
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: sviridk-in-tls
-            kind: Secret
