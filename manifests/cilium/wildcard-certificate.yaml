@@ -10,5 +10,18 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - "*.lex.la"
-    - "*.k8s.home.lex.la"
     - "*.home.lex.la"
+    - "*.k8s.home.lex.la"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-sviridk-in
+  namespace: kube-system
+spec:
+  secretName: wildcard-sviridk-in-tls
+  issuerRef:
+    name: cloudflare-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.sviridk.in"
