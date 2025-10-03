@@ -20,10 +20,7 @@ spec:
             name: cloudflare
           policy: sync
           sources:
-            - service
-            - ingress
             - gateway-httproute
-            - traefik-proxy
           env:
             - name: CF_API_TOKEN
               valueFrom:
