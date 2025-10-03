@@ -6,6 +6,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: "cloudflare-issuer"
     external-dns.alpha.kubernetes.io/target: "172.16.100.250"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
 spec:
   gatewayClassName: cilium
   addresses:
