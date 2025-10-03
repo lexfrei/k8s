@@ -1,0 +1,10 @@
+config:
+  address: "172.16.101.101"
+
+env:
+  vip_interface: "eth0"
+  vip_arp: "true"
+  lb_enable: "false"
+  vip_leaderelection: "true"
+  cp_enable: "true"
+  svc_enable: "false"

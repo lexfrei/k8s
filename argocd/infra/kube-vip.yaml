@@ -10,21 +10,16 @@ spec:
   destination:
     namespace: kube-system
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://kube-vip.github.io/helm-charts"
-    targetRevision: "0.5.0"
-    chart: kube-vip
-    helm:
-      valuesObject:
-        config:
-          address: "172.16.101.101"
-        env:
-          vip_interface: "eth0"
-          vip_arp: "true"
-          lb_enable: "false"
-          vip_leaderelection: "true"
-          cp_enable: "true"
-          svc_enable: "false"
+  sources:
+    - repoURL: "https://kube-vip.github.io/helm-charts"
+      targetRevision: "0.5.0"
+      chart: kube-vip
+      helm:
+        valueFiles:
+          - $values/values/kube-vip.yaml
+    - repoURL: "https://github.com/lexfrei/k8s.git"
+      targetRevision: master
+      ref: values
   syncPolicy:
     automated:
       prune: true
