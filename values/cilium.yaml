@@ -36,13 +36,9 @@ l2NeighDiscovery:
 operator:
   replicas: 1
 
-# Enable Hubble for network observability
+# Hubble network observability
 hubble:
-  enabled: true
-  relay:
-    enabled: true
-  ui:
-    enabled: true
+  enabled: false
 
 # Gateway API support
 gatewayAPI:
