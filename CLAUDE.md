@@ -36,7 +36,8 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
 - **`values/`** - Helm chart values files for infrastructure components
   - `argocd.yaml` - ArgoCD configuration including Crossplane health checks
   - `coredns.yaml` - CoreDNS configuration
-  - `cilium.yaml` - Cilium CNI configuration (VXLAN, kube-proxy replacement, L2 announcements)
+  - `cilium.yaml` - Cilium CNI configuration (native routing, kube-proxy replacement, L2 announcements, Gateway API)
+  - `kube-vip.yaml` - kube-vip configuration for control plane HA with VIP
 
 - **`secrets/`** - Encrypted secrets (likely using SOPS or similar)
   - Contains CloudFlare credentials, Grafana config
@@ -45,33 +46,40 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
 
 The cluster runs on K3s with these core components (in deployment order):
 
-1. **Networking**: Cilium CNI with native routing on 10.42.0.0/16
-2. **DNS**: CoreDNS with custom configuration
-3. **Storage**: Longhorn for distributed block storage
-4. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
-5. **Gateway API**: Cilium Gateway API v1.3.0 for HTTP/HTTPS routing
-6. **Certificate Management**: cert-manager with automatic Gateway API integration
-7. **GitOps**: ArgoCD (self-managed via the meta application)
-8. **External DNS**: external-dns with Gateway API HTTPRoute support
-9. **Monitoring**: Grafana operator, node-exporter, metrics-server
+1. **DNS**: CoreDNS with custom configuration
+2. **Networking**: Cilium CNI with native routing on 10.42.0.0/16
+3. **Control Plane HA**: kube-vip for control plane high availability (VIP: 172.16.101.101)
+4. **GitOps**: ArgoCD (self-managed via the meta application)
+5. **Storage**: Longhorn for distributed block storage
+6. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
+7. **Gateway API**: Cilium Gateway API v1.3.0 for HTTP/HTTPS routing with automatic HTTP→HTTPS redirect
+8. **Certificate Management**: cert-manager with automatic Gateway API integration
+9. **External DNS**: external-dns with Gateway API HTTPRoute support
+10. **Monitoring**: Grafana operator, node-exporter, metrics-server
 
 ### Network Configuration
 
-- Pod network: 10.42.0.0/16 (Cilium native routing)
-- Cilium kube-proxy replacement for service load balancing and NodePort
-- Cilium L2 Announcements for LoadBalancer IP allocation:
+- **Control Plane VIP**: 172.16.101.101 (kube-vip in ARP mode for control plane HA)
+  - Cilium requires explicit k8sServiceHost configuration (cannot use kubernetes.default.svc due to kube-proxy replacement)
+  - All nodes and worker join operations use this VIP for API access
+- **Pod network**: 10.42.0.0/16 (Cilium native routing)
+- **Cilium kube-proxy replacement** for service load balancing and NodePort
+- **Cilium L2 Announcements** for LoadBalancer IP allocation:
   - Gateway pool: 172.16.100.251
   - Transmission pool: 172.16.100.252
   - Minecraft pool: 172.16.100.253
   - Default pool: 172.16.100.101-110
-- Cilium Gateway API for HTTP/HTTPS routing
+- **Cilium Gateway API** for HTTP/HTTPS routing
+  - Gateway IP: 172.16.100.251 (assigned via spec.addresses)
   - Public services use direct IP access: 217.78.182.161
   - Cloudflare operates in DNS-only mode (no proxy)
+  - Automatic HTTP→HTTPS redirect (301) via dedicated HTTPRoute
   - TLS certificates automatically managed by cert-manager via Gateway API integration
   - Supports wildcard certificates for *.lex.la, *.home.lex.la, *.k8s.home.lex.la, *.sviridk.in
-- External DNS automatically creates DNS records from HTTPRoute resources
-- Cluster domain: `k8s.home.example.com` (configured in K3s)
-- Hubble for network observability and troubleshooting
+- **External DNS** automatically creates DNS records from HTTPRoute resources
+  - Target IP centralized on Gateway annotation (external-dns.alpha.kubernetes.io/target)
+- **Cluster domain**: `k8s.home.example.com` (configured in K3s)
+- **Hubble** for network observability and troubleshooting
 
 ## Key Commands
 
@@ -83,18 +91,25 @@ Bootstrap the cluster (run on management machine after K3s installation):
 # Add Helm repositories
 helm repo add coredns https://coredns.github.io/helm
 helm repo add cilium https://helm.cilium.io/
+helm repo add kube-vip https://kube-vip.github.io/helm-charts
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 
-# Install core components
+# Install core components in order
 helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
 helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
+helm install kube-vip kube-vip/kube-vip --namespace kube-system --values values/kube-vip.yaml
 helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
 
-# Apply Cilium LB IP pools and L2 announcement policy
+# Apply Cilium LB IP pools, L2 announcement policy, and Gateway
 kubectl apply --filename manifests/cilium/
 
-# Deploy meta application (deploys all other applications)
+# Wait for kube-vip VIP to be assigned
+kubectl wait --namespace kube-system --for=condition=ready pod --selector app.kubernetes.io/name=kube-vip --timeout=60s
+
+# Now worker nodes can join using VIP: https://172.16.101.101:6443
+
+# Deploy meta application (deploys all other applications via GitOps)
 kubectl apply --filename argocd/meta/meta.yaml
 ```
 
@@ -185,6 +200,8 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - cert-manager automatically manages certificates for Gateway API listeners
 - TLS certificates issued via DNS-01 ACME challenge with Cloudflare API
 - Gateway API provides modern, role-oriented routing instead of legacy Ingress
+- kube-vip MUST be deployed before worker nodes join (they need VIP for API access)
+- Cilium k8sServiceHost MUST point to kube-vip VIP (cannot be empty due to kube-proxy replacement)
 
 ## Renovate Configuration
 
