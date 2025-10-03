@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-vip
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: kube-system
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://kube-vip.github.io/helm-charts"
+    targetRevision: "0.5.0"
+    chart: kube-vip
+    helm:
+      valuesObject:
+        config:
+          address: "172.16.101.101"
+        env:
+          vip_interface: "eth0"
+          vip_arp: "true"
+          lb_enable: "true"
+          lb_port: "6443"
+          vip_leaderelection: "true"
+        cp_enable: "true"
+        svc_enable: "false"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
