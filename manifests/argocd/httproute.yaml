@@ -6,11 +6,11 @@ metadata:
   annotations: {}
 spec:
   parentRefs:
-    - name: cilium-gateway
+    - name: cilium-gateway-internal
       namespace: kube-system
-      sectionName: https-lex-la
+      sectionName: https-home-lex-la
   hostnames:
-    - argocd.lex.la
+    - argocd.home.lex.la
   rules:
     - matches:
         - path:

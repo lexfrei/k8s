@@ -6,9 +6,9 @@ metadata:
   annotations: {}
 spec:
   parentRefs:
-    - name: cilium-gateway
+    - name: cilium-gateway-internal
       namespace: kube-system
-      sectionName: https-k8s-home-lex-la
+      sectionName: https-longhorn-k8s-home-lex-la
   hostnames:
     - longhorn.k8s.home.lex.la
   rules:

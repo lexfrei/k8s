@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: cilium-gateway
       namespace: kube-system
-      sectionName: https-lex-la
+      sectionName: https-job-lex-la
   hostnames:
     - job.lex.la
   rules:

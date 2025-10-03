@@ -1,16 +1,15 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: cilium-gateway
+  name: cilium-gateway-internal
   namespace: kube-system
   annotations:
     cert-manager.io/cluster-issuer: "cloudflare-issuer"
-    external-dns.alpha.kubernetes.io/target: "217.78.182.161"
 spec:
   gatewayClassName: cilium
   addresses:
     - type: IPAddress
-      value: "172.16.100.251"
+      value: "172.16.100.250"
   listeners:
     - name: http
       protocol: HTTP
@@ -18,8 +17,8 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https-eta-lex-la
-      hostname: "eta.lex.la"
+    - name: https-home-lex-la
+      hostname: "argocd.home.lex.la"
       protocol: HTTPS
       port: 443
       allowedRoutes:
@@ -28,10 +27,10 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: lex-la-tls
+          - name: home-lex-la-tls
             kind: Secret
-    - name: https-job-lex-la
-      hostname: "job.lex.la"
+    - name: https-transmission-home-lex-la
+      hostname: "transmission.home.lex.la"
       protocol: HTTPS
       port: 443
       allowedRoutes:
@@ -40,10 +39,10 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: lex-la-tls
+          - name: home-lex-la-tls
             kind: Secret
-    - name: https-map-lex-la
-      hostname: "map.lex.la"
+    - name: https-longhorn-k8s-home-lex-la
+      hostname: "longhorn.k8s.home.lex.la"
       protocol: HTTPS
       port: 443
       allowedRoutes:
@@ -52,17 +51,5 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: lex-la-tls
-            kind: Secret
-    - name: https-sviridk-in
-      hostname: "*.sviridk.in"
-      protocol: HTTPS
-      port: 443
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: sviridk-in-tls
+          - name: k8s-home-lex-la-tls
             kind: Secret
