@@ -6,9 +6,9 @@ k8sServicePort: "6443"
 kubeProxyReplacement: "true"
 kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 
-# Routing and tunnel configuration
-routingMode: "tunnel"
-tunnelProtocol: "vxlan"
+# Routing configuration
+routingMode: "native"
+ipv4NativeRoutingCIDR: "10.42.0.0/16"
 
 # IPAM configuration for Pod networking
 ipam:
@@ -41,3 +41,17 @@ hubble:
     enabled: true
   ui:
     enabled: true
+
+# Gateway API support
+gatewayAPI:
+  enabled: true
+
+# Ingress Controller
+ingressController:
+  enabled: true
+  default: true
+  loadbalancerMode: shared
+  service:
+    annotations:
+      io.cilium/lb-ipam-ips: "172.16.100.251"
+      lbipam.cilium.io/sharing-key: "web-traffic"

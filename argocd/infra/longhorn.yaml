@@ -23,7 +23,6 @@ spec:
           enabled: true
           host: longhorn.k8s.home.lex.la
           annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
             cert-manager.io/cluster-issuer: "cloudflare-issuer"
           tls: true
         preUpgradeChecker:
