@@ -34,9 +34,9 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
   - Referenced by ArgoCD Applications for deployment
 
 - **`values/`** - Helm chart values files for infrastructure components
-  - `argocd.yaml` - ArgoCD configuration including Crossplane health checks
+  - `argocd.yaml` - ArgoCD configuration including Crossplane health checks and server.insecure for Gateway TLS termination
   - `coredns.yaml` - CoreDNS configuration
-  - `cilium.yaml` - Cilium CNI configuration (native routing, kube-proxy replacement, L2 announcements, Gateway API)
+  - `cilium.yaml` - Cilium CNI configuration (tunnel mode VXLAN, kube-proxy replacement, L2 announcements, Gateway API, Hubble disabled)
   - `kube-vip.yaml` - kube-vip configuration for control plane HA with VIP
 
 - **`secrets/`** - Encrypted secrets (likely using SOPS or similar)
@@ -62,24 +62,33 @@ The cluster runs on K3s with these core components (in deployment order):
 - **Control Plane VIP**: 172.16.101.101 (kube-vip in ARP mode for control plane HA)
   - Cilium requires explicit k8sServiceHost configuration (cannot use kubernetes.default.svc due to kube-proxy replacement)
   - All nodes and worker join operations use this VIP for API access
-- **Pod network**: 10.42.0.0/16 (Cilium native routing)
+- **Pod network**: 10.42.0.0/16 (Cilium tunnel mode with VXLAN)
 - **Cilium kube-proxy replacement** for service load balancing and NodePort
 - **Cilium L2 Announcements** for LoadBalancer IP allocation:
-  - Gateway pool: 172.16.100.251
+  - Public Gateway pool: 172.16.100.251
+  - Internal Gateway pool: 172.16.100.250
   - Transmission pool: 172.16.100.252
   - Minecraft pool: 172.16.100.253
   - Default pool: 172.16.100.101-110
-- **Cilium Gateway API** for HTTP/HTTPS routing
-  - Gateway IP: 172.16.100.251 (assigned via spec.addresses)
-  - Public services use direct IP access: 217.78.182.161
-  - Cloudflare operates in DNS-only mode (no proxy)
-  - Automatic HTTP→HTTPS redirect (301) via dedicated HTTPRoute
+- **Cilium Gateway API** for HTTP/HTTPS routing with **security-hardened dual Gateway setup**:
+  - **Public Gateway** (cilium-gateway): 172.16.100.251
+    - Port-forwarded from public IP 217.78.182.161
+    - Uses **explicit hostnames only** (no wildcards) to prevent Host header manipulation attacks
+    - Configured hostnames: eta.lex.la, job.lex.la, map.lex.la, aleksei.sviridk.in
+    - Cloudflare proxy enabled (orange cloud) for DDoS protection
+    - Automatic HTTP→HTTPS redirect (301) via dedicated HTTPRoute
+  - **Internal Gateway** (cilium-gateway-internal): 172.16.100.250
+    - **NOT port-forwarded** - accessible only from local network
+    - Uses **explicit hostnames only**: argocd.home.lex.la, transmission.home.lex.la, longhorn.k8s.home.lex.la
+    - Cloudflare DNS-only mode (grey cloud) - no proxy
+    - Automatic HTTP→HTTPS redirect (301) via dedicated HTTPRoute
   - TLS certificates automatically managed by cert-manager via Gateway API integration
   - Supports wildcard certificates for *.lex.la, *.home.lex.la, *.k8s.home.lex.la, *.sviridk.in
-- **External DNS** automatically creates DNS records from HTTPRoute resources
-  - Target IP centralized on Gateway annotation (external-dns.alpha.kubernetes.io/target)
+- **External DNS** automatically creates DNS records from Gateway annotations
+  - Public Gateway: external-dns.alpha.kubernetes.io/target: "217.78.182.161" (proxied)
+  - Internal Gateway: external-dns.alpha.kubernetes.io/target: "172.16.100.250" (DNS-only)
 - **Cluster domain**: `k8s.home.example.com` (configured in K3s)
-- **Hubble** for network observability and troubleshooting
+- **Hubble**: Disabled to reduce resource consumption
 
 ## Key Commands
 
@@ -152,8 +161,12 @@ Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar
 1. Create manifests in `manifests/NEW_APP/`
 2. Create ArgoCD Application in appropriate `argocd/CATEGORY/` directory
 3. Reference the manifests directory in the Application spec
-4. Create HTTPRoute resource for public access:
+4. **Choose appropriate Gateway based on service accessibility**:
+   - **Public services** (accessible from internet): Use `cilium-gateway`
+   - **Internal services** (home network only): Use `cilium-gateway-internal`
+5. Create HTTPRoute resource:
    ```yaml
+   # Example for PUBLIC service
    apiVersion: gateway.networking.k8s.io/v1
    kind: HTTPRoute
    metadata:
@@ -164,7 +177,7 @@ Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar
      parentRefs:
        - name: cilium-gateway
          namespace: kube-system
-         sectionName: https-lex-la  # or https-home-lex-la, https-k8s-home-lex-la, https-sviridk-in
+         sectionName: https-YOUR-HOSTNAME-lex-la  # Must match explicit listener name
      hostnames:
        - your-app.lex.la
      rules:
@@ -176,8 +189,34 @@ Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar
            - name: your-service
              port: 80
    ```
-5. Add your namespace to ReferenceGrant in `manifests/cilium/reference-grant.yaml`
-6. Commit and push - ArgoCD meta app will auto-deploy
+   ```yaml
+   # Example for INTERNAL service
+   apiVersion: gateway.networking.k8s.io/v1
+   kind: HTTPRoute
+   metadata:
+     name: your-app
+     namespace: your-namespace
+     annotations: {}
+   spec:
+     parentRefs:
+       - name: cilium-gateway-internal
+         namespace: kube-system
+         sectionName: https-YOUR-HOSTNAME-home-lex-la  # Must match explicit listener name
+     hostnames:
+       - your-app.home.lex.la
+     rules:
+       - matches:
+           - path:
+               type: PathPrefix
+               value: /
+         backendRefs:
+           - name: your-service
+             port: 80
+   ```
+6. **For PUBLIC services**: Add new explicit hostname listener to `manifests/cilium/gateway.yaml`
+7. **For INTERNAL services**: Add new explicit hostname listener to `manifests/cilium/internal-gateway.yaml`
+8. Add your namespace to ReferenceGrant in `manifests/cilium/reference-grant.yaml`
+9. Commit and push - ArgoCD meta app will auto-deploy
 
 ### Modifying Infrastructure Components
 
@@ -200,8 +239,11 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - cert-manager automatically manages certificates for Gateway API listeners
 - TLS certificates issued via DNS-01 ACME challenge with Cloudflare API
 - Gateway API provides modern, role-oriented routing instead of legacy Ingress
+- **SECURITY**: Both Gateways use EXPLICIT hostnames only - NO wildcards allowed to prevent Host header manipulation attacks
+- **SECURITY**: Internal Gateway (172.16.100.250) MUST NOT be port-forwarded - local network access only
 - kube-vip MUST be deployed before worker nodes join (they need VIP for API access)
 - Cilium k8sServiceHost MUST point to kube-vip VIP (cannot be empty due to kube-proxy replacement)
+- ArgoCD server.insecure MUST be true when behind Gateway with TLS termination
 
 ## Renovate Configuration
 
