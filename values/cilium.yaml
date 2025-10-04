@@ -36,6 +36,10 @@ l2NeighDiscovery:
 operator:
   replicas: 1
 
+# Envoy proxy - disable external DaemonSet, use embedded in Cilium agent
+envoy:
+  enabled: false
+
 # Hubble network observability
 hubble:
   enabled: false
