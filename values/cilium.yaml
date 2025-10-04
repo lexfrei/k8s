@@ -16,18 +16,21 @@ tunnelProtocol: "vxlan"
 ipam:
   mode: "kubernetes"
 
-# L2 Announcements - DISABLED, using BGP instead
+# L2 Announcements for LoadBalancer services
 l2announcements:
-  enabled: false
+  enabled: true
+  leaseDuration: 15s
+  leaseRenewDeadline: 5s
+  leaseRetryPeriod: 2s
 
 # Load Balancer configuration
 loadBalancer:
   algorithm: maglev
   mode: snat
 
-# L2 neighbor discovery - DISABLED, using BGP instead
+# Enable L2 neighbor discovery
 l2NeighDiscovery:
-  enabled: false
+  enabled: true
 
 # Operator configuration
 operator:
@@ -44,7 +47,3 @@ gatewayAPI:
 # Ingress Controller
 ingressController:
   enabled: false
-
-# BGP Control Plane
-bgpControlPlane:
-  enabled: true

@@ -3,6 +3,3 @@ secrets/*
 
 # Exclude (unignore) all .asc files in the secrets directory
 !secrets/*.asc
-
-# UniFi BGP configuration (local reference only)
-unifi-bgp-config.txt
