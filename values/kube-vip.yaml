@@ -5,6 +5,6 @@ env:
   vip_interface: "eth0"
   vip_arp: "true"
   lb_enable: "false"
-  vip_leaderelection: "true"
+  vip_leaderelection: "false"
   cp_enable: "true"
   svc_enable: "false"
