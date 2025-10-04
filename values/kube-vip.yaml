@@ -3,14 +3,8 @@ config:
 
 env:
   vip_interface: "eth0"
-  vip_arp: "false"
+  vip_arp: "true"
   lb_enable: "false"
   vip_leaderelection: "false"
   cp_enable: "true"
   svc_enable: "false"
-  bgp_enable: "true"
-  bgp_routerinterface: "eth0"
-  bgp_as: "65100"
-  bgp_peeraddress: "172.16.0.1"
-  bgp_peerpass: ""
-  bgp_peeras: "65100"
