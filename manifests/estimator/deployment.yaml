@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: estimator
-          image: ghcr.io/lexfrei/estimator:2.0.0
+          image: ghcr.io/lexfrei/estimator:2.0.1
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
