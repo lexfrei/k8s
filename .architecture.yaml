@@ -1,0 +1,1029 @@
+metadata:
+  repository:
+    name: "k8s"
+    type: "infrastructure"
+    owner: "Aleksei Sviridkin <f@lex.la>"
+    description: "Production Kubernetes GitOps cluster for ARM64 systems (Raspberry Pi compatible)"
+    url: "https://github.com/lexfrei/k8s"
+  version: "1.0.0"
+  last_updated: "2025-10-05"
+  maintainer:
+    name: "Aleksei Sviridkin"
+    email: "f@lex.la"
+    role: "SRE"
+    gpg: "F57F 85FC 7975 F22B BC3F 2504 9C17 3EB1 B531 AA1F"
+
+architecture_overview:
+  type: "GitOps-based Kubernetes Infrastructure"
+  target_platform: "ARM64 (Raspberry Pi 4/5, compatible hardware)"
+  deployment_model: "Bare metal Kubernetes cluster with GitOps automation"
+  gitops_pattern: "ArgoCD App-of-Apps pattern for declarative infrastructure management"
+
+  design_principles:
+    - "Infrastructure as Code: All cluster configuration versioned in Git"
+    - "GitOps First: ArgoCD manages all application deployments automatically"
+    - "Declarative Configuration: Kubernetes manifests and Helm values define desired state"
+    - "ARM64 Optimized: Designed for resource-constrained ARM64 systems"
+    - "Production Ready: High availability control plane with kube-vip VIP"
+    - "Security Hardened: GPG-signed commits, encrypted secrets, explicit hostname-only Gateway routing"
+    - "Self-Healing: ArgoCD automated sync with selfHeal and prune enabled"
+    - "Minimal Dependencies: Lean component selection for resource efficiency"
+
+  key_characteristics:
+    - "Control Plane HA: kube-vip provides VIP failover for API server"
+    - "Custom Networking: Cilium CNI replaces default Flannel with advanced features"
+    - "Modern Ingress: Gateway API v1.3.0 with dual gateway security model"
+    - "Automatic TLS: cert-manager + Gateway API integration for certificate lifecycle"
+    - "Automatic DNS: external-dns creates Cloudflare records from Gateway annotations"
+    - "Distributed Storage: Longhorn provides persistent volumes across cluster nodes"
+
+technical_stack:
+  kubernetes:
+    distribution: "K3s"
+    version: "latest"
+    channel: "stable"
+    cluster_domain: "k8s.home.example.com"
+
+    disabled_components:
+      - "traefik"
+      - "local-storage"
+      - "servicelb"
+      - "metrics-server"
+      - "coredns"
+      - "kube-proxy"
+      - "flannel"
+
+    reasoning: |
+      K3s chosen for:
+      - Lightweight: Minimal resource footprint ideal for ARM64 systems
+      - Production Ready: CNCF certified Kubernetes distribution
+      - ARM64 Native: First-class support for ARM64 architecture
+      - Battery Included: Includes Helm controller, local-path provisioner
+      - Easy Management: Single binary, automatic updates via system-upgrade-controller
+
+      Disabled components allow custom replacements:
+      - Cilium CNI replaces Flannel for advanced networking
+      - Cilium Gateway API replaces Traefik for modern routing
+      - Longhorn replaces local-storage for distributed volumes
+      - Custom CoreDNS configuration for cluster DNS
+
+  control_plane_ha:
+    tool: "kube-vip"
+    version: "latest"
+    chart: "kube-vip/kube-vip"
+    vip_address: "172.16.101.101"
+    mode: "ARP"
+
+    configuration:
+      interface: "eth0"
+      arp_enabled: true
+      load_balancer: false
+      leader_election: false
+      control_plane: true
+      service_lb: false
+
+    reasoning: |
+      kube-vip chosen for control plane HA:
+      - Virtual IP Failover: Single stable IP (172.16.101.101) for API server access
+      - ARP Mode: Layer 2 announcement for bare metal environments without BGP
+      - Simple Architecture: No external load balancer required
+      - Worker Node Join: Workers use stable VIP instead of individual master IPs
+      - Production Proven: Battle-tested for bare metal Kubernetes HA
+
+      Critical deployment requirement:
+      - MUST be deployed before worker nodes join cluster
+      - Workers cannot join without stable VIP for API access
+      - Cilium k8sServiceHost must reference VIP (cannot use kubernetes.default.svc)
+
+  networking:
+    cni: "Cilium"
+    version: "latest"
+    chart: "cilium/cilium"
+
+    configuration:
+      routing_mode: "tunnel"
+      tunnel_protocol: "vxlan"
+      kube_proxy_replacement: true
+      l2_announcements: true
+      gateway_api: true
+      hubble: false
+      envoy_external_daemonset: false
+
+    pod_network:
+      cidr: "10.42.0.0/16"
+      mode: "kubernetes"
+
+    api_server:
+      host: "172.16.101.101"
+      port: "6443"
+      reasoning: "Must use kube-vip VIP because kube-proxy is replaced by Cilium"
+
+    reasoning: |
+      Cilium CNI chosen for:
+      - Complete kube-proxy Replacement: Native Kubernetes service implementation
+      - eBPF Performance: Kernel-level networking for low overhead
+      - Gateway API Support: Native implementation of Gateway API v1.3.0
+      - L2 Announcements: LoadBalancer IP allocation for bare metal (replaces MetalLB)
+      - Advanced Features: Network policies, observability, security
+
+      VXLAN tunnel mode:
+      - Network Reliability: Better compatibility than native routing on complex networks
+      - Encapsulation: Works across different network segments
+      - Flexibility: No dependency on underlying network routing
+
+      Hubble disabled:
+      - Resource Conservation: Reduces memory/CPU usage on ARM64 nodes
+      - Production Trade-off: Network observability sacrificed for performance
+
+      Envoy embedded in Cilium agent:
+      - Resource Efficiency: No separate Envoy DaemonSet
+      - Simpler Architecture: Fewer moving parts
+      - Gateway API Functionality: Embedded proxy handles HTTP/HTTPS routing
+
+  load_balancing:
+    solution: "Cilium L2 Announcements"
+    mode: "Layer 2 ARP/NDP"
+
+    ip_pools:
+      public_gateway:
+        name: "gateway-pool"
+        cidr: "172.16.100.251/32"
+        purpose: "Public-facing Gateway (port-forwarded from 217.78.182.161)"
+
+      internal_gateway:
+        name: "internal-gateway-pool"
+        cidr: "172.16.100.250/32"
+        purpose: "Internal-only Gateway (local network access, not port-forwarded)"
+
+      transmission:
+        name: "transmission-pool"
+        cidr: "172.16.100.252/32"
+        purpose: "Transmission BitTorrent dedicated IP"
+
+      minecraft:
+        name: "minecraft-pool"
+        cidr: "172.16.100.253/32"
+        purpose: "Minecraft server dedicated IP"
+
+      default:
+        name: "default-pool"
+        cidr: "172.16.100.101-110"
+        purpose: "General LoadBalancer services (10 IPs)"
+
+    announcement_policy:
+      service_selector: "matchLabels: {}"
+      node_selector: "matchLabels: {}"
+      interfaces: ["^eth[0-9]+", "^en[ospx][0-9]+"]
+      external_ips: true
+      load_balancer_ips: true
+
+    reasoning: |
+      Cilium L2 Announcements chosen over MetalLB:
+      - Native Integration: Built into Cilium CNI, no separate controller
+      - Simplified Stack: One component handles CNI + load balancing
+      - Layer 2 Mode: ARP announcements for bare metal without BGP router
+      - IP Pool Isolation: Dedicated pools prevent IP conflicts
+      - Resource Efficiency: No additional DaemonSet overhead
+
+      IP allocation strategy:
+      - Dedicated pools for services needing stable IPs (gateways, game servers)
+      - Default pool provides flexibility for general services
+      - All IPs excluded from DHCP to prevent conflicts
+
+  gateway_api:
+    version: "v1.3.0"
+    implementation: "Cilium Gateway API"
+    crds_source: "gateway-api-crds ArgoCD application"
+
+    security_model: "Dual Gateway with Explicit Hostname Enforcement"
+
+    gateways:
+      public:
+        name: "cilium-gateway"
+        namespace: "kube-system"
+        class: "cilium"
+        ip_address: "172.16.100.251"
+        external_ip: "217.78.182.161"
+
+        access_model: "Public Internet via port forwarding"
+        cloudflare_proxy: true
+
+        listeners:
+          http:
+            port: 80
+            protocol: "HTTP"
+            purpose: "Redirects to HTTPS via http-to-https-redirect HTTPRoute"
+
+          https_listeners:
+            - name: "https-eta-lex-la"
+              hostname: "eta.lex.la"
+              certificate: "lex-la-tls"
+            - name: "https-job-lex-la"
+              hostname: "job.lex.la"
+              certificate: "lex-la-tls"
+            - name: "https-map-lex-la"
+              hostname: "map.lex.la"
+              certificate: "lex-la-tls"
+            - name: "https-sviridk-in"
+              hostname: "aleksei.sviridk.in"
+              certificate: "sviridk-in-tls"
+
+        security_constraints:
+          wildcard_hostnames: false
+          hostname_enforcement: "explicit"
+          reasoning: "Each listener has explicit hostname to prevent Host header manipulation attacks"
+
+      internal:
+        name: "cilium-gateway-internal"
+        namespace: "kube-system"
+        class: "cilium"
+        ip_address: "172.16.100.250"
+
+        access_model: "Local network ONLY - NOT port-forwarded"
+        cloudflare_proxy: false
+
+        listeners:
+          http:
+            port: 80
+            protocol: "HTTP"
+            purpose: "Redirects to HTTPS via internal-http-redirect HTTPRoute"
+
+          https_listeners:
+            - name: "https-home-lex-la"
+              hostname: "argocd.home.lex.la"
+              certificate: "home-lex-la-tls"
+            - name: "https-transmission-home-lex-la"
+              hostname: "transmission.home.lex.la"
+              certificate: "home-lex-la-tls"
+            - name: "https-longhorn-k8s-home-lex-la"
+              hostname: "longhorn.k8s.home.lex.la"
+              certificate: "k8s-home-lex-la-tls"
+
+        security_constraints:
+          wildcard_hostnames: false
+          hostname_enforcement: "explicit"
+          port_forwarding: "FORBIDDEN - security requirement"
+          reasoning: "Explicit hostnames prevent attacks, no public exposure for admin interfaces"
+
+    http_to_https_redirect:
+      enabled: true
+      status_code: 301
+      implementation: "HTTPRoute with RequestRedirect filter on HTTP listener"
+
+    reference_grants:
+      enabled: true
+      purpose: "Allow HTTPRoutes in application namespaces to reference Gateway in kube-system"
+      namespaces: ["argocd", "default", "estimator", "longhorn-system", "me-site", "paper", "transmission-system"]
+
+    reasoning: |
+      Gateway API chosen over Ingress:
+      - Modern Standard: CNCF Gateway API is successor to Ingress
+      - Role-Oriented: Separates infrastructure (Gateway) from routing (HTTPRoute)
+      - Native TLS: First-class cert-manager integration via Gateway annotations
+      - Protocol Support: Designed for HTTP, TCP, UDP, gRPC
+      - Vendor Neutral: Standard API across implementations
+
+      Cilium implementation chosen:
+      - Native Integration: Built into Cilium CNI
+      - eBPF Performance: Kernel-level packet processing
+      - No External Controller: Embedded in Cilium agent
+
+      Dual Gateway security architecture:
+      - Public Gateway: Exposed services with Cloudflare DDoS protection
+      - Internal Gateway: Admin interfaces (ArgoCD, Longhorn) local-only access
+      - Explicit Hostnames: NO wildcards prevent Host header spoofing
+      - Defense in Depth: Multiple security layers
+
+      Security decision (ADR-001):
+      - Rejected wildcard hostnames due to Host header manipulation risk
+      - Each service requires explicit listener configuration
+      - Trade-off: More configuration vs. stronger security posture
+
+  certificate_management:
+    solution: "cert-manager"
+    version: "v1.18.2"
+    chart: "jetstack/cert-manager"
+
+    gateway_api_integration: true
+
+    issuers:
+      cloudflare_issuer:
+        type: "ClusterIssuer"
+        acme_challenge: "DNS-01"
+        provider: "Cloudflare"
+        credentials: "cloudflare-api-token Secret"
+
+    certificates:
+      - name: "lex-la-tls"
+        domains: ["*.lex.la", "lex.la"]
+        issuer: "cloudflare-issuer"
+      - name: "home-lex-la-tls"
+        domains: ["*.home.lex.la"]
+        issuer: "cloudflare-issuer"
+      - name: "k8s-home-lex-la-tls"
+        domains: ["*.k8s.home.lex.la"]
+        issuer: "cloudflare-issuer"
+      - name: "sviridk-in-tls"
+        domains: ["*.sviridk.in", "sviridk.in"]
+        issuer: "cloudflare-issuer"
+
+    dns_configuration:
+      nameservers: ["1.1.1.1", "8.8.8.8"]
+      recursive_nameservers: "8.8.8.8:53,1.1.1.1:53"
+      recursive_only: true
+      reasoning: "External nameservers required for DNS-01 challenge validation"
+
+    reasoning: |
+      cert-manager chosen for:
+      - Automatic Renewal: Certificates renewed 30 days before expiration
+      - Gateway API Integration: Certificates created from Gateway annotations
+      - ACME Support: Let's Encrypt DNS-01 challenge for wildcard certificates
+      - Kubernetes Native: CRD-based configuration, no external tools
+
+      DNS-01 challenge method:
+      - Wildcard Support: Required for *.lex.la certificates
+      - Private Network: Works without public HTTP endpoint
+      - Cloudflare Integration: API-based DNS record creation
+
+      External DNS configuration:
+      - Bypass cluster DNS: Prevents chicken-egg problem during challenge
+      - Direct resolution: Uses public DNS (1.1.1.1, 8.8.8.8) for validation
+
+      Gateway API integration workflow:
+      1. Gateway created with cert-manager.io/cluster-issuer annotation
+      2. cert-manager watches Gateway resources
+      3. Certificate automatically created for each HTTPS listener
+      4. TLS Secret referenced in Gateway listener configuration
+
+  dns_management:
+    internal_dns:
+      solution: "CoreDNS"
+      version: "latest"
+      chart: "coredns/coredns"
+      cluster_ip: "10.43.0.10"
+
+      configuration:
+        zones: ["."]
+        kubernetes_plugin:
+          zones: ["k8s.home.lex.la", "in-addr.arpa", "ip6.arpa"]
+          pods: "insecure"
+          fallthrough: true
+          ttl: 30
+
+        forward_plugin:
+          upstream: "/etc/resolv.conf"
+
+        cache_ttl: 30
+
+      reasoning: |
+        Custom CoreDNS deployment:
+        - Configuration Control: K3s default CoreDNS lacks customization
+        - Custom Zones: Support for custom cluster domain (k8s.home.lex.la)
+        - Performance Tuning: Custom cache TTL and forwarding
+        - Integration: Works with kube-vip and Cilium networking
+
+    external_dns:
+      solution: "external-dns"
+      version: "1.19.0"
+      chart: "kubernetes-sigs/external-dns"
+
+      configuration:
+        provider: "cloudflare"
+        policy: "sync"
+        sources: ["service", "gateway-httproute"]
+        credentials: "cloudflare-api-token Secret"
+
+      gateway_integration:
+        public_gateway:
+          annotation: "external-dns.alpha.kubernetes.io/target: 217.78.182.161"
+          cloudflare_proxied: true
+          note: "cloudflare-proxied annotation doesn't work on Gateway API (only Ingress)"
+
+        internal_gateway:
+          annotation: "external-dns.alpha.kubernetes.io/target: 172.16.100.250"
+          cloudflare_proxied: false
+
+      reasoning: |
+        external-dns chosen for:
+        - Automatic DNS Records: Creates/updates Cloudflare DNS from Kubernetes resources
+        - Gateway API Support: Reads HTTPRoute resources for routing configuration
+        - Sync Policy: Deletes DNS records when resources removed
+        - GitOps Compatible: Declarative DNS management via Kubernetes manifests
+
+        Known limitation (ADR-002):
+        - cloudflare-proxied annotation only works on Ingress resources
+        - Gateway API does not support cloudflare-proxied annotation
+        - Workaround: Manually manage Cloudflare proxy status in dashboard
+        - Public gateway requires manual "orange cloud" (proxied) configuration
+        - Internal gateway requires manual "grey cloud" (DNS-only) configuration
+
+  storage:
+    solution: "Longhorn"
+    version: "1.10.0"
+    chart: "longhorn/longhorn"
+
+    configuration:
+      default_replica_count: 1
+      default_class: false
+      resource_optimization: "Replicas reduced to 1 for ARM64 resource constraints"
+
+      components:
+        ui_replicas: 1
+        conversion_webhook_replicas: 1
+        admission_webhook_replicas: 1
+        recovery_backend_replicas: 1
+        csi_attacher_replicas: 1
+        csi_provisioner_replicas: 1
+        csi_resizer_replicas: 1
+        csi_snapshotter_replicas: 1
+
+    reasoning: |
+      Longhorn chosen for:
+      - Distributed Storage: Persistent volumes across multiple nodes
+      - ARM64 Support: Native ARM64 container images
+      - Kubernetes Native: CSI driver integration
+      - Snapshot Support: Volume snapshots and backups
+      - Web UI: Management interface at longhorn.k8s.home.lex.la
+
+      Production trade-offs:
+      - Single replica: NOT recommended for production data
+      - Resource constraint decision: ARM64 nodes have limited resources
+      - Suitable for: Home lab, development, non-critical workloads
+      - Alternative for production: NFS, Rook-Ceph with higher resource allocation
+
+  gitops:
+    platform: "ArgoCD"
+    version: "latest"
+    chart: "argo/argo-cd"
+    domain: "argocd.lex.la"
+
+    pattern: "App-of-Apps"
+    root_application: "argocd/meta/meta.yaml"
+
+    configuration:
+      server_insecure: true
+      reasoning: "Gateway terminates TLS, ArgoCD receives plain HTTP"
+
+      resource_tracking: "annotation"
+
+      custom_health_checks:
+        - "Crossplane resources (*.crossplane.io/*)"
+        - "Upbound resources (*.upbound.io/*)"
+
+      resource_exclusions:
+        - "ProviderConfigUsage"
+
+    sync_policy:
+      automated: true
+      self_heal: true
+      prune: true
+      reasoning: "Fully automated GitOps - Git is single source of truth"
+
+    projects:
+      - name: "meta"
+        purpose: "ArgoCD self-management and projects"
+        applications: ["meta", "projects"]
+
+      - name: "infra"
+        purpose: "Infrastructure components"
+        applications: ["argocd", "cilium", "kube-vip", "coredns", "longhorn", "cert-manager", "external-dns", "gateway-api-crds", "csi-driver-nfs", "tor-controller"]
+
+      - name: "monitoring"
+        purpose: "Monitoring and observability"
+        applications: ["metrics-server", "node-exporter", "grafana-operator"]
+
+      - name: "workloads"
+        purpose: "User applications"
+        applications: ["transmission", "estimator", "job-countdown", "minecraft", "me-site"]
+
+      - name: "smarthome"
+        purpose: "Smart home applications"
+        applications: []
+
+      - name: "default"
+        purpose: "Default namespace applications"
+        applications: []
+
+    workflow:
+      bootstrap: |
+        1. Install K3s on master nodes with control plane HA
+        2. Install core components via Helm: CoreDNS, Cilium, kube-vip, ArgoCD
+        3. Apply Cilium manifests: IP pools, L2 announcements, Gateways
+        4. Deploy meta application: kubectl apply -f argocd/meta/meta.yaml
+        5. ArgoCD automatically deploys all other applications from Git
+
+      adding_application: |
+        1. Create manifests in manifests/NEW_APP/
+        2. Create ArgoCD Application in argocd/CATEGORY/NEW_APP.yaml
+        3. For public services: Create HTTPRoute referencing cilium-gateway
+        4. For internal services: Create HTTPRoute referencing cilium-gateway-internal
+        5. Add explicit hostname listener to appropriate Gateway
+        6. Add namespace to ReferenceGrant in manifests/cilium/reference-grant.yaml
+        7. Commit and push - ArgoCD auto-deploys
+
+      disabling_application: |
+        1. Move ArgoCD Application from argocd/CATEGORY/ to argocd-disabled/
+        2. Commit and push - ArgoCD auto-prunes resources
+
+    reasoning: |
+      ArgoCD chosen for:
+      - GitOps Platform: Industry standard for Kubernetes GitOps
+      - Declarative: All configuration in Git, no manual kubectl apply
+      - App-of-Apps Pattern: Single meta application manages all other apps
+      - Self-Healing: Automatically corrects drift from Git state
+      - Multi-Source: Combines Helm charts with custom manifests
+      - RBAC: Project-based access control
+      - Web UI: Visual application management
+
+      Server insecure mode (ADR-003):
+      - Gateway API terminates TLS at cilium-gateway-internal
+      - ArgoCD server receives plain HTTP traffic
+      - TLS encryption handled by Gateway, not ArgoCD
+      - Simplifies certificate management (cert-manager + Gateway)
+
+infrastructure:
+  monitoring:
+    components:
+      metrics_server:
+        version: "3.13.0"
+        chart: "kubernetes-sigs/metrics-server"
+        purpose: "Kubernetes metrics API for HPA and kubectl top"
+
+      node_exporter:
+        purpose: "Node-level metrics collection"
+        disabled: true
+        location: "argocd-disabled/"
+
+      grafana_operator:
+        purpose: "Grafana instance management"
+        status: "enabled"
+
+    observability_decisions:
+      hubble: "Disabled to reduce resource consumption on ARM64"
+      full_stack: "Disabled (Loki, Grafana dashboards in argocd-disabled/)"
+      reasoning: "Minimal monitoring for resource-constrained environment"
+
+  security:
+    secrets_management:
+      solution: "Encrypted secrets in secrets/ directory"
+      likely_tool: "SOPS or sealed-secrets"
+      secrets:
+        - "cloudflare-api-token"
+        - "grafana-config"
+
+    git_security:
+      gpg_signing: "mandatory"
+      gpg_key: "F57F 85FC 7975 F22B BC3F 2504 9C17 3EB1 B531 AA1F"
+      no_gpg_sign_flag: "STRICTLY FORBIDDEN"
+
+    network_security:
+      gateway_model: "Dual gateway with explicit hostname enforcement"
+      wildcard_hostnames: "FORBIDDEN - prevents Host header manipulation"
+      internal_gateway_exposure: "FORBIDDEN - must remain local network only"
+
+    container_security:
+      base_images: "TBD - not specified in current config"
+      user: "TBD - not specified in current config"
+
+  ci_cd:
+    platform: "GitHub Actions"
+    repository: "https://github.com/lexfrei/k8s"
+
+    renovate:
+      enabled: true
+      config_file: ".github/renovate.json"
+
+      settings:
+        semantic_commits: true
+        automerge: true
+        dependency_dashboard: true
+        pin_versions: true
+
+        staging_periods:
+          major: "5 days"
+          minor: "3 days"
+
+        pr_limits:
+          hourly: 5
+          concurrent: 10
+
+        labels:
+          major: ["major"]
+          minor: ["minor"]
+          argocd: ["argocd"]
+          github_actions: ["github-actions"]
+
+        timezone: "Asia/Tbilisi"
+
+      reasoning: "Automated dependency updates with safety staging periods"
+
+directory_structure:
+  argocd:
+    purpose: "ArgoCD Application manifests"
+    organization:
+      meta: "ArgoCD self-management and project definitions"
+      infra: "Infrastructure components (networking, storage, ingress)"
+      monitoring: "Monitoring stack components"
+      workloads: "User applications and services"
+      smarthome: "Smart home related applications"
+      default: "Default namespace applications"
+
+    pattern: "Each Application references Helm chart or manifests/ directory"
+    file_naming: "CATEGORY/APPLICATION_NAME.yaml"
+
+  argocd-disabled:
+    purpose: "Disabled or experimental applications"
+    contents: ["cloudflared", "crossplane", "dashboard", "grafana", "kyverno", "loki-stack", "node-exporter", "plex", "system-upgrade-controller", "trivy-operator"]
+    reasoning: "Keep configurations for future re-enablement"
+
+  manifests:
+    purpose: "Raw Kubernetes YAML manifests"
+    organization: "One subdirectory per application"
+    applications: ["argocd", "cert-manager", "cilium", "csi-driver-nfs", "estimator", "grafana-operator", "job-countdown", "kubernetes-dashboard", "longhorn", "node-exporter", "papermc", "system-upgrade-controller", "transmission"]
+
+    special_directories:
+      cilium:
+        purpose: "Cilium networking configuration"
+        contents:
+          - "*.yaml - CiliumLoadBalancerIPPool definitions"
+          - "gateway.yaml - Public Gateway configuration"
+          - "internal-gateway.yaml - Internal Gateway configuration"
+          - "l2-announcement.yaml - L2 announcement policy"
+          - "http-redirect.yaml - HTTP to HTTPS redirect"
+          - "reference-grant.yaml - Cross-namespace Gateway access"
+
+  values:
+    purpose: "Helm chart values for core components"
+    files:
+      - "argocd.yaml - ArgoCD configuration"
+      - "cilium.yaml - Cilium CNI configuration"
+      - "coredns.yaml - CoreDNS configuration"
+      - "kube-vip.yaml - kube-vip HA configuration"
+
+  secrets:
+    purpose: "Encrypted secrets"
+    encryption: "SOPS or similar"
+    contents: ["cloudflare credentials", "grafana config"]
+
+  tools:
+    purpose: "Helper scripts and tools"
+
+  github:
+    purpose: "GitHub Actions workflows and configuration"
+    contents:
+      - "renovate.json - Renovate bot configuration"
+      - "workflows/ - CI/CD pipelines"
+
+conventions:
+  naming:
+    applications: "lowercase-with-hyphens"
+    namespaces: "application-name-system or application-name"
+    resources: "kebab-case"
+
+  yaml_formatting:
+    indentation: 2
+    quotes: "double quotes"
+    line_length: "no strict limit"
+
+  argocd_applications:
+    sync_policy: "automated with selfHeal and prune"
+    finalizers: "resources-finalizer.argocd.argoproj.io"
+    namespace_creation: "CreateNamespace=true in syncOptions"
+
+  helm_values:
+    inline: "valuesObject in ArgoCD Application"
+    external: "values/ directory for core components"
+
+  commit_messages:
+    format: "semantic commits (feat, fix, chore, docs, etc.)"
+    attribution: "Co-Authored-By: Claude <noreply@anthropic.com>"
+    gpg_signing: "mandatory"
+    no_claude_code_link: "Do NOT include 'Generated with Claude Code' link"
+
+deployment_procedures:
+  cluster_bootstrap:
+    prerequisites:
+      node_preparation:
+        - "Add cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 to /boot/cmdline.txt"
+        - "Set Storage=volatile in /etc/systemd/journald.conf"
+        - "Disable firewall: systemctl disable --now firewalld"
+        - "Disable swap: swapoff -a and comment swap in /etc/fstab"
+        - "Set unique hostname: hostnamectl hostname nodeXX"
+        - "Reboot system"
+
+      network_preparation:
+        - "Exclude Cilium L2 LB IPs from DHCP pool"
+        - "Configure port forwarding: 217.78.182.161 -> 172.16.100.251"
+        - "Update DNS domain references from lex.la to your domain"
+
+      management_machine:
+        - "Install Helm"
+        - "Configure kubectl"
+
+    steps:
+      step_1_k3s_first_master:
+        commands: |
+          sudo mkdir -p /etc/rancher/k3s
+          cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml
+          tls-san:
+            - 172.16.101.101
+            - <MASTER_NODE_IP>
+          EOF
+
+          curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest \
+            INSTALL_K3S_EXEC="--disable traefik,local-storage,servicelb,metrics-server,coredns,kube-proxy \
+            --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none --cluster-init" sh -
+
+          cat /etc/rancher/k3s/k3s.yaml  # Copy to ~/.kube/config, update server to 172.16.101.101
+          cat /var/lib/rancher/k3s/server/node-token  # Save for other nodes
+
+      step_2_k3s_additional_masters:
+        commands: |
+          sudo mkdir -p /etc/rancher/k3s
+          cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml
+          tls-san:
+            - 172.16.101.101
+            - <THIS_MASTER_IP>
+          EOF
+
+          curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest \
+            K3S_TOKEN=<TOKEN_FROM_FIRST_MASTER> \
+            INSTALL_K3S_EXEC="server --server https://172.16.101.101:6443 \
+            --disable traefik,local-storage,servicelb,metrics-server,kube-proxy \
+            --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none" sh -
+
+      step_3_core_components:
+        commands: |
+          helm repo add coredns https://coredns.github.io/helm
+          helm repo add cilium https://helm.cilium.io/
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo add kube-vip https://kube-vip.github.io/helm-charts
+          helm repo update
+
+          helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
+          helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
+          helm install kube-vip kube-vip/kube-vip --namespace kube-system --values values/kube-vip.yaml
+          helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
+
+      step_4_cilium_config:
+        commands: |
+          kubectl apply --filename manifests/cilium/
+          kubectl wait --namespace kube-system --for=condition=ready pod \
+            --selector app.kubernetes.io/name=kube-vip --timeout=60s
+
+      step_5_workers:
+        commands: |
+          curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest \
+            K3S_URL='https://172.16.101.101:6443' \
+            K3S_TOKEN=<TOKEN_FROM_MASTER> \
+            INSTALL_K3S_EXEC="--disable kube-proxy" sh -
+
+      step_6_gitops:
+        commands: |
+          kubectl apply --filename argocd/meta/meta.yaml
+
+        result: "ArgoCD meta application deploys all other applications automatically"
+
+  adding_new_application:
+    public_service:
+      steps:
+        - "Create manifests in manifests/NEW_APP/"
+        - "Create ArgoCD Application in argocd/workloads/NEW_APP.yaml"
+        - "Add explicit HTTPS listener to manifests/cilium/gateway.yaml"
+        - "Create HTTPRoute referencing cilium-gateway with correct sectionName"
+        - "Add namespace to manifests/cilium/reference-grant.yaml"
+        - "Commit and push to Git"
+        - "ArgoCD automatically syncs and deploys"
+        - "Manually enable Cloudflare proxy (orange cloud) in Cloudflare dashboard"
+
+    internal_service:
+      steps:
+        - "Create manifests in manifests/NEW_APP/"
+        - "Create ArgoCD Application in argocd/infra/NEW_APP.yaml or argocd/workloads/NEW_APP.yaml"
+        - "Add explicit HTTPS listener to manifests/cilium/internal-gateway.yaml"
+        - "Create HTTPRoute referencing cilium-gateway-internal with correct sectionName"
+        - "Add namespace to manifests/cilium/reference-grant.yaml"
+        - "Commit and push to Git"
+        - "ArgoCD automatically syncs and deploys"
+        - "Verify Cloudflare DNS is DNS-only (grey cloud)"
+
+  testing_changes:
+    validation_commands:
+      - "kubectl apply --dry-run=client --filename manifests/APP_NAME/"
+      - "kubectl apply --dry-run=client --filename argocd/CATEGORY/APP_NAME.yaml"
+      - "helm template TEST_NAME CHART_NAME --values values/COMPONENT.yaml"
+
+    argocd_check:
+      - "kubectl get applications --namespace argocd"
+      - "kubectl describe application APP_NAME --namespace argocd"
+
+environment_variables:
+  CF_API_TOKEN:
+    description: "Cloudflare API token for external-dns and cert-manager"
+    stored_in: "cloudflare-api-token Secret"
+    namespace: "kube-system"
+
+decisions:
+  - id: ADR-001
+    date: 2025-10-05
+    status: accepted
+    decision: "Use explicit hostname-only listeners in Gateway API (NO wildcards)"
+    reasoning: |
+      Wildcard hostnames (*.lex.la) allow Host header manipulation attacks where
+      attackers can access any service by sending arbitrary Host headers. Explicit
+      hostname enforcement prevents this by validating each hostname at Gateway level.
+    alternatives:
+      - "Wildcard hostnames: Rejected due to security risk of Host header manipulation"
+      - "Single listener with multiple hostnames: Rejected for granular control per service"
+    impact: |
+      All services (gopher-builder, docker-smith):
+      - Each new service requires explicit listener addition to Gateway
+      - More configuration overhead vs. wildcard convenience
+      - Stronger security posture for production environment
+
+  - id: ADR-002
+    date: 2025-10-05
+    status: accepted
+    decision: "Manually manage Cloudflare proxy status (cloudflare-proxied annotation doesn't work on Gateway API)"
+    reasoning: |
+      external-dns supports cloudflare-proxied annotation ONLY on Ingress resources,
+      not on Gateway API resources. Gateway API is newer and external-dns integration
+      doesn't yet support proxy control. Manual management is only current option.
+    alternatives:
+      - "Use Ingress instead of Gateway API: Rejected - Gateway API is future, better features"
+      - "Wait for external-dns support: Rejected - timeline uncertain, need working solution now"
+      - "Custom controller: Rejected - maintenance burden too high"
+    impact: |
+      Operations team:
+      - After deploying new public Gateway HTTPRoute, manually enable Cloudflare proxy in dashboard
+      - After deploying new internal Gateway HTTPRoute, verify DNS-only mode in dashboard
+      - Additional manual step in deployment workflow
+      - Risk of forgetting to set proxy status correctly
+    workaround: |
+      1. Deploy Gateway/HTTPRoute with external-dns annotations
+      2. external-dns creates DNS record in Cloudflare
+      3. Manually log into Cloudflare dashboard
+      4. Set proxy status: orange cloud (proxied) for public, grey cloud (DNS-only) for internal
+
+  - id: ADR-003
+    date: 2025-10-05
+    status: accepted
+    decision: "Run ArgoCD in insecure mode (server.insecure: true) with TLS termination at Gateway"
+    reasoning: |
+      Gateway API terminates TLS at cilium-gateway-internal and forwards plain HTTP
+      to ArgoCD server. ArgoCD doesn't need to handle TLS when behind reverse proxy.
+      Simplifies certificate management - cert-manager manages Gateway certificates only.
+    alternatives:
+      - "ArgoCD handles TLS: Rejected - duplicate certificate management, more complexity"
+      - "End-to-end TLS: Rejected - unnecessary overhead for internal traffic behind Gateway"
+    impact: |
+      - ArgoCD server receives plain HTTP from Gateway
+      - TLS encryption only between client and Gateway (sufficient for internal network)
+      - Simpler certificate management workflow
+      - Standard pattern for services behind reverse proxy
+
+  - id: ADR-004
+    date: 2025-10-05
+    status: accepted
+    decision: "Disable Cilium Hubble to conserve resources on ARM64 nodes"
+    reasoning: |
+      Hubble provides network observability and flow visualization but consumes
+      significant memory and CPU. ARM64 Raspberry Pi nodes are resource-constrained.
+      Trade-off network visibility for better application performance.
+    alternatives:
+      - "Enable Hubble: Rejected - resource consumption too high for ARM64"
+      - "Hubble Relay only: Rejected - still requires agent-side overhead"
+    impact: |
+      - No network flow visualization
+      - No Hubble UI for troubleshooting
+      - Reduced memory/CPU usage on each node
+      - Must use traditional debugging methods (tcpdump, logs)
+
+  - id: ADR-005
+    date: 2025-10-05
+    status: accepted
+    decision: "Use Cilium tunnel mode (VXLAN) instead of native routing"
+    reasoning: |
+      VXLAN encapsulation provides better network reliability across complex network
+      topologies. Works in environments where native routing would require BGP setup
+      or direct routing table manipulation on network infrastructure.
+    alternatives:
+      - "Native routing: Rejected - requires network infrastructure control for routing"
+      - "Geneve: Rejected - VXLAN has better compatibility with existing tools"
+    impact: |
+      - Slight performance overhead from encapsulation (~5%)
+      - Works in any network environment without infrastructure changes
+      - Simplified deployment - no router configuration required
+
+  - id: ADR-006
+    date: 2025-10-05
+    status: accepted
+    decision: "Use Longhorn with single replica for storage (NOT production safe)"
+    reasoning: |
+      ARM64 nodes have limited resources. Multi-replica Longhorn deployment would
+      consume too much disk space and network bandwidth. Single replica acceptable
+      for home lab and non-critical workloads.
+    alternatives:
+      - "Multi-replica Longhorn: Rejected - insufficient resources"
+      - "NFS external storage: Considered - requires external NFS server"
+      - "No persistent storage: Rejected - applications need stateful storage"
+    impact: |
+      - NO data redundancy - node failure = data loss
+      - Suitable for: development, testing, home lab
+      - NOT suitable for: production, critical data
+      - Users must implement external backups for important data
+
+  - id: ADR-007
+    date: 2025-10-05
+    status: accepted
+    decision: "kube-vip MUST be deployed before worker nodes join cluster"
+    reasoning: |
+      Cilium replaces kube-proxy, so kubernetes.default.svc doesn't work for API access.
+      Worker nodes need stable VIP (172.16.101.101) to join cluster. kube-vip must
+      provide this VIP before workers attempt to join.
+    alternatives:
+      - "Direct master IP: Rejected - loses HA benefit, workers tied to specific master"
+      - "External load balancer: Rejected - not available in bare metal home environment"
+    impact: |
+      Deployment sequence:
+      - Install K3s on master nodes
+      - Install CoreDNS, Cilium, kube-vip via Helm
+      - Wait for kube-vip VIP to be assigned (kubectl wait)
+      - THEN join worker nodes using VIP URL
+
+      If violated:
+      - Worker nodes fail to join (connection refused)
+      - Must manually reconfigure worker nodes after kube-vip deployment
+
+known_limitations:
+  cloudflare_proxied_annotation:
+    issue: "external-dns cloudflare-proxied annotation doesn't work on Gateway API"
+    affected_components: ["external-dns", "Gateway API"]
+    workaround: "Manually set Cloudflare proxy status in dashboard after DNS record creation"
+    tracking: "See ADR-002"
+
+  hubble_disabled:
+    issue: "No network flow visualization due to Hubble being disabled"
+    affected_components: ["Cilium"]
+    workaround: "Use traditional debugging: tcpdump, kubectl logs, Cilium CLI"
+    tracking: "See ADR-004"
+
+  single_replica_storage:
+    issue: "No storage redundancy - data loss on node failure"
+    affected_components: ["Longhorn"]
+    workaround: "External backups required for important data"
+    tracking: "See ADR-006"
+
+  arm64_resource_constraints:
+    issue: "Limited resources prevent full monitoring stack deployment"
+    affected_components: ["Grafana", "Loki", "Prometheus"]
+    status: "Components disabled in argocd-disabled/"
+    impact: "Minimal observability - only metrics-server active"
+
+  kube_vip_deployment_order:
+    issue: "Worker nodes cannot join before kube-vip deploys VIP"
+    affected_components: ["kube-vip", "K3s worker join"]
+    workaround: "Always deploy kube-vip and wait for VIP before joining workers"
+    tracking: "See ADR-007"
+
+security_practices:
+  git_workflow:
+    gpg_signing: "Mandatory for all commits"
+    gpg_key_id: "F57F 85FC 7975 F22B BC3F 2504 9C17 3EB1 B531 AA1F"
+    no_gpg_sign_forbidden: "NEVER use --no-gpg-sign flag"
+
+  secrets_management:
+    encryption: "All secrets encrypted in secrets/ directory"
+    tool: "Likely SOPS with GPG key"
+    secrets_in_git: "Only encrypted secrets committed to Git"
+
+  network_security:
+    gateway_hostnames: "Explicit only - NO wildcards"
+    internal_gateway_exposure: "MUST NOT be port-forwarded to internet"
+    cloudflare_protection: "Public gateway uses Cloudflare proxy for DDoS protection"
+
+  container_security:
+    note: "Not specified in current configuration - should be added in future"
+    recommendations:
+      - "Use distroless base images"
+      - "Run as non-root user"
+      - "Scan images with Trivy (currently disabled)"
+      - "Implement Pod Security Standards"
+
+notes:
+  - "This is a home lab / production home cluster, not enterprise production"
+  - "Resource optimization prioritized over redundancy due to ARM64 constraints"
+  - "Many monitoring components disabled to conserve resources"
+  - "Single replica Longhorn is acceptable for home use, NOT for critical data"
+  - "Manual Cloudflare proxy management is temporary workaround until external-dns supports Gateway API"
+  - "All domain references use lex.la - must be updated for different deployments"
+  - "Public IP 217.78.182.161 is specific to this deployment"
+
+future_improvements:
+  - "Automate Cloudflare proxy status management when external-dns adds Gateway API support"
+  - "Document container security standards (base images, non-root user)"
+  - "Add Pod Security Standards enforcement"
+  - "Consider resource upgrades to enable full monitoring stack"
+  - "Implement automated backup solution for Longhorn volumes"
+  - "Add network policies for micro-segmentation"
+  - "Enable Hubble when resources allow for better observability"
