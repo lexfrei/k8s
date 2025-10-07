@@ -29,18 +29,3 @@ spec:
                     secretKeyRef:
                       key: GF_SECURITY_ADMIN_PASSWORD
                       name: grafana-credentials
-  ingress:
-    metadata:
-      annotations: {}
-    spec:
-      rules:
-        - host: grafana.lex.la
-          http:
-            paths:
-              - backend:
-                  service:
-                    name: grafana-service
-                    port:
-                      number: 3000
-                path: /
-                pathType: Prefix
