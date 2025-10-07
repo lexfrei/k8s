@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: monitoring
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://grafana.github.io/helm-charts"
+    targetRevision: "v5.19.4"
+    chart: grafana-operator
+    helm:
+      valuesObject:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        rbac:
+          create: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
