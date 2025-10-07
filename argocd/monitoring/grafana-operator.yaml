@@ -10,21 +10,24 @@ spec:
   destination:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://grafana.github.io/helm-charts"
-    targetRevision: "v5.19.4"
-    chart: grafana-operator
-    helm:
-      valuesObject:
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
-        rbac:
-          create: true
+  sources:
+    - repoURL: "https://grafana.github.io/helm-charts"
+      targetRevision: "v5.19.4"
+      chart: grafana-operator
+      helm:
+        valuesObject:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          rbac:
+            create: true
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/grafana-operator
   syncPolicy:
     automated:
       prune: true
