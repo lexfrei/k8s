@@ -7,7 +7,7 @@ spec:
   parentRefs:
     - name: cilium-gateway-internal
       namespace: kube-system
-      sectionName: https-transmission-home-lex-la
+      sectionName: https-home-lex-la
   hostnames:
     - transmission.home.lex.la
   rules:
