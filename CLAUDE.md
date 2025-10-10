@@ -34,7 +34,7 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
   - Referenced by ArgoCD Applications for deployment
 
 - **`values/`** - Helm chart values files for infrastructure components
-  - `argocd.yaml` - ArgoCD configuration including Crossplane health checks and server.insecure for Gateway TLS termination
+  - `argocd.yaml` - ArgoCD configuration including Crossplane health checks, server.insecure for Gateway TLS termination, and HTTPRoute configuration
   - `coredns.yaml` - CoreDNS configuration
   - `cilium.yaml` - Cilium CNI configuration (tunnel mode VXLAN, kube-proxy replacement, L2 announcements, Gateway API, Hubble disabled)
   - `kube-vip.yaml` - kube-vip configuration for control plane HA with VIP
@@ -221,8 +221,9 @@ Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar
 ### Modifying Infrastructure Components
 
 1. Update Helm values in `values/COMPONENT.yaml`
-2. Commit changes
-3. ArgoCD will detect and sync changes automatically (selfHeal: true)
+2. For components with HTTPRoute support (e.g., ArgoCD), use built-in Helm chart configuration instead of manual manifests
+3. Commit changes
+4. ArgoCD will detect and sync changes automatically (selfHeal: true)
 
 ### Disabling Applications
 
@@ -244,6 +245,7 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - kube-vip MUST be deployed before worker nodes join (they need VIP for API access)
 - Cilium k8sServiceHost MUST point to kube-vip VIP (cannot be empty due to kube-proxy replacement)
 - ArgoCD server.insecure MUST be true when behind Gateway with TLS termination
+- ArgoCD HTTPRoute is managed via Helm chart values (server.httproute section), not manual manifests
 
 ## Renovate Configuration
 
