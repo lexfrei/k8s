@@ -5,8 +5,8 @@ metadata:
   namespace: kube-system
   annotations:
     cert-manager.io/cluster-issuer: "cloudflare-issuer"
-    external-dns.alpha.kubernetes.io/target: "217.78.182.161"
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    # external-dns.alpha.kubernetes.io/target: "217.78.182.161"
+    # external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   gatewayClassName: cilium
   addresses:
