@@ -29,6 +29,10 @@ spec:
         vmauth:
           enabled: false
         # VictoriaMetrics components
+        vmagent:
+          spec:
+            remoteWrite:
+              - url: http://vmsingle-victoria-metrics-k8s-stack.monitoring.svc:8428/api/v1/write
         vmsingle:
           resources:
             requests:
