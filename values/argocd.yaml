@@ -1,5 +1,5 @@
 global:
-  domain: argocd.lex.la
+  domain: argocd.home.lex.la
 configs:
   params:
     server.insecure: true
@@ -147,10 +147,20 @@ configs:
 server:
   ingress:
     enabled: false
-    hostname: argocd.lex.la
-    annotations:
-      external-dns.alpha.kubernetes.io/target: "217.78.182.161"
-      external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+  httproute:
+    enabled: true
+    annotations: {}
+    parentRefs:
+      - name: cilium-gateway-internal
+        namespace: kube-system
+        sectionName: https-home-lex-la
+    hostnames:
+      - argocd.home.lex.la
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
   # extensions:
   #   enabled: true
   #   extensionList:
