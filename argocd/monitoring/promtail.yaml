@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: promtail
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: monitoring
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://grafana.github.io/helm-charts"
+    targetRevision: "6.17.0"
+    chart: promtail
+    helm:
+      valuesObject:
+        config:
+          clients:
+            - url: http://loki:3100/loki/api/v1/push
+          snippets:
+            extraScrapeConfigs: |
+              # Systemd journal logs
+              - job_name: journal
+                journal:
+                  path: /run/log/journal
+                  max_age: 24h
+                  labels:
+                    job: systemd-journal
+                relabel_configs:
+                  - source_labels: ['__journal__systemd_unit']
+                    target_label: 'unit'
+                  - source_labels: ['__journal__hostname']
+                    target_label: 'hostname'
+                  # Filter out noisy systemd units
+                  - source_labels: ['__journal__systemd_unit']
+                    action: drop
+                    regex: '(systemd-timesyncd|systemd-resolved|systemd-udevd|systemd-networkd|NetworkManager|polkit-agent-helper-1)\.service'
+        # Security context to read journal
+        securityContext:
+          privileged: true
+        # Mount journal directory
+        extraVolumes:
+          - name: journal
+            hostPath:
+              path: /run/log/journal
+        extraVolumeMounts:
+          - name: journal
+            mountPath: /run/log/journal
+            readOnly: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

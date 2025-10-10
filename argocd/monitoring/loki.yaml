@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: monitoring
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://grafana.github.io/helm-charts"
+    targetRevision: "6.42.0"
+    chart: loki
+    helm:
+      valuesObject:
+        deploymentMode: SingleBinary
+        loki:
+          auth_enabled: false
+          commonConfig:
+            replication_factor: 1
+          storage:
+            type: filesystem
+          schemaConfig:
+            configs:
+              - from: "2024-01-01"
+                store: tsdb
+                object_store: filesystem
+                schema: v13
+                index:
+                  prefix: loki_index_
+                  period: 24h
+          limits_config:
+            retention_period: 24h
+            split_queries_by_interval: 1h
+          compactor:
+            retention_enabled: true
+            retention_delete_delay: 1h
+            delete_request_cancel_period: 10m
+        singleBinary:
+          replicas: 1
+          persistence:
+            enabled: true
+            size: 10Gi
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+        # Disable components not needed in SingleBinary mode
+        read:
+          replicas: 0
+        backend:
+          replicas: 0
+        write:
+          replicas: 0
+        # Disable other components
+        gateway:
+          enabled: false
+        monitoring:
+          selfMonitoring:
+            enabled: false
+            grafanaAgent:
+              installOperator: false
+          lokiCanary:
+            enabled: false
+        test:
+          enabled: false
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
