@@ -24,7 +24,7 @@ spec:
               # Systemd journal logs
               - job_name: journal
                 journal:
-                  path: /run/log/journal
+                  path: /var/log/journal
                   max_age: 24h
                   labels:
                     job: systemd-journal
@@ -44,10 +44,10 @@ spec:
         extraVolumes:
           - name: journal
             hostPath:
-              path: /run/log/journal
+              path: /var/log/journal
         extraVolumeMounts:
           - name: journal
-            mountPath: /run/log/journal
+            mountPath: /var/log/journal
             readOnly: true
         resources:
           requests:
