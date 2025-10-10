@@ -31,16 +31,3 @@ spec:
         certificateRefs:
           - name: home-lex-la-tls
             kind: Secret
-
-    - name: https-k8s-home-lex-la
-      hostname: "*.k8s.home.lex.la"
-      protocol: HTTPS
-      port: 443
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: k8s-home-lex-la-tls
-            kind: Secret

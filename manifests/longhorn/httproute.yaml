@@ -10,7 +10,7 @@ spec:
       namespace: kube-system
       sectionName: https-home-lex-la
   hostnames:
-    - longhorn.k8s.home.lex.la
+    - longhorn.home.lex.la
   rules:
     - matches:
         - path:
