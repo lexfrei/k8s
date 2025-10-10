@@ -1,0 +1,20 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: vmagent
+  namespace: monitoring
+spec:
+  selectAllByDefault: true
+  scrapeInterval: 20s
+  remoteWrite:
+    - url: http://vmsingle.monitoring.svc:8428/api/v1/write
+  resources:
+    requests:
+      cpu: 50m
+      memory: 200Mi
+    limits:
+      cpu: 200m
+      memory: 500Mi
+  extraArgs:
+    promscrape.streamParse: "true"
+    promscrape.dropOriginalLabels: "true"
