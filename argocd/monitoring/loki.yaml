@@ -39,6 +39,7 @@ spec:
             retention_enabled: true
             retention_delete_delay: 1h
             delete_request_cancel_period: 10m
+            delete_request_store: filesystem
         singleBinary:
           replicas: 1
           persistence:
@@ -60,6 +61,10 @@ spec:
           replicas: 0
         # Disable other components
         gateway:
+          enabled: false
+        chunksCache:
+          enabled: false
+        resultsCache:
           enabled: false
         monitoring:
           selfMonitoring:
