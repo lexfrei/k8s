@@ -16,8 +16,6 @@ spec:
     chart: victoria-metrics-k8s-stack
     helm:
       valuesObject:
-        cluster:
-          dnsDomain: k8s.home.lex.la
         # Dependencies
         grafana:
           enabled: false
