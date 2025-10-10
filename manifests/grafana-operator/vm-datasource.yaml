@@ -10,5 +10,5 @@ spec:
     name: VictoriaMetrics
     type: prometheus
     access: proxy
-    url: "http://vmsingle.monitoring.svc:8428"
+    url: "http://vmsingle-vmsingle.monitoring.svc:8428"
     isDefault: true
