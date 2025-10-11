@@ -11,9 +11,9 @@ spec:
     namespace: system-upgrade
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: "https://github.com/rancher/system-upgrade-controller"
-    targetRevision: v0.16.3
-    path: "manifests"
+    repoURL: "https://github.com/lexfrei/k8s.git"
+    targetRevision: HEAD
+    path: manifests/system-upgrade-controller
   syncPolicy:
     automated:
       prune: true
