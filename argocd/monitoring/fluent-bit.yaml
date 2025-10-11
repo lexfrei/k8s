@@ -24,8 +24,6 @@ spec:
                 Daemon Off
                 Flush 1
                 Log_Level info
-                Parsers_File /fluent-bit/parsers/parsers.conf
-                Parsers_File /fluent-bit/etc/custom_parsers.conf
                 HTTP_Server On
                 HTTP_Listen 0.0.0.0
                 HTTP_Port 2020
@@ -68,21 +66,19 @@ spec:
             [OUTPUT]
                 Name loki
                 Match kube.*
-                Url http://loki.monitoring.svc:3100/loki/api/v1/push
-                Labels {job="fluent-bit"}
+                uri http://loki.monitoring.svc:3100
+                labels {job="fluent-bit"}
                 label_keys $kubernetes['namespace_name'],$kubernetes['pod_name'],$kubernetes['container_name']
                 remove_keys kubernetes,stream
                 line_format json
-                log_level info
 
             [OUTPUT]
                 Name loki
                 Match host.*
-                Url http://loki.monitoring.svc:3100/loki/api/v1/push
-                Labels {job="systemd-journal"}
+                uri http://loki.monitoring.svc:3100
+                labels {job="systemd-journal"}
                 label_keys SYSTEMD_UNIT
                 line_format json
-                log_level info
 
         resources:
           requests:
