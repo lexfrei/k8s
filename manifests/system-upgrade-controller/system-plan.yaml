@@ -59,7 +59,7 @@ spec:
   tolerations:
     - operator: Exists
   upgrade:
-    image: ubuntu:plucky
+    image: ubuntu:plucky-20251001
     command:
       - chroot
       - /host
@@ -92,7 +92,7 @@ spec:
   tolerations:
     - operator: Exists
   upgrade:
-    image: ubuntu:plucky
+    image: ubuntu:plucky-20251001
     command:
       - chroot
       - /host
