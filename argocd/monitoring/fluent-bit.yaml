@@ -66,7 +66,8 @@ spec:
             [OUTPUT]
                 Name loki
                 Match kube.*
-                uri http://loki.monitoring.svc:3100
+                host loki.monitoring.svc
+                port 3100
                 labels {job="fluent-bit"}
                 label_keys $kubernetes['namespace_name'],$kubernetes['pod_name'],$kubernetes['container_name']
                 remove_keys kubernetes,stream
@@ -75,7 +76,8 @@ spec:
             [OUTPUT]
                 Name loki
                 Match host.*
-                uri http://loki.monitoring.svc:3100
+                host loki.monitoring.svc
+                port 3100
                 labels {job="systemd-journal"}
                 line_format json
 
