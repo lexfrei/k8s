@@ -14,16 +14,18 @@ data:
         exclude_paths_glob_patterns:
           - "**/kube-system/coredns*"
 
-      journald:
-        type: journald
-        current_boot_only: true
-        data_dir: /vector-data-dir
-        exclude_units:
-          - systemd-timesyncd.service
-          - systemd-resolved.service
-          - systemd-udevd.service
-          - systemd-networkd.service
-          - NetworkManager.service
+      # journald source disabled - distroless image doesn't have journalctl
+      # TODO: Switch to debian-based image or use fluent-bit for journal logs
+      # journald:
+      #   type: journald
+      #   current_boot_only: true
+      #   data_dir: /vector-data-dir
+      #   exclude_units:
+      #     - systemd-timesyncd.service
+      #     - systemd-resolved.service
+      #     - systemd-udevd.service
+      #     - systemd-networkd.service
+      #     - NetworkManager.service
 
     transforms:
       k8s_metadata:
@@ -36,21 +38,12 @@ data:
           .container = .kubernetes.container_name
           .node = .kubernetes.pod_node_name
 
-      journal_metadata:
-        type: remap
-        inputs:
-          - journald
-        source: |
-          .job = "systemd-journal"
-          .unit = .SYSTEMD_UNIT
-          .hostname = .host
-
     sinks:
+      # Send Kubernetes logs to Loki
       loki:
         type: loki
         inputs:
           - k8s_metadata
-          - journal_metadata
         endpoint: http://loki.monitoring.svc:3100
         encoding:
           codec: json
@@ -60,9 +53,6 @@ data:
           pod: "{{ pod }}"
           container: "{{ container }}"
           node: "{{ node }}"
-          job: "{{ job }}"
-          unit: "{{ unit }}"
-          hostname: "{{ hostname }}"
         compression: snappy
         healthcheck:
           enabled: true
