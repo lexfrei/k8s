@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: system-upgrade
 
 resources:
-  - https://github.com/rancher/system-upgrade-controller/manifests?ref=v0.16.3
+  - github.com/rancher/system-upgrade-controller/manifests?ref=v0.16.3
 
 images:
   - name: rancher/system-upgrade-controller
