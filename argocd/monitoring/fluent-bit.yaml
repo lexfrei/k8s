@@ -68,7 +68,7 @@ spec:
                 Match kube.*
                 host loki.monitoring.svc
                 port 3100
-                labels {job="fluent-bit"}
+                labels job=fluent-bit
                 label_keys $kubernetes['namespace_name'],$kubernetes['pod_name'],$kubernetes['container_name']
                 remove_keys kubernetes,stream
                 line_format json
@@ -78,7 +78,7 @@ spec:
                 Match host.*
                 host loki.monitoring.svc
                 port 3100
-                labels {job="systemd-journal"}
+                labels job=systemd-journal
                 line_format json
 
         resources:
