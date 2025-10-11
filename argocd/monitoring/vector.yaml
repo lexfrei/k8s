@@ -76,13 +76,13 @@ spec:
                 codec: json
                 timestamp_format: rfc3339
               labels:
-                namespace: "{{ namespace }}"
-                pod: "{{ pod }}"
-                container: "{{ container }}"
-                node: "{{ node }}"
-                job: "{{ job }}"
-                unit: "{{ unit }}"
-                hostname: "{{ hostname }}"
+                namespace: "{{`{{ namespace }}`}}"
+                pod: "{{`{{ pod }}`}}"
+                container: "{{`{{ container }}`}}"
+                node: "{{`{{ node }}`}}"
+                job: "{{`{{ job }}`}}"
+                unit: "{{`{{ unit }}`}}"
+                hostname: "{{`{{ hostname }}`}}"
               compression: snappy
               healthcheck:
                 enabled: true
