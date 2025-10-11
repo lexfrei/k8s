@@ -11,15 +11,12 @@ spec:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: "https://grafana.github.io/helm-charts"
-    targetRevision: "2.6.0"
+    repoURL: "https://fluent.github.io/helm-charts"
+    targetRevision: "0.54.0"
     chart: fluent-bit
     helm:
       valuesObject:
-        loki:
-          serviceName: loki.monitoring.svc
-          servicePort: 3100
-          serviceScheme: http
+        kind: DaemonSet
 
         config:
           service: |
@@ -27,8 +24,8 @@ spec:
                 Daemon Off
                 Flush 1
                 Log_Level info
-                Parsers_File parsers.conf
-                Parsers_File custom_parsers.conf
+                Parsers_File /fluent-bit/parsers/parsers.conf
+                Parsers_File /fluent-bit/etc/custom_parsers.conf
                 HTTP_Server On
                 HTTP_Listen 0.0.0.0
                 HTTP_Port 2020
@@ -73,19 +70,19 @@ spec:
                 Match kube.*
                 Url http://loki.monitoring.svc:3100/loki/api/v1/push
                 Labels {job="fluent-bit"}
-                LabelKeys $kubernetes['namespace_name'],$kubernetes['pod_name'],$kubernetes['container_name']
-                RemoveKeys kubernetes,stream
-                LineFormat json
-                LogLevel info
+                label_keys $kubernetes['namespace_name'],$kubernetes['pod_name'],$kubernetes['container_name']
+                remove_keys kubernetes,stream
+                line_format json
+                log_level info
 
             [OUTPUT]
                 Name loki
                 Match host.*
                 Url http://loki.monitoring.svc:3100/loki/api/v1/push
                 Labels {job="systemd-journal"}
-                LabelKeys SYSTEMD_UNIT
-                LineFormat json
-                LogLevel info
+                label_keys SYSTEMD_UNIT
+                line_format json
+                log_level info
 
         resources:
           requests:
@@ -100,7 +97,6 @@ spec:
 
         podSecurityContext:
           runAsUser: 0
-          runAsGroup: 0
 
         securityContext:
           privileged: true
@@ -116,11 +112,14 @@ spec:
           - name: journal
             mountPath: /run/log/journal
             readOnly: true
+          - name: journalvar
+            mountPath: /var/log/journal
+            readOnly: true
           - name: systemd
             mountPath: /etc/machine-id
             readOnly: true
 
-        volumes:
+        daemonSetVolumes:
           - name: varlog
             hostPath:
               path: /var/log
@@ -130,6 +129,9 @@ spec:
           - name: journal
             hostPath:
               path: /run/log/journal
+          - name: journalvar
+            hostPath:
+              path: /var/log/journal
           - name: systemd
             hostPath:
               path: /etc/machine-id
