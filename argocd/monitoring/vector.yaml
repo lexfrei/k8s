@@ -28,50 +28,50 @@ spec:
           existingConfigMaps:
             - vector-config
 
-        # DaemonSet configuration
-        podSecurityContext:
-          runAsUser: 0
-          runAsGroup: 0
+          # DaemonSet configuration
+          podSecurityContext:
+            runAsUser: 0
+            runAsGroup: 0
 
-        securityContext:
-          privileged: true
+          securityContext:
+            privileged: true
 
-        # Volume mounts for log collection
-        extraVolumeMounts:
-          - name: var-log
-            mountPath: /var/log
-            readOnly: true
-          - name: var-lib
-            mountPath: /var/lib
-            readOnly: true
-          - name: journal
-            mountPath: /run/log/journal
-            readOnly: true
+          # Volume mounts for log collection
+          extraVolumeMounts:
+            - name: var-log
+              mountPath: /var/log
+              readOnly: true
+            - name: var-lib
+              mountPath: /var/lib
+              readOnly: true
+            - name: journal
+              mountPath: /run/log/journal
+              readOnly: true
 
-        extraVolumes:
-          - name: var-log
-            hostPath:
-              path: /var/log
-          - name: var-lib
-            hostPath:
-              path: /var/lib
-          - name: journal
-            hostPath:
-              path: /run/log/journal
+          extraVolumes:
+            - name: var-log
+              hostPath:
+                path: /var/log
+            - name: var-lib
+              hostPath:
+                path: /var/lib
+            - name: journal
+              hostPath:
+                path: /run/log/journal
 
-        # Resources
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
+          # Resources
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
 
-        # Tolerations to run on all nodes
-        tolerations:
-          - effect: NoSchedule
-            operator: Exists
+          # Tolerations to run on all nodes
+          tolerations:
+            - effect: NoSchedule
+              operator: Exists
 
   syncPolicy:
     automated:
