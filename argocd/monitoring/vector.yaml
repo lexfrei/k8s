@@ -39,28 +39,22 @@ spec:
           securityContext:
             privileged: true
 
-          # Volume mounts for log collection
+          # Volume mounts for journal logs
           extraVolumeMounts:
-            - name: var-log
-              mountPath: /var/log
-              readOnly: true
-            - name: var-lib
-              mountPath: /var/lib
-              readOnly: true
             - name: journal
               mountPath: /run/log/journal
               readOnly: true
+            - name: journal-persistent
+              mountPath: /var/log/journal
+              readOnly: true
 
           extraVolumes:
-            - name: var-log
-              hostPath:
-                path: /var/log
-            - name: var-lib
-              hostPath:
-                path: /var/lib
             - name: journal
               hostPath:
                 path: /run/log/journal
+            - name: journal-persistent
+              hostPath:
+                path: /var/log/journal
 
           # Resources
           resources:
