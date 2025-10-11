@@ -24,6 +24,9 @@ spec:
         valuesObject:
           role: Agent
 
+          # Data directory for Vector checkpoints
+          dataDir: /vector-data-dir
+
           # Use external ConfigMap for Vector config
           existingConfigMaps:
             - vector-config
