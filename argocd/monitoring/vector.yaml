@@ -1,0 +1,140 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vector
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: monitoring
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://helm.vector.dev"
+    targetRevision: "0.46.0"
+    chart: vector
+    helm:
+      valuesObject:
+        role: Agent
+
+        # Vector configuration
+        customConfig:
+          data_dir: /vector-data-dir
+
+          sources:
+            # Kubernetes container logs
+            kubernetes_logs:
+              type: kubernetes_logs
+              auto_partial_merge: true
+              exclude_paths_glob_patterns:
+                - "**/kube-system/coredns*"
+
+            # Systemd journal logs
+            journald:
+              type: journald
+              current_boot_only: true
+              data_dir: /vector-data-dir
+              exclude_units:
+                - systemd-timesyncd.service
+                - systemd-resolved.service
+                - systemd-udevd.service
+                - systemd-networkd.service
+                - NetworkManager.service
+
+          transforms:
+            # Add common labels for Kubernetes logs
+            k8s_metadata:
+              type: remap
+              inputs:
+                - kubernetes_logs
+              source: |
+                .namespace = .kubernetes.pod_namespace
+                .pod = .kubernetes.pod_name
+                .container = .kubernetes.container_name
+                .node = .kubernetes.pod_node_name
+
+            # Add labels for journal logs
+            journal_metadata:
+              type: remap
+              inputs:
+                - journald
+              source: |
+                .job = "systemd-journal"
+                .unit = .SYSTEMD_UNIT
+                .hostname = .host
+
+          sinks:
+            # Send all logs to Loki
+            loki:
+              type: loki
+              inputs:
+                - k8s_metadata
+                - journal_metadata
+              endpoint: http://loki.monitoring.svc:3100
+              encoding:
+                codec: json
+                timestamp_format: rfc3339
+              labels:
+                namespace: "{{ namespace }}"
+                pod: "{{ pod }}"
+                container: "{{ container }}"
+                node: "{{ node }}"
+                job: "{{ job }}"
+                unit: "{{ unit }}"
+                hostname: "{{ hostname }}"
+              compression: snappy
+              healthcheck:
+                enabled: true
+
+        # DaemonSet configuration
+        podSecurityContext:
+          runAsUser: 0
+          runAsGroup: 0
+
+        securityContext:
+          privileged: true
+
+        # Volume mounts for log collection
+        extraVolumeMounts:
+          - name: var-log
+            mountPath: /var/log
+            readOnly: true
+          - name: var-lib
+            mountPath: /var/lib
+            readOnly: true
+          - name: journal
+            mountPath: /run/log/journal
+            readOnly: true
+
+        extraVolumes:
+          - name: var-log
+            hostPath:
+              path: /var/log
+          - name: var-lib
+            hostPath:
+              path: /var/lib
+          - name: journal
+            hostPath:
+              path: /run/log/journal
+
+        # Resources
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+        # Tolerations to run on all nodes
+        tolerations:
+          - effect: NoSchedule
+            operator: Exists
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
