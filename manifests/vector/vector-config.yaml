@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector-config
+  namespace: monitoring
+data:
+  vector.yaml: |
+    data_dir: /vector-data-dir
+
+    sources:
+      kubernetes_logs:
+        type: kubernetes_logs
+        auto_partial_merge: true
+        exclude_paths_glob_patterns:
+          - "**/kube-system/coredns*"
+
+      journald:
+        type: journald
+        current_boot_only: true
+        data_dir: /vector-data-dir
+        exclude_units:
+          - systemd-timesyncd.service
+          - systemd-resolved.service
+          - systemd-udevd.service
+          - systemd-networkd.service
+          - NetworkManager.service
+
+    transforms:
+      k8s_metadata:
+        type: remap
+        inputs:
+          - kubernetes_logs
+        source: |
+          .namespace = .kubernetes.pod_namespace
+          .pod = .kubernetes.pod_name
+          .container = .kubernetes.container_name
+          .node = .kubernetes.pod_node_name
+
+      journal_metadata:
+        type: remap
+        inputs:
+          - journald
+        source: |
+          .job = "systemd-journal"
+          .unit = .SYSTEMD_UNIT
+          .hostname = .host
+
+    sinks:
+      loki:
+        type: loki
+        inputs:
+          - k8s_metadata
+          - journal_metadata
+        endpoint: http://loki.monitoring.svc:3100
+        encoding:
+          codec: json
+          timestamp_format: rfc3339
+        labels:
+          namespace: "{{ namespace }}"
+          pod: "{{ pod }}"
+          container: "{{ container }}"
+          node: "{{ node }}"
+          job: "{{ job }}"
+          unit: "{{ unit }}"
+          hostname: "{{ hostname }}"
+        compression: snappy
+        healthcheck:
+          enabled: true
