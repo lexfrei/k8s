@@ -31,6 +31,10 @@ spec:
           existingConfigMaps:
             - vector-config
 
+          # Disable Service creation for Agent role (no exposed ports)
+          service:
+            enabled: false
+
           # DaemonSet configuration
           podSecurityContext:
             runAsUser: 0
