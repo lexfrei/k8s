@@ -14,8 +14,6 @@ spec:
     repoURL: "https://github.com/rancher/system-upgrade-controller"
     targetRevision: v0.16.3
     path: "manifests"
-    directory:
-      include: "{clusterrole.yaml,clusterrolebinding.yaml,system-upgrade-controller.yaml}"
   syncPolicy:
     automated:
       prune: true
