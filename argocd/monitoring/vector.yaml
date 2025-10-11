@@ -31,6 +31,11 @@ spec:
           existingConfigMaps:
             - vector-config
 
+          # Use Debian-based image for journalctl support
+          image:
+            repository: timberio/vector
+            tag: 0.50.0-debian
+
           # DaemonSet configuration
           podSecurityContext:
             runAsUser: 0
