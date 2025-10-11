@@ -11,6 +11,7 @@ data:
       kubernetes_logs:
         type: kubernetes_logs
         auto_partial_merge: true
+        read_from: "end"  # Only read new logs, skip old ones
         exclude_paths_glob_patterns:
           - "**/kube-system/coredns*"
 
