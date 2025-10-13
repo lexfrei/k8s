@@ -11,7 +11,7 @@ spec:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: "git@github.com:prometheus-operator/prometheus-operator.git"
+    repoURL: "https://github.com/prometheus-operator/prometheus-operator.git"
     targetRevision: v0.86.0
     path: example/prometheus-operator-crd-full
   syncPolicy:
