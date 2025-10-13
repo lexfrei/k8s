@@ -1,9 +1,0 @@
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDashboard
-metadata:
-  name: node-exporter-dashboard
-spec:
-  instanceSelector:
-    matchLabels:
-      dashboards: "grafana"
-  url: "https://grafana.com/api/dashboards/1860/revisions/37/download"
