@@ -14,6 +14,13 @@ spec:
     - repoURL: "https://kubernetes-sigs.github.io/metrics-server/"
       targetRevision: "3.13.0"
       chart: metrics-server
+      helm:
+        valuesObject:
+          metrics:
+            enabled: true
+
+          serviceMonitor:
+            enabled: true
   syncPolicy:
     automated:
       prune: true
