@@ -40,6 +40,9 @@ spec:
             provisionerReplicaCount: 1
             resizerReplicaCount: 1
             snapshotterReplicaCount: 1
+          metrics:
+            serviceMonitor:
+              enabled: true
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/longhorn
