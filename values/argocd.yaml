@@ -171,9 +171,9 @@ server:
     hostnames:
       - argocd.home.lex.la
     rules:
-      - matches:
-          - method:
-              type: Exact
+      - backendRefs:
+          - name: argocd-server
+            port: 8080
   # extensions:
   #   enabled: true
   #   extensionList:
