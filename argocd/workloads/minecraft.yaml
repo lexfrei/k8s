@@ -11,9 +11,91 @@ spec:
     namespace: paper
     server: "https://kubernetes.default.svc"
   sources:
-    - path: manifests/papermc
-      repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
+    - repoURL: oci://ghcr.io/lexfrei/papermc
+      chart: papermc
+      targetRevision: 0.1.0
+      helm:
+        values: |
+          fullnameOverride: "papermc"
+
+          podLabels:
+            app: papermc
+            type: paper
+
+          image:
+            repository: lexfrei/papermc
+            pullPolicy: Always
+
+          ports:
+            minecraft:
+              tcp: 25565
+              udp: 25565
+            extra:
+              - name: dynmap
+                port: 8123
+                protocol: TCP
+
+          service:
+            type: LoadBalancer
+            annotations:
+              io.cilium/lb-ipam-ips: "172.16.100.253"
+
+          httpRoute:
+            enabled: true
+            spec:
+              parentRefs:
+                - name: cilium-gateway
+                  namespace: kube-system
+                  sectionName: https-map-lex-la
+              hostnames:
+                - map.lex.la
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: /
+                  backendRefs:
+                    - name: papermc
+                      port: 8123
+
+          persistence:
+            enabled: true
+            storageClassName: longhorn
+            size: 40Gi
+
+          resources:
+            requests:
+              memory: "6Gi"
+              cpu: "2000m"
+            limits:
+              memory: "6Gi"
+
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: In
+                        values:
+                          - mc
+
+          livenessProbe:
+            enabled: true
+            tcpSocket:
+              port: minecraft-tcp
+            initialDelaySeconds: 60
+            periodSeconds: 15
+
+          readinessProbe:
+            enabled: true
+            tcpSocket:
+              port: minecraft-tcp
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          updateStrategy:
+            type: RollingUpdate
   syncPolicy:
     automated:
       prune: true
