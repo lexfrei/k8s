@@ -145,7 +145,8 @@ configs:
 
           return health_status
 server:
-  servicePortHttpsAppProtocol: kubernetes.io/h2c  # Enable HTTP/2 for gRPC
+  service:
+    servicePortHttpsAppProtocol: kubernetes.io/h2c  # Enable HTTP/2 for gRPC
   ingress:
     enabled: false
   httproute:
@@ -175,6 +176,9 @@ server:
       - matches:
           - method:
               service: cluster.ClusterService
+        backendRefs:
+          - name: argocd-server
+            port: 443
   # extensions:
   #   enabled: true
   #   extensionList:
