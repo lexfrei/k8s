@@ -6,6 +6,9 @@ metadata:
 spec:
   from:
     - group: gateway.networking.k8s.io
+      kind: GRPCRoute
+      namespace: argocd
+    - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: argocd
     - group: gateway.networking.k8s.io
