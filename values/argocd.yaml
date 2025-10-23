@@ -171,7 +171,7 @@ server:
     hostnames:
       - argocd.home.lex.la
     rules:
-      - {}
+      - matches: []
   # extensions:
   #   enabled: true
   #   extensionList:
