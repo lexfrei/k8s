@@ -153,7 +153,7 @@ server:
     parentRefs:
       - name: cilium-gateway-internal
         namespace: kube-system
-        sectionName: https-argocd-home-lex-la
+        sectionName: https-home-lex-la
     hostnames:
       - argocd.home.lex.la
     rules:
