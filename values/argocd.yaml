@@ -145,6 +145,11 @@ configs:
 
           return health_status
 server:
+  service:
+    type: LoadBalancer
+    annotations:
+      io.cilium/lb-ipam-ips: "172.16.100.254"
+      external-dns.alpha.kubernetes.io/hostname: "api.argocd.home.lex.la"
   ingress:
     enabled: false
   httproute:
