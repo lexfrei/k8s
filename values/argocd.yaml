@@ -161,22 +161,6 @@ server:
           - path:
               type: PathPrefix
               value: /
-  grpcroute:
-    enabled: true
-    annotations: {}
-    parentRefs:
-      - name: cilium-gateway-internal
-        namespace: kube-system
-        sectionName: https-home-lex-la
-    hostnames:
-      - argocd.home.lex.la
-    rules:
-      - matches:
-          - method:
-              service: cluster.ClusterService
-        backendRefs:
-          - name: argocd-server
-            port: 80
   # extensions:
   #   enabled: true
   #   extensionList:
