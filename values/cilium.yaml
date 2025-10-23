@@ -46,6 +46,7 @@ hubble:
 # Gateway API support
 gatewayAPI:
   enabled: true
+  enableAlpn: true  # Enable ALPN for gRPC with TLS termination
 
 # Ingress Controller
 ingressController:
