@@ -18,8 +18,8 @@ spec:
         namespaces:
           from: All
 
-    - name: https-home-lex-la
-      hostname: "*.home.lex.la"
+    - name: https-argocd-home-lex-la
+      hostname: "argocd.home.lex.la"
       protocol: HTTPS
       port: 443
       allowedRoutes:
@@ -29,4 +29,30 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: home-lex-la-tls
+            kind: Secret
+
+    - name: https-transmission-home-lex-la
+      hostname: "transmission.home.lex.la"
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: home-lex-la-tls
+            kind: Secret
+
+    - name: https-longhorn-k8s-home-lex-la
+      hostname: "longhorn.k8s.home.lex.la"
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: k8s-home-lex-la-tls
             kind: Secret
