@@ -19,7 +19,6 @@ spec:
           provider:
             name: cloudflare
           policy: sync
-          logLevel: debug
           sources:
             - service
             - gateway-httproute
@@ -30,6 +29,8 @@ spec:
                   name: cloudflare-api-token
                   key: api-token
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
