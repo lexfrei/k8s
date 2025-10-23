@@ -124,16 +124,36 @@ kubectl apply --filename argocd/meta/meta.yaml
 
 ### Working with ArgoCD Applications
 
-```bash
-# Check all ArgoCD applications
-kubectl get applications --namespace argocd
+**IMPORTANT**: Always use ArgoCD CLI for operations, not kubectl commands directly.
 
-# Sync a specific application
-kubectl patch application APP_NAME --namespace argocd --type merge --patch '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"normal"}}}'
+```bash
+# Login to ArgoCD
+argocd login api.argocd.home.lex.la:443 --username admin --plaintext
+
+# Check all ArgoCD applications
+argocd app list
 
 # View application details
-kubectl describe application APP_NAME --namespace argocd
+argocd app get APP_NAME
+
+# Sync a specific application (after GitOps changes)
+# 1. Make changes in git repository
+# 2. Commit and push
+# 3. Sync meta app first (it manages all other apps)
+argocd app sync argocd/meta
+# 4. Sync target application
+argocd app sync argocd/APP_NAME
+
+# Force hard refresh (reconcile from git)
+argocd app sync argocd/APP_NAME --prune --force
 ```
+
+**GitOps Workflow for Updates:**
+1. Make changes in git repository (manifests, values, argocd definitions)
+2. Commit and push to master
+3. Sync meta application: `argocd app sync argocd/meta`
+4. Sync target application: `argocd app sync argocd/TARGET_APP`
+5. Verify: `argocd app get argocd/TARGET_APP`
 
 ### Testing Changes
 
