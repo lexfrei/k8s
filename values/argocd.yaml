@@ -149,8 +149,7 @@ server:
     enabled: false
   httproute:
     enabled: true
-    annotations:
-      external-dns.alpha.kubernetes.io/target: "172.16.100.250"
+    annotations: {}
     parentRefs:
       - name: cilium-gateway-internal
         namespace: kube-system
