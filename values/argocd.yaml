@@ -170,7 +170,8 @@ server:
         sectionName: https-argocd-home-lex-la
     hostnames:
       - argocd.home.lex.la
-    rules: []
+    rules:
+      - {}
   # extensions:
   #   enabled: true
   #   extensionList:
