@@ -79,7 +79,7 @@ The cluster runs on K3s with these core components (in deployment order):
     - Automatic HTTP→HTTPS redirect (301) via dedicated HTTPRoute
   - **Internal Gateway** (cilium-gateway-internal): 172.16.100.250
     - **NOT port-forwarded** - accessible only from local network
-    - Uses **explicit hostnames only**: argocd.home.lex.la, transmission.home.lex.la, longhorn.k8s.home.lex.la
+    - Uses **wildcard listener** (*.home.lex.la) for simplified internal routing
     - Cloudflare DNS-only mode (grey cloud) - no proxy
     - Automatic HTTP→HTTPS redirect (301) via dedicated HTTPRoute
   - TLS certificates automatically managed by cert-manager via Gateway API integration
@@ -201,7 +201,7 @@ Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar
      parentRefs:
        - name: cilium-gateway-internal
          namespace: kube-system
-         sectionName: https-YOUR-HOSTNAME-home-lex-la  # Must match explicit listener name
+         sectionName: https-home-lex-la  # Wildcard listener for *.home.lex.la
      hostnames:
        - your-app.home.lex.la
      rules:
@@ -214,7 +214,7 @@ Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar
              port: 80
    ```
 6. **For PUBLIC services**: Add new explicit hostname listener to `manifests/cilium/gateway.yaml`
-7. **For INTERNAL services**: Add new explicit hostname listener to `manifests/cilium/internal-gateway.yaml`
+7. **For INTERNAL services**: Use existing wildcard listener `https-home-lex-la` (no Gateway changes needed)
 8. Add your namespace to ReferenceGrant in `manifests/cilium/reference-grant.yaml`
 9. Commit and push - ArgoCD meta app will auto-deploy
 
@@ -240,7 +240,8 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - cert-manager automatically manages certificates for Gateway API listeners
 - TLS certificates issued via DNS-01 ACME challenge with Cloudflare API
 - Gateway API provides modern, role-oriented routing instead of legacy Ingress
-- **SECURITY**: Both Gateways use EXPLICIT hostnames only - NO wildcards allowed to prevent Host header manipulation attacks
+- **SECURITY**: Public Gateway uses EXPLICIT hostnames only - NO wildcards allowed to prevent Host header manipulation attacks
+- **SECURITY**: Internal Gateway uses wildcard (*.home.lex.la) since it's not exposed to internet
 - **SECURITY**: Internal Gateway (172.16.100.250) MUST NOT be port-forwarded - local network access only
 - kube-vip MUST be deployed before worker nodes join (they need VIP for API access)
 - Cilium k8sServiceHost MUST point to kube-vip VIP (cannot be empty due to kube-proxy replacement)
