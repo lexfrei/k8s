@@ -145,6 +145,7 @@ configs:
 
           return health_status
 server:
+  servicePortHttpsAppProtocol: kubernetes.io/h2c  # Enable HTTP/2 for gRPC
   ingress:
     enabled: false
   httproute:
