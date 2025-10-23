@@ -247,6 +247,8 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - Cilium k8sServiceHost MUST point to kube-vip VIP (cannot be empty due to kube-proxy replacement)
 - ArgoCD server.insecure MUST be true when behind Gateway with TLS termination
 - ArgoCD HTTPRoute is managed via Helm chart values (server.httproute section), not manual manifests
+- **ArgoCD CLI is NOT available through Gateway** - gRPC requires HTTP/2, but Gateway uses HTTP/1.1 to avoid breaking ArgoCD's cmux protocol detection
+- **For ArgoCD management**: Use WebUI (https://argocd.home.lex.la) or `kubectl patch` commands for GitOps operations
 
 ## Renovate Configuration
 
