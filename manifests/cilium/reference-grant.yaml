@@ -29,6 +29,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: transmission-system
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: security
   to:
     - group: ""
       kind: Service
