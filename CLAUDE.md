@@ -283,3 +283,76 @@ Renovate bot is configured with:
 - Staging periods: 5 days for major, 3 days for minor
 - PR limits: 5 hourly, 10 concurrent
 - Timezone: Asia/Tbilisi
+
+## Lessons Learned: Common Mistakes to Avoid
+
+### Critical Workflow Errors
+
+1. **NEVER edit files while in plan mode**
+   - Plan mode is ONLY for discussion and planning
+   - Execute mode is for actual file modifications
+   - Violation causes workflow confusion and errors
+
+2. **ALWAYS verify commits before pushing**
+   - Use `git show HEAD` or `git diff --cached` before push
+   - Check for unintended content (comments, debug code, wrong language)
+   - One verification step prevents hours of history cleanup
+
+3. **Git history rewriting strategy**
+   - For multiple commits with errors: `git reset --hard GOOD_COMMIT` → recreate → `git push --force-with-lease`
+   - AVOID interactive rebase for signed commits (requires GPG PIN for each commit)
+   - Force push creates orphaned commits on GitHub (accessible ~90 days, contact support for immediate removal)
+
+### Code Quality Errors
+
+4. **Language consistency**
+   - ALL code, comments, commit messages MUST be in English
+   - NO Russian (or other non-English) text in any files
+   - Validate with: `grep -r "Russian-specific-chars" .` before commit
+
+5. **Renovate comment rules**
+   - Renovate comments (`# renovate: datasource=...`) ONLY for git sources
+   - NOT needed for Helm charts (Renovate tracks ArgoCD Applications automatically)
+   - Only use when source is `path:` in git repository
+
+6. **Version verification**
+   - ALWAYS verify versions with `helm search repo CHART_NAME` before use
+   - NEVER guess or assume chart versions
+   - Use latest stable version unless specific version required
+
+7. **YAML cleanliness**
+   - Remove empty objects: `annotations: {}`, `labels: {}`
+   - Remove metadata added by kubectl/ArgoCD: `resourceVersion`, `uid`, `creationTimestamp`
+   - Use `yq` or manual editing to clean exported resources
+
+### ArgoCD-Specific Patterns
+
+8. **Exporting from ArgoCD cluster**
+   - When applications already exist in cluster, export with `kubectl get application NAME -o yaml`
+   - Clean exported manifests before committing to git
+   - Verify exported configs match desired state
+
+9. **Values organization**
+   - `values/` directory ONLY for bootstrap Helm charts
+   - ArgoCD Applications MUST use inline `valuesObject` in Application manifest
+   - This ensures GitOps single source of truth in ArgoCD Application definitions
+
+### Pre-Commit Checklist
+
+Before every commit, verify:
+- [ ] No non-English text in code or comments
+- [ ] Versions verified with `helm search repo` or official sources
+- [ ] Renovate comments only on git sources, not Helm charts
+- [ ] No empty YAML objects (`annotations: {}`, `labels: {}`)
+- [ ] No metadata pollution (`uid`, `resourceVersion`, etc.)
+- [ ] Tested with `kubectl apply --dry-run=client`
+- [ ] Plan mode exited if was in planning phase
+
+### GitHub Force Push Consequences
+
+When using `git push --force-with-lease`:
+- Remote branch is rewritten immediately
+- Old commits become orphaned (unreachable from any branch)
+- Orphaned commits remain accessible by direct hash URL for ~90 days
+- For sensitive data removal, contact GitHub Support immediately
+- Local cleanup: `git reflog expire --expire=now --all && git gc --prune=now --aggressive`
