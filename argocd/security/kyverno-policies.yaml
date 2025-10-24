@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: kyverno-policies
+  namespace: argocd
+spec:
+  destination:
+    namespace: security
+    server: https://kubernetes.default.svc
+  project: security
+  source:
+    chart: kyverno-policies
+    helm:
+      valuesObject:
+        background: true
+        includeOtherValidationPolicies: false
+        podSecurityStandard: baseline
+        validationFailureAction: Audit
+    repoURL: https://kyverno.github.io/kyverno/
+    targetRevision: 3.5.2
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

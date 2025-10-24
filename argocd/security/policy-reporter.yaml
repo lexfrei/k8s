@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: policy-reporter
+  namespace: argocd
+spec:
+  destination:
+    namespace: security
+    server: https://kubernetes.default.svc
+  project: security
+  sources:
+    - chart: policy-reporter
+      helm:
+        valuesObject:
+          kyvernoPlugin:
+            enabled: true
+          monitoring:
+            enabled: true
+            serviceMonitor:
+              enabled: true
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+          ui:
+            enabled: true
+            resources:
+              limits:
+                cpu: 200m
+                memory: 128Mi
+              requests:
+                cpu: 50m
+                memory: 64Mi
+      repoURL: https://kyverno.github.io/policy-reporter
+      targetRevision: 3.5.0
+    - path: manifests/policy-reporter
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
