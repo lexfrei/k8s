@@ -1,0 +1,30 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: longhorn-system-storage
+  namespace: security
+spec:
+  exceptions:
+    - policyName: disallow-capabilities
+      ruleNames:
+        - adding-capabilities
+    - policyName: disallow-host-path
+      ruleNames:
+        - host-path
+    - policyName: disallow-privileged-containers
+      ruleNames:
+        - privileged-containers
+  match:
+    any:
+      - resources:
+          kinds:
+            - DaemonSet
+            - Deployment
+            - Pod
+          namespaces:
+            - longhorn-system
+          names:
+            - longhorn-*
+            - csi-*
+            - engine-image-*
+            - instance-manager-*
