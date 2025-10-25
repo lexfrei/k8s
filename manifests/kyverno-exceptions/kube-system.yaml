@@ -3,6 +3,10 @@ kind: PolicyException
 metadata:
   name: kube-system-infrastructure
   namespace: security
+  annotations:
+    description: "Exempts core infrastructure components from baseline PSS policies"
+    components: "cilium, cilium-operator, kube-vip, csi-nfs-controller, csi-nfs-node"
+    justification: "CNI, control plane HA, and storage drivers require elevated privileges for system-level operations"
 spec:
   exceptions:
     - policyName: disallow-capabilities

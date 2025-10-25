@@ -20,6 +20,11 @@ spec:
             namespace: security
         admissionController:
           replicas: 1
+          revisionHistoryLimit: 3
+          metering:
+            enabled: true
+          serviceMonitor:
+            enabled: true
           resources:
             limits:
               cpu: 500m
@@ -29,6 +34,13 @@ spec:
               memory: 128Mi
         backgroundController:
           enabled: true
+          revisionHistoryLimit: 3
+          metering:
+            enabled: true
+          serviceMonitor:
+            enabled: true
+          resourceFilters:
+            - "[ReplicaSet,*,*]"
           resources:
             limits:
               cpu: 200m
@@ -38,6 +50,11 @@ spec:
               memory: 64Mi
         cleanupController:
           enabled: true
+          revisionHistoryLimit: 3
+          metering:
+            enabled: true
+          serviceMonitor:
+            enabled: true
           resources:
             limits:
               cpu: 200m
@@ -47,6 +64,11 @@ spec:
               memory: 64Mi
         reportsController:
           enabled: true
+          revisionHistoryLimit: 3
+          metering:
+            enabled: true
+          serviceMonitor:
+            enabled: true
           resources:
             limits:
               cpu: 200m

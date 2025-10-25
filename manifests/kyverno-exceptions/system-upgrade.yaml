@@ -3,6 +3,10 @@ kind: PolicyException
 metadata:
   name: system-upgrade-controller
   namespace: security
+  annotations:
+    description: "Exempts OS upgrade controller from baseline PSS policies"
+    components: "system-upgrade-controller"
+    justification: "Kubernetes node OS upgrade management requires host filesystem access"
 spec:
   exceptions:
     - policyName: disallow-host-path
