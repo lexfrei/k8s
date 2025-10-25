@@ -28,6 +28,9 @@ spec:
         rbacAssessmentScannerEnabled: true
         serviceMonitor:
           enabled: true
+        trivy:
+          ignoreUnfixed: true
+          severity: HIGH,CRITICAL
         vulnerabilityScannerEnabled: true
         vulnerabilityScannerScanOnlyCurrentRevisions: true
     repoURL: https://aquasecurity.github.io/helm-charts/
