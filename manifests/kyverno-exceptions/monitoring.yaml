@@ -1,0 +1,27 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: monitoring-observability
+  namespace: security
+spec:
+  exceptions:
+    - policyName: disallow-host-namespaces
+      ruleNames:
+        - host-namespaces
+    - policyName: disallow-host-path
+      ruleNames:
+        - host-path
+    - policyName: disallow-privileged-containers
+      ruleNames:
+        - privileged-containers
+  match:
+    any:
+      - resources:
+          kinds:
+            - DaemonSet
+            - Pod
+          namespaces:
+            - monitoring
+          names:
+            - fluent-bit*
+            - node-exporter*
