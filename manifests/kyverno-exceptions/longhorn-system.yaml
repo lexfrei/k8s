@@ -3,6 +3,10 @@ kind: PolicyException
 metadata:
   name: longhorn-system-storage
   namespace: security
+  annotations:
+    description: "Exempts distributed storage components from baseline PSS policies"
+    components: "longhorn-manager, longhorn-csi-plugin, engine-image, instance-manager, csi-*"
+    justification: "Block storage management requires privileged access to host devices and filesystems"
 spec:
   exceptions:
     - policyName: disallow-capabilities

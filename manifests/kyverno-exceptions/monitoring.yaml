@@ -3,6 +3,10 @@ kind: PolicyException
 metadata:
   name: monitoring-observability
   namespace: security
+  annotations:
+    description: "Exempts observability components from baseline PSS policies"
+    components: "fluent-bit, node-exporter"
+    justification: "Log collection and metrics exporters require host-level access for system observability"
 spec:
   exceptions:
     - policyName: disallow-host-namespaces
