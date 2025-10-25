@@ -17,6 +17,7 @@ spec:
         features:
           policyExceptions:
             enabled: true
+            namespace: security
         admissionController:
           replicas: 1
           resources:
