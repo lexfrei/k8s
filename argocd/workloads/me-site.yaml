@@ -17,6 +17,8 @@ spec:
       valuesObject:
         ingress:
           enabled: false
+        onionService:
+          enabled: false
         httpRoute:
           enabled: true
           annotations: {}
