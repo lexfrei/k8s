@@ -16,6 +16,7 @@ data:
 
     vrrp_instance VI_CONTROL_PLANE {
       state BACKUP
+      interface eth0
       priority 100
       virtual_router_id 51
       advert_int 1

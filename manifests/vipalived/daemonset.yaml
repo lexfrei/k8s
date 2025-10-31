@@ -23,7 +23,7 @@ spec:
       hostNetwork: true
       priorityClassName: system-node-critical
       nodeSelector:
-        node-role.kubernetes.io/control-plane: ""
+        node-role.kubernetes.io/control-plane: "true"
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists
@@ -54,8 +54,13 @@ spec:
           effect: NoSchedule
       containers:
         - name: keepalived
-          image: ghcr.io/acassen/keepalived:latest
-          imagePullPolicy: IfNotPresent
+          image: alpine:3.19
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache keepalived
+              exec keepalived --dont-fork --log-console --log-detail
           securityContext:
             capabilities:
               add:
