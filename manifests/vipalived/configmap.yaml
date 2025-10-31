@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vipalived-config
+  namespace: kube-system
+data:
+  keepalived.conf: |
+    global_defs {
+      router_id vipalived
+      vrrp_version 3
+      vrrp_garp_master_delay 1
+      vrrp_garp_master_refresh 60
+      vrrp_garp_master_repeat 5
+      vrrp_garp_master_refresh_repeat 2
+    }
+
+    vrrp_instance VI_CONTROL_PLANE {
+      state BACKUP
+      priority 100
+      virtual_router_id 51
+      advert_int 1
+      nopreempt
+
+      authentication {
+        auth_type PASS
+        auth_pass k8s_vip_secret
+      }
+
+      virtual_ipaddress {
+        172.16.101.101/32
+      }
+    }

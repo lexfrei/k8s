@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vipalived
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: kube-system
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://github.com/lexfrei/k8s.git"
+    targetRevision: HEAD
+    path: manifests/vipalived
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
