@@ -151,8 +151,12 @@ argocd app sync argocd/APP_NAME --prune --force
 **GitOps Workflow for Updates:**
 1. Make changes in git repository (manifests, values, argocd definitions)
 2. Commit and push to master
-3. Sync meta application: `argocd app sync argocd/meta`
-4. Sync target application: `argocd app sync argocd/TARGET_APP`
+3. **CRITICAL**: When changing Application definitions (argocd/CATEGORY/*.yaml):
+   - First sync meta app: `argocd app sync argocd/meta` or `kubectl annotate application meta --namespace argocd argocd.argoproj.io/refresh=normal --overwrite`
+   - Meta app will update Application CRDs in cluster
+   - Then sync target app: `argocd app sync argocd/TARGET_APP`
+4. When changing only manifests/values (NOT Application definitions):
+   - Sync target application directly: `argocd app sync argocd/TARGET_APP`
 5. Verify: `argocd app get argocd/TARGET_APP`
 
 ### Testing Changes
