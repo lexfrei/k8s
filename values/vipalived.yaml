@@ -1,0 +1,13 @@
+# vipalived Helm chart values
+# Chart defaults are already configured correctly for this cluster:
+# - VIP: 172.16.101.101/32
+# - Interface: eth0
+# - Priority: 100
+# - Node selector: node-role.kubernetes.io/control-plane: "true"
+
+# Override values below if needed:
+# keepalived:
+#   vrrpInstance:
+#     virtualIpAddress: 172.16.101.101/32
+#     interface: eth0
+#     priority: 100
