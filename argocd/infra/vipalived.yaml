@@ -10,16 +10,10 @@ spec:
   destination:
     namespace: kube-system
     server: "https://kubernetes.default.svc"
-  sources:
-    - repoURL: oci://ghcr.io/lexfrei/charts/vipalived
-      targetRevision: 0.3.0
-      chart: vipalived
-      helm:
-        valueFiles:
-          - $values/values/vipalived.yaml
-    - repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
-      ref: values
+  source:
+    repoURL: oci://ghcr.io/lexfrei/charts/vipalived
+    targetRevision: 0.3.0
+    chart: vipalived
   syncPolicy:
     automated:
       prune: true
