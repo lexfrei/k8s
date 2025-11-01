@@ -32,6 +32,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: security
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: minecraft-operator-system
   to:
     - group: ""
       kind: Service
