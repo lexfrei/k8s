@@ -11,9 +11,9 @@ spec:
     namespace: system-upgrade
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: "https://github.com/lexfrei/k8s.git"
-    targetRevision: HEAD
-    path: manifests/system-upgrade-controller
+    repoURL: oci://ghcr.io/lexfrei/charts/system-upgrade-controller
+    targetRevision: 0.2.0
+    chart: system-upgrade-controller
   syncPolicy:
     automated:
       prune: true
