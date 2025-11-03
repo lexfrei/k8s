@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://grafana.github.io/helm-charts"
-    targetRevision: "6.45.1"
+    targetRevision: "6.45.2"
     chart: loki
     helm:
       valuesObject:
