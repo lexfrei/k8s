@@ -16,12 +16,6 @@ spec:
     chart: transmission
     helm:
       valuesObject:
-        env:
-          PUID: "1000"
-          PGID: "1000"
-          TZ: "Europe/Moscow"
-        podSecurityContext:
-          fsGroup: 1000
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -33,16 +27,9 @@ spec:
               - ALL
           readOnlyRootFilesystem: false
         service:
-          web:
-            type: ClusterIP
-            port: 9091
           torrent:
-            enabled: true
-            type: LoadBalancer
             annotations:
               io.cilium/lb-ipam-ips: "172.16.100.252"
-            tcpPort: 51413
-            udpPort: 51413
         httpRoute:
           enabled: true
           parentRefs:
@@ -51,24 +38,10 @@ spec:
               sectionName: https-home-lex-la
           hostnames:
             - transmission.home.lex.la
-          rules:
-            - matches:
-                - path:
-                    type: PathPrefix
-                    value: /
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "400m"
         persistence:
           config:
-            enabled: true
             existingClaim: "transmission-config"
           downloads:
-            enabled: true
             type: nfs
             nfsServer: truenas.home.lex.la
             nfsPath: /mnt/pool/Transmission
