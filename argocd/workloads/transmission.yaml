@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - chart: transmission
-      repoURL: oci://ghcr.io/lexfrei/charts
+      repoURL: oci://ghcr.io/lexfrei/charts/transmission
       targetRevision: 1.0.0
       helm:
         valuesObject:
