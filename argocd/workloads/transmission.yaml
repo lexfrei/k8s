@@ -22,11 +22,13 @@ spec:
           TZ: "Europe/Moscow"
         podSecurityContext:
           fsGroup: 1000
-          seccompProfile:
-            type: RuntimeDefault
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
+            add:
+              - SETUID
+              - SETGID
+              - CHOWN
             drop:
               - ALL
           readOnlyRootFilesystem: false
