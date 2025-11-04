@@ -10,6 +10,12 @@ spec:
       namespace: argocd
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
+      namespace: argo
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: argo-events
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
       namespace: argocd
     - group: gateway.networking.k8s.io
       kind: HTTPRoute

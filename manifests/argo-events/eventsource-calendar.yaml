@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: calendar
+  namespace: argo-events
+spec:
+  calendar:
+    system-upgrade-weekly:
+      schedule: "0 3 * * 0"
+      timezone: "Asia/Tbilisi"
+      exclusionDates:
+        []
+      metadata:
+        labels:
+          event-type: system-upgrade
+          schedule: weekly
