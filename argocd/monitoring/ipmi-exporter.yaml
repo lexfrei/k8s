@@ -28,17 +28,7 @@ spec:
           name: ipmi-exporter
           key: config.yml
         scrapeConfig:
-          enabled: true
-          namespace: monitoring
-          mode: remote
-          metricsPath: /ipmi
-          modules:
-            - default
-          scrapeInterval: 1m
-          scrapeTimeout: 30s
-          staticConfigs:
-            - targets:
-                - "172.16.10.23"
+          enabled: false
   syncPolicy:
     automated:
       prune: true
