@@ -45,6 +45,11 @@ spec:
 
             filters: |
               [FILTER]
+                  Name grep
+                  Match ilo
+                  Exclude message IPMI/RMCP (login|logout)
+
+              [FILTER]
                   Name modify
                   Match ilo
                   Add job ilo-syslog
