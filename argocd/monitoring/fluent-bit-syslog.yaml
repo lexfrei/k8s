@@ -47,7 +47,7 @@ spec:
               [FILTER]
                   Name grep
                   Match ilo
-                  Exclude message IPMI/RMCP (login|logout)
+                  Exclude message IPMI/RMCP (login|logout) by exporter
 
               [FILTER]
                   Name modify
