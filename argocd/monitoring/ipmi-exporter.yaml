@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ipmi-exporter
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: monitoring
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://prometheus-community.github.io/helm-charts"
+    targetRevision: "0.7.0"
+    chart: prometheus-ipmi-exporter
+    helm:
+      valuesObject:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        configSecret:
+          enabled: true
+          name: ipmi-exporter
+          key: config.yml
+        scrapeConfig:
+          enabled: true
+          namespace: monitoring
+          mode: remote
+          modules:
+            - default
+          scrapeInterval: 1m
+          scrapeTimeout: 30s
+          staticConfigs:
+            - targets:
+                - "172.16.10.23"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
