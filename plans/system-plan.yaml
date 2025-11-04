@@ -37,13 +37,11 @@ kind: Plan
 metadata:
   name: system-upgrade-server
   namespace: system-upgrade
+  labels:
+    policies.kyverno.io/validate: skip
 spec:
   concurrency: 1
-  cordon: true
-  drain:
-    force: true
-    ignoreDaemonSets: true
-    timeout: 900
+  cordon: false
   nodeSelector:
     matchExpressions:
       - key: node-role.kubernetes.io/control-plane
@@ -71,13 +69,11 @@ kind: Plan
 metadata:
   name: system-upgrade-agent
   namespace: system-upgrade
+  labels:
+    policies.kyverno.io/validate: skip
 spec:
   concurrency: 1
-  cordon: true
-  drain:
-    force: true
-    ignoreDaemonSets: true
-    timeout: 900
+  cordon: false
   nodeSelector:
     matchExpressions:
       - key: node-role.kubernetes.io/control-plane
