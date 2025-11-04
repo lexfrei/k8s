@@ -10,25 +10,28 @@ spec:
   destination:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://prometheus-community.github.io/helm-charts"
-    targetRevision: "0.7.0"
-    chart: prometheus-ipmi-exporter
-    helm:
-      valuesObject:
-        resources:
-          requests:
-            cpu: 50m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
-        configSecret:
-          enabled: true
-          name: ipmi-exporter
-          key: config.yml
-        scrapeConfig:
-          enabled: false
+  sources:
+    - repoURL: "https://prometheus-community.github.io/helm-charts"
+      targetRevision: "0.7.0"
+      chart: prometheus-ipmi-exporter
+      helm:
+        valuesObject:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          configSecret:
+            enabled: true
+            name: ipmi-exporter
+            key: config.yml
+          scrapeConfig:
+            enabled: false
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/ipmi-exporter
   syncPolicy:
     automated:
       prune: true
