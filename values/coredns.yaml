@@ -20,16 +20,23 @@ servers:
       - name: kubernetes
         parameters: k8s.home.lex.la in-addr.arpa ip6.arpa
         configBlock: |-
-          pods insecure
+          pods verified
           fallthrough in-addr.arpa ip6.arpa
           ttl 30
       # Serves a /metrics endpoint on :9153, required for serviceMonitor
       - name: prometheus
         parameters: 0.0.0.0:9153
+      # Forward to router for split-horizon DNS, fallback to Cloudflare
       - name: forward
-        parameters: . /etc/resolv.conf
+        parameters: . 172.16.101.1 1.1.1.1 1.0.0.1
+        configBlock: |-
+          max_concurrent 1000
+          health_check 5s
+      # Cache configuration - balance between freshness and performance
       - name: cache
-        parameters: 30
+        configBlock: |-
+          success 300
+          denial 60
       - name: loop
       - name: reload
       - name: loadbalance
