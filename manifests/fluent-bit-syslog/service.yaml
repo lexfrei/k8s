@@ -11,6 +11,6 @@ spec:
     app.kubernetes.io/instance: fluent-bit-syslog
   ports:
     - name: syslog
-      protocol: TCP
+      protocol: UDP
       port: 5140
       targetPort: 5140
