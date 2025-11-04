@@ -46,7 +46,7 @@ spec:
     - name: verify-plan-exists
       container:
         # renovate: datasource=docker depName=alpine
-        image: alpine:3.21.3
+        image: alpine:3.22.2
         command:
           - sh
           - -c
