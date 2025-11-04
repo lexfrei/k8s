@@ -43,9 +43,8 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
 
 - **`values/`** - Helm chart values files for infrastructure components
   - `argocd.yaml` - ArgoCD configuration including Crossplane health checks, server.insecure for Gateway TLS termination, and HTTPRoute configuration
-  - `coredns.yaml` - CoreDNS configuration
+  - `coredns.yaml` - CoreDNS configuration with custom cluster domain k8s.home.lex.la
   - `cilium.yaml` - Cilium CNI configuration (tunnel mode VXLAN, kube-proxy replacement, L2 announcements, Gateway API, Hubble disabled)
-  - `kube-vip.yaml` - kube-vip configuration for control plane HA with VIP
 
 - **`secrets/`** - Encrypted secrets (likely using SOPS or similar)
   - Contains CloudFlare credentials, Grafana config
@@ -54,9 +53,9 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
 
 The cluster runs on K3s with these core components (in deployment order):
 
-1. **DNS**: CoreDNS with custom configuration
+1. **DNS**: CoreDNS with custom cluster domain k8s.home.lex.la
 2. **Networking**: Cilium CNI with native routing on 10.42.0.0/16
-3. **Control Plane HA**: kube-vip for control plane high availability (VIP: 172.16.101.101)
+3. **Control Plane HA**: vipalived for control plane high availability (VIP: 172.16.101.101)
 4. **GitOps**: ArgoCD (self-managed via the meta application)
 5. **Storage**: Longhorn for distributed block storage
 6. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
@@ -69,7 +68,7 @@ The cluster runs on K3s with these core components (in deployment order):
 
 ### Network Configuration
 
-- **Control Plane VIP**: 172.16.101.101 (kube-vip in ARP mode for control plane HA)
+- **Control Plane VIP**: 172.16.101.101 (vipalived in ARP mode for control plane HA)
   - Cilium requires explicit k8sServiceHost configuration (cannot use kubernetes.default.svc due to kube-proxy replacement)
   - All nodes and worker join operations use this VIP for API access
 - **Pod network**: 10.42.0.0/16 (Cilium tunnel mode with VXLAN)
@@ -97,7 +96,7 @@ The cluster runs on K3s with these core components (in deployment order):
 - **External DNS** automatically creates DNS records from Gateway annotations
   - Public Gateway: external-dns.alpha.kubernetes.io/target: "217.78.182.161" (proxied)
   - Internal Gateway: external-dns.alpha.kubernetes.io/target: "172.16.100.250" (DNS-only)
-- **Cluster domain**: `k8s.home.example.com` (configured in K3s)
+- **Cluster domain**: `k8s.home.lex.la` (configured in K3s and CoreDNS)
 - **Hubble**: Disabled to reduce resource consumption
 
 ## Key Commands
@@ -110,26 +109,22 @@ Bootstrap the cluster (run on management machine after K3s installation):
 # Add Helm repositories
 helm repo add coredns https://coredns.github.io/helm
 helm repo add cilium https://helm.cilium.io/
-helm repo add kube-vip https://kube-vip.github.io/helm-charts
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 
 # Install core components in order
 helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
 helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
-helm install kube-vip kube-vip/kube-vip --namespace kube-system --values values/kube-vip.yaml
 helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
 
 # Apply Cilium LB IP pools, L2 announcement policy, and Gateway
 kubectl apply --filename manifests/cilium/
 
-# Wait for kube-vip VIP to be assigned
-kubectl wait --namespace kube-system --for=condition=ready pod --selector app.kubernetes.io/name=kube-vip --timeout=60s
-
-# Now worker nodes can join using VIP: https://172.16.101.101:6443
-
 # Deploy meta application (deploys all other applications via GitOps)
 kubectl apply --filename argocd/meta/meta.yaml
+
+# Note: Control plane VIP (172.16.101.101) is managed by vipalived on the host level
+# Worker nodes can join using VIP: https://172.16.101.101:6443
 ```
 
 ### Working with ArgoCD Applications
@@ -320,8 +315,9 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - **SECURITY**: Public Gateway uses EXPLICIT hostnames only - NO wildcards allowed to prevent Host header manipulation attacks
 - **SECURITY**: Internal Gateway uses wildcard (*.home.lex.la) since it's not exposed to internet
 - **SECURITY**: Internal Gateway (172.16.100.250) MUST NOT be port-forwarded - local network access only
-- kube-vip MUST be deployed before worker nodes join (they need VIP for API access)
-- Cilium k8sServiceHost MUST point to kube-vip VIP (cannot be empty due to kube-proxy replacement)
+- **Cluster domain**: k8s.home.lex.la is configured in both K3s and CoreDNS, must be consistent across all components
+- vipalived MUST be running on control plane nodes before worker nodes join (they need VIP for API access)
+- Cilium k8sServiceHost MUST point to vipalived VIP 172.16.101.101 (cannot be empty due to kube-proxy replacement)
 - ArgoCD server.insecure MUST be true when behind Gateway with TLS termination
 - ArgoCD HTTPRoute is managed via Helm chart values (server.httproute section), not manual manifests
 - **ArgoCD dual-access architecture**:
