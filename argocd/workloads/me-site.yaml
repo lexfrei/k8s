@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: oci://ghcr.io/lexfrei/charts/me-site
     targetRevision: 0.5.0
-    chart: me-site
+    path: .
     helm:
       valuesObject:
         onionService:
