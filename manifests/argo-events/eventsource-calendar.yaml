@@ -8,9 +8,7 @@ spec:
     system-upgrade-weekly:
       schedule: "0 4 * * 3"
       timezone: "Asia/Tbilisi"
-      exclusionDates:
-        []
+      exclusionDates: []
       metadata:
-        labels:
-          event-type: system-upgrade
-          schedule: weekly
+        event-type: system-upgrade
+        schedule: weekly
