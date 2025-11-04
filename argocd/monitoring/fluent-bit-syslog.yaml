@@ -10,12 +10,12 @@ spec:
   destination:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
-  sources:
-    - repoURL: "https://fluent.github.io/helm-charts"
-      targetRevision: "0.54.0"
-      chart: fluent-bit
-      helm:
-        valuesObject:
+  source:
+    repoURL: "https://fluent.github.io/helm-charts"
+    targetRevision: "0.54.0"
+    chart: fluent-bit
+    helm:
+      valuesObject:
         kind: Deployment
         replicaCount: 1
 
