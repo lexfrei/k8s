@@ -368,3 +368,134 @@ When using `git push --force-with-lease`:
 - Orphaned commits remain accessible by direct hash URL for ~90 days
 - For sensitive data removal, contact GitHub Support immediately
 - Local cleanup: `git reflog expire --expire=now --all && git gc --prune=now --aggressive`
+
+### Error 9: Watchdog False-Positive Reboots
+**Error**: Hardware watchdog (bcm2835_wdt) triggering unexpected system reboots during normal operation
+
+**Root Cause**: Watchdog daemon configured to check for non-existent `/usr/sbin/test` and `/usr/sbin/repair` binary files, timing out after 70 seconds and triggering system shutdown
+
+**Investigation**:
+```bash
+journalctl --boot=-1 --unit=watchdog
+# Output showed:
+# test binary /usr/sbin/test returned 2 = 'No such file or directory'
+# Retry timed-out at 70 seconds for /usr/sbin/test
+# shutting down the system because of error 2
+```
+
+**Fix**:
+- Removed `test-binary` and `repair-binary` configuration lines (not needed for load monitoring)
+- Increased `watchdog-timeout` from 60 to 120 seconds
+- Increased load thresholds significantly: `max-load-1` 24→40, `max-load-5` 18→30, `max-load-15` 12→20
+- Increased check interval from 10 to 30 seconds
+- Watchdog now only monitors system load without external binaries
+
+**Lesson**: Hardware watchdog configuration must match actual system capabilities. Missing test/repair binaries will cause shutdowns. For Raspberry Pi clusters, conservative thresholds prevent false positives.
+
+### Error 10: Hostname Not Persisting Across Reboots (cloud-init)
+**Error**: Node hostname reverting to original value ("mc") after reboot despite using `hostnamectl set-hostname`
+
+**Root Cause**: cloud-init managing hostname via `manage_etc_hosts: true` in `/etc/cloud/cloud.cfg`, resetting `/etc/hostname` and `/etc/hosts` on every boot
+
+**Detection**: `/etc/hosts` contained warning comment:
+```
+# Your system has configured 'manage_etc_hosts' as True.
+# As a result, if you wish for changes to this file to persist
+# then you will need to either
+# a.) make changes to the master file in /etc/cloud/templates/hosts.debian.tmpl
+# b.) change or remove the value of 'manage_etc_hosts' in
+#     /etc/cloud/cloud.cfg or cloud-config from user-data
+```
+
+**Fix**:
+```bash
+# Set hostname via hostnamectl
+hostnamectl set-hostname k8s-worker-01
+
+# Update /etc/hostname
+echo "k8s-worker-01" > /etc/hostname
+
+# Update /etc/hosts
+sed -i "s/127.0.1.1 OLD_NAME/127.0.1.1 k8s-worker-01/g" /etc/hosts
+
+# Disable cloud-init hostname management
+mkdir -p /etc/cloud/cloud.cfg.d/
+cat > /etc/cloud/cloud.cfg.d/99-disable-hostname-management.cfg <<EOF
+manage_etc_hosts: false
+preserve_hostname: true
+EOF
+
+# Restart k3s-agent to re-register with new hostname
+systemctl restart k3s-agent
+```
+
+**Lesson**: On cloud-init enabled systems (Raspberry Pi OS, Ubuntu Cloud Images), hostname changes require disabling cloud-init's hostname management, otherwise changes will be reverted on every boot.
+
+### Error 11: System Upgrade Plan Idempotency Check False Negative
+**Error**: System upgrade plan reporting "already configured" when checking for OLD values, not applying NEW configuration
+
+**Root Cause**: Idempotency check in script was checking for OLD values (max-load-1 = 24) instead of NEW values (max-load-1 = 40), so when OLD configuration was present, script skipped update
+
+**Example from watchdog-setup.yaml**:
+```bash
+# Broken idempotency check
+if grep -q "^max-load-1 = 24" /etc/watchdog.conf 2>/dev/null; then
+  echo "Watchdog is already properly configured, skipping"
+  exit 0
+fi
+```
+
+**Fix**: Update idempotency check to match desired NEW configuration values:
+```bash
+# Correct idempotency check
+if grep -q "^max-load-1 = 40" /etc/watchdog.conf 2>/dev/null; then
+  echo "Watchdog is already properly configured, skipping"
+  exit 0
+fi
+```
+
+**Lesson**: When updating system-upgrade plans with new configuration values, ALWAYS update the idempotency check conditions to match the NEW desired values, not old values. Otherwise, plan will report success without applying changes.
+
+### Error 12: Kyverno Webhook Blocking System Upgrade Jobs
+**Error**: System-upgrade-controller unable to create Jobs due to Kyverno validating webhook unavailability:
+```
+failed calling webhook "validate.kyverno.svc-fail":
+Post "https://kyverno-svc.security.svc:443/validate/fail?timeout=10s":
+no endpoints available for service "kyverno-svc"
+```
+
+**Root Cause**:
+- Kyverno admission controller pods in bad state (Terminating/Pending)
+- Webhook configured as fail-closed (blocks operations when endpoint unavailable)
+- All Job creation in system-upgrade namespace blocked
+
+**Fix**: Delete problematic validating webhooks to unblock Job creation:
+```bash
+kubectl delete validatingwebhookconfigurations \
+  kyverno-policy-validating-webhook-cfg \
+  kyverno-resource-validating-webhook-cfg
+```
+
+**Lesson**: Fail-closed admission webhooks can block critical cluster operations when the webhook service is unavailable. For non-critical policy enforcement, consider fail-open webhooks or add proper health checks and PodDisruptionBudgets for webhook pods.
+
+## Node Optimization Summary
+
+After troubleshooting and applying all system upgrade plans, the cluster nodes have these optimizations:
+
+### Successfully Applied
+- ✅ **Hostname persistence**: cloud-init disabled, proper hostname configuration
+- ✅ **Filesystem parameters**: vm.swappiness=1, vm.dirty_ratio=10, fs.file-max=2097152, fs.inotify.max_user_watches=524288
+- ✅ **Kernel panic settings**: kernel.panic=10, kernel.panic_on_oops=1
+- ✅ **CPU governor**: ondemand (for noise reduction in home environment)
+- ✅ **Watchdog configuration**: Conservative thresholds, no test/repair binaries (control plane only)
+
+### Intentionally Skipped
+- ⏭️ **Watchdog on worker**: Skipped to avoid reboot risks until thoroughly tested on control plane
+- ⏭️ **Performance CPU governor**: Changed to ondemand due to excessive fan noise in home environment
+
+### Key Learnings
+1. Hardware watchdog requires careful configuration - missing binaries cause shutdowns
+2. cloud-init hostname management must be disabled for persistent hostnames
+3. System upgrade plan idempotency checks must match NEW configuration values
+4. Fail-closed webhooks can block critical operations - plan for webhook unavailability
+5. Home environment priorities (noise) differ from production (performance)
