@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: oci://ghcr.io/lexfrei/charts/transmission
-    targetRevision: 1.0.0
+    targetRevision: 1.1.0
     chart: transmission
     helm:
       valuesObject:
@@ -45,6 +45,20 @@ spec:
             type: nfs
             nfsServer: truenas.home.lex.la
             nfsPath: /mnt/pool/Transmission
+        initContainers:
+          - name: init-permissions
+            image: busybox:latest
+            command:
+              - sh
+              - -c
+              - chown -R 1000:1000 /config /downloads
+            volumeMounts:
+              - name: config
+                mountPath: /config
+              - name: downloads
+                mountPath: /downloads
+            securityContext:
+              runAsUser: 0
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
