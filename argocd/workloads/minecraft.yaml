@@ -75,10 +75,10 @@ spec:
               requiredDuringSchedulingIgnoredDuringExecution:
                 nodeSelectorTerms:
                   - matchExpressions:
-                      - key: kubernetes.io/hostname
+                      - key: minecraft
                         operator: In
                         values:
-                          - mc
+                          - "true"
 
           livenessProbe:
             enabled: true
