@@ -16,16 +16,6 @@ spec:
       chart: argo-events
       helm:
         valuesObject:
-          crds:
-            install: true
-          configs:
-            jetstream:
-              versions:
-                - version: latest
-                  natsImage: nats:2.10.24
-                  metricsExporterImage: natsio/prometheus-nats-exporter:0.16.0
-                  configReloaderImage: natsio/nats-server-config-reloader:0.16.0
-                  startCommand: /nats-server
           controller:
             replicas: 1
     - repoURL: https://github.com/lexfrei/k8s.git
