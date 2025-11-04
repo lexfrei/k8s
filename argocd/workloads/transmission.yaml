@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: oci://ghcr.io/lexfrei/charts/transmission
     targetRevision: 1.1.0
-    chart: transmission
+    path: .
     helm:
       valuesObject:
         securityContext:

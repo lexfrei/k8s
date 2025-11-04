@@ -4,12 +4,6 @@
         ":pinDependencies",
         ":semanticCommits"
     ],
-    "hostRules": [
-        {
-            "matchHost": "ghcr.io",
-            "hostType": "docker"
-        }
-    ],
     "major": {
         "minimumReleaseAge": "5 days",
         "labels": [
