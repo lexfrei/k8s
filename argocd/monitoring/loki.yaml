@@ -23,6 +23,10 @@ spec:
             replication_factor: 1
           storage:
             type: filesystem
+            bucketNames:
+              chunks: chunks
+              ruler: ruler
+              admin: admin
           schemaConfig:
             configs:
               - from: "2024-01-01"
