@@ -64,6 +64,8 @@ The cluster runs on K3s with these core components (in deployment order):
 8. **Certificate Management**: cert-manager with automatic Gateway API integration
 9. **External DNS**: external-dns with Gateway API HTTPRoute support
 10. **Monitoring**: Grafana operator, node-exporter, metrics-server
+11. **Workflow Automation**: Argo Workflows for Kubernetes-native workflow orchestration
+12. **Event-Driven Automation**: Argo Events for event-driven workflow triggers
 
 ### Network Configuration
 
@@ -182,6 +184,49 @@ kubectl apply --dry-run=client --filename argocd/CATEGORY/APP_NAME.yaml
 helm template TEST_NAME CHART_NAME --values values/COMPONENT.yaml
 ```
 
+### Working with Argo Workflows and Argo Events
+
+**Argo Workflows** provides Kubernetes-native workflow orchestration. **Argo Events** enables event-driven automation.
+
+```bash
+# View workflows
+argo list --namespace argo-events
+
+# View workflow details
+argo get WORKFLOW_NAME --namespace argo-events
+
+# View workflow logs
+argo logs WORKFLOW_NAME --namespace argo-events
+argo logs @latest --namespace argo-events
+
+# Manual workflow submission from template
+argo submit --from workflowtemplate/system-upgrade --namespace argo-events
+
+# Check EventSource status
+kubectl get eventsource --namespace argo-events
+
+# Check Sensor status
+kubectl get sensor --namespace argo-events
+
+# Check EventBus status
+kubectl get eventbus --namespace argo-events
+
+# Web UI
+# https://argo-workflows.home.lex.la
+```
+
+**Event-Driven Architecture:**
+- **EventSource** (calendar, resource, webhook, GitHub, etc.) → **EventBus** (NATS JetStream) → **Sensor** → **Workflow**
+- Calendar EventSource triggers workflows on schedule (e.g., weekly system upgrades)
+- Resource EventSource can trigger on Kubernetes events (new nodes, pod failures, etc.)
+- Sensor watches EventBus and submits WorkflowTemplates when events match
+
+**Example Use Cases:**
+- Weekly system upgrade plan application via calendar trigger
+- New node provisioning automation via resource events
+- Automated recovery workflows on pod failures
+- GitHub webhook-triggered deployments
+
 ### Secrets Management
 
 Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar tool is used.
@@ -284,6 +329,15 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
   - **CLI/gRPC**: api.argocd.home.lex.la:443 (via dedicated LoadBalancer 172.16.100.254, plaintext)
   - Gateway uses HTTP/1.1 (breaks gRPC), LoadBalancer allows direct cmux access for CLI
 - ArgoCD LoadBalancer uses dedicated IP pool (argocd-api-pool) with external-dns integration
+- **Argo Workflows**: Deployed in argo-events namespace for workflow orchestration
+  - WorkflowTemplates define reusable workflow specifications
+  - ServiceAccount argo-workflow has ClusterRole for kubectl operations
+  - Web UI at https://argo-workflows.home.lex.la (internal Gateway)
+- **Argo Events**: Event-driven automation framework deployed in argo-events namespace
+  - EventBus uses NATS JetStream with Longhorn persistence (1Gi)
+  - EventSources define event triggers (calendar, resource, webhook, GitHub, etc.)
+  - Sensors watch EventBus and submit Workflows when events match
+  - Current setup: Calendar EventSource triggers weekly system-plan.yaml application
 
 ## Renovate Configuration
 
