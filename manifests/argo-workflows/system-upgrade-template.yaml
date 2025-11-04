@@ -1,0 +1,85 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: system-upgrade
+  namespace: argo-events
+spec:
+  entrypoint: apply-system-plan
+  serviceAccountName: argo-workflow
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
+  templates:
+    - name: apply-system-plan
+      steps:
+        - - name: clone-repo
+            template: git-clone
+        - - name: verify-files
+            template: verify-plan-exists
+        - - name: apply-plan
+            template: kubectl-apply
+
+    - name: git-clone
+      container:
+        # renovate: datasource=docker depName=alpine/git
+        image: alpine/git:2.47.1
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            set -e
+            echo "Cloning repository..."
+            git clone --depth 1 https://github.com/lexfrei/k8s.git /work/repo
+            echo "Repository cloned successfully"
+            ls -la /work/repo/plans/
+        volumeMounts:
+          - name: work
+            mountPath: /work
+
+    - name: verify-plan-exists
+      container:
+        # renovate: datasource=docker depName=alpine
+        image: alpine:3.21.3
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            set -e
+            echo "Verifying system-plan.yaml exists..."
+            if [ ! -f /work/repo/plans/system-plan.yaml ]; then
+              echo "ERROR: system-plan.yaml not found!"
+              exit 1
+            fi
+            echo "File verified successfully"
+            echo "--- File content preview ---"
+            head --lines=20 /work/repo/plans/system-plan.yaml
+        volumeMounts:
+          - name: work
+            mountPath: /work
+
+    - name: kubectl-apply
+      container:
+        # renovate: datasource=docker depName=rancher/kubectl
+        image: rancher/kubectl:v1.32.1
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            set -e
+            echo "Applying system-plan.yaml..."
+            kubectl apply --filename /work/repo/plans/system-plan.yaml
+            echo "Plan applied successfully"
+            echo "--- Current Plans status ---"
+            kubectl get plans --namespace system-upgrade
+        volumeMounts:
+          - name: work
+            mountPath: /work

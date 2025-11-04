@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-workflows
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: argo
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://argoproj.github.io/argo-helm"
+      targetRevision: "0.45.27"
+      chart: argo-workflows
+      helm:
+        valuesObject:
+          server:
+            enabled: true
+            replicas: 1
+            extraArgs:
+              - --auth-mode=server
+            secure: false
+          controller:
+            replicas: 1
+            workflowDefaults:
+              spec:
+                serviceAccountName: argo-workflow
+          executor:
+            env:
+              - name: RESOURCE_STATE_CHECK_INTERVAL
+                value: "1s"
+          useDefaultArtifactRepo: true
+          artifactRepository:
+            archiveLogs: true
+            s3:
+              insecure: true
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/argo-workflows
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
