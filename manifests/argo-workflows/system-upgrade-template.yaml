@@ -68,7 +68,7 @@ spec:
     - name: kubectl-apply
       container:
         # renovate: datasource=docker depName=rancher/kubectl
-        image: rancher/kubectl:v1.32.1
+        image: rancher/kubectl:v1.34.1
         command:
           - sh
           - -c
