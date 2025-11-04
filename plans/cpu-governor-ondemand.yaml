@@ -79,7 +79,7 @@ stringData:
 apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
-  name: cpu-governor-performance
+  name: cpu-governor-ondemand
   namespace: system-upgrade
 spec:
   concurrency: 1
