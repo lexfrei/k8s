@@ -37,7 +37,7 @@ spec:
             inputs: |
               [INPUT]
                   Name syslog
-                  Mode tcp
+                  Mode udp
                   Listen 0.0.0.0
                   Port 5140
                   Parser syslog-rfc3164
