@@ -43,7 +43,6 @@ spec:
   drain:
     force: true
     ignoreDaemonSets: true
-    deleteEmptyDirData: true
     timeout: 900
   nodeSelector:
     matchExpressions:
@@ -78,7 +77,6 @@ spec:
   drain:
     force: true
     ignoreDaemonSets: true
-    deleteEmptyDirData: true
     timeout: 900
   nodeSelector:
     matchExpressions:
