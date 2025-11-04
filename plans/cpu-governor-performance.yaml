@@ -1,20 +1,18 @@
-# System Upgrade Plan: CPU Governor Performance Mode
+# System Upgrade Plan: CPU Governor Ondemand Mode
 #
-# Purpose: Set CPU frequency governor to 'performance' mode
+# Purpose: Set CPU frequency governor to 'ondemand' mode
 #
 # What it does:
 #   - Installs cpufrequtils package for CPU frequency management
-#   - Sets CPU governor to 'performance' mode (maximum frequency)
+#   - Sets CPU governor to 'ondemand' mode (dynamic frequency scaling)
 #   - Configures systemd service to apply on boot
-#   - Disables ondemand governor (dynamic frequency scaling)
 #
-# Why it's needed:
-#   - Current 'ondemand' governor causes RCU stalls under load
-#   - Performance mode eliminates frequency scaling delays
-#   - Critical for Kubernetes node stability and predictable performance
-#   - Detected as ondemand in node audit (High priority)
+# Why ondemand instead of performance:
+#   - Performance mode causes excessive fan noise in home environment
+#   - Ondemand provides good balance between performance and power/noise
+#   - For home cluster, noise reduction is higher priority than maximum performance
 #
-# Trade-off: Slightly higher power consumption for better stability
+# Trade-off: Potential for RCU stalls under extreme load, but acceptable for home use
 #
 # Idempotency: Checks current governor state before making changes
 #
@@ -36,11 +34,11 @@ stringData:
     CURRENT_GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo "unknown")
     echo "Current CPU governor: $CURRENT_GOVERNOR"
 
-    # Check if already set to performance
-    if [ "$CURRENT_GOVERNOR" = "performance" ]; then
+    # Check if already set to ondemand
+    if [ "$CURRENT_GOVERNOR" = "ondemand" ]; then
       # Verify configuration file exists
-      if [ -f /etc/default/cpufrequtils ] && grep -q "GOVERNOR=\"performance\"" /etc/default/cpufrequtils; then
-        echo "CPU governor already set to performance and persistent, skipping"
+      if [ -f /etc/default/cpufrequtils ] && grep -q "GOVERNOR=\"ondemand\"" /etc/default/cpufrequtils; then
+        echo "CPU governor already set to ondemand and persistent, skipping"
         exit 0
       fi
     fi
@@ -51,24 +49,18 @@ stringData:
     # Install cpufrequtils
     DEBIAN_FRONTEND=noninteractive apt-get install --yes cpufrequtils
 
-    # Configure performance governor
+    # Configure ondemand governor
     cat > /etc/default/cpufrequtils <<'EOF'
     # CPU frequency governor configuration
-    # Set to performance mode for Kubernetes node stability
-    GOVERNOR="performance"
+    # Set to ondemand mode for better power/noise balance in home environment
+    GOVERNOR="ondemand"
     EOF
-
-    # Disable ondemand service if exists
-    if systemctl list-unit-files | grep -q ondemand; then
-      systemctl disable ondemand 2>/dev/null || true
-      systemctl stop ondemand 2>/dev/null || true
-    fi
 
     # Apply governor immediately to all CPUs
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
       if [ -f "$cpu/cpufreq/scaling_governor" ]; then
-        echo "performance" > "$cpu/cpufreq/scaling_governor"
-        echo "Set $(basename $cpu) to performance mode"
+        echo "ondemand" > "$cpu/cpufreq/scaling_governor"
+        echo "Set $(basename $cpu) to ondemand mode"
       fi
     done
 
@@ -77,10 +69,10 @@ stringData:
 
     # Verify configuration
     FINAL_GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
-    if [ "$FINAL_GOVERNOR" = "performance" ]; then
-      echo "CPU governor successfully set to performance"
+    if [ "$FINAL_GOVERNOR" = "ondemand" ]; then
+      echo "CPU governor successfully set to ondemand"
     else
-      echo "ERROR: Failed to set CPU governor to performance (current: $FINAL_GOVERNOR)"
+      echo "ERROR: Failed to set CPU governor to ondemand (current: $FINAL_GOVERNOR)"
       exit 1
     fi
 ---
@@ -102,7 +94,7 @@ spec:
   secrets:
     - name: cpu-governor-secret
       path: /host/run/system-upgrade/secrets
-  version: v1.0.0
+  version: v2.0.0
   tolerations:
     - operator: Exists
   upgrade:
