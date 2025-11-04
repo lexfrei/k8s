@@ -40,7 +40,7 @@ spec:
                   Mode udp
                   Listen 0.0.0.0
                   Port 5140
-                  Parser syslog-rfc3164
+                  Parser syslog-rfc5424
                   Tag ilo
 
             filters: |
@@ -58,12 +58,6 @@ spec:
                   labels job=ilo-syslog
                   line_format json
                   auto_kubernetes_labels off
-
-            customParsers: |
-              [PARSER]
-                  Name syslog-rfc3164
-                  Format regex
-                  Regex /^<(?<pri>[0-9]+)>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$/
 
         resources:
           requests:
