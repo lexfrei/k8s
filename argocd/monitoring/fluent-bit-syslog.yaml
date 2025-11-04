@@ -10,63 +10,60 @@ spec:
   destination:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
-  source:
-    repoURL: "https://fluent.github.io/helm-charts"
-    targetRevision: "0.54.0"
-    chart: fluent-bit
-    helm:
-      valuesObject:
-        kind: Deployment
-        replicaCount: 1
+  sources:
+    - repoURL: "https://fluent.github.io/helm-charts"
+      targetRevision: "0.54.0"
+      chart: fluent-bit
+      helm:
+        valuesObject:
+          kind: Deployment
+          replicaCount: 1
 
-        service:
-          type: LoadBalancer
-          port: 5140
-          annotations:
-            io.cilium/lb-ipam-ips: "172.16.100.249"
+          service:
+            type: ClusterIP
 
-        config:
-          service: |
-            [SERVICE]
-                Daemon Off
-                Flush 1
-                Log_Level info
-                Parsers_File /fluent-bit/etc/parsers.conf
-                HTTP_Server On
-                HTTP_Listen 0.0.0.0
-                HTTP_Port 2020
-                Health_Check On
+          config:
+            service: |
+              [SERVICE]
+                  Daemon Off
+                  Flush 1
+                  Log_Level info
+                  Parsers_File /fluent-bit/etc/parsers.conf
+                  HTTP_Server On
+                  HTTP_Listen 0.0.0.0
+                  HTTP_Port 2020
+                  Health_Check On
 
-          inputs: |
-            [INPUT]
-                Name syslog
-                Mode tcp
-                Listen 0.0.0.0
-                Port 5140
-                Parser syslog-rfc3164
-                Tag ilo
+            inputs: |
+              [INPUT]
+                  Name syslog
+                  Mode tcp
+                  Listen 0.0.0.0
+                  Port 5140
+                  Parser syslog-rfc3164
+                  Tag ilo
 
-          filters: |
-            [FILTER]
-                Name modify
-                Match ilo
-                Add job ilo-syslog
+            filters: |
+              [FILTER]
+                  Name modify
+                  Match ilo
+                  Add job ilo-syslog
 
-          outputs: |
-            [OUTPUT]
-                Name loki
-                Match ilo
-                host loki.monitoring.svc
-                port 3100
-                labels job=ilo-syslog
-                line_format json
-                auto_kubernetes_labels off
+            outputs: |
+              [OUTPUT]
+                  Name loki
+                  Match ilo
+                  host loki.monitoring.svc
+                  port 3100
+                  labels job=ilo-syslog
+                  line_format json
+                  auto_kubernetes_labels off
 
-          customParsers: |
-            [PARSER]
-                Name syslog-rfc3164
-                Format regex
-                Regex /^<(?<pri>[0-9]+)>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$/
+            customParsers: |
+              [PARSER]
+                  Name syslog-rfc3164
+                  Format regex
+                  Regex /^<(?<pri>[0-9]+)>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$/
 
         resources:
           requests:
@@ -75,6 +72,9 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/fluent-bit-syslog
   syncPolicy:
     automated:
       prune: true
