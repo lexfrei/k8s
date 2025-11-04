@@ -10,21 +10,20 @@ spec:
   destination:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
-  sources:
-    - repoURL: "https://fluent.github.io/helm-charts"
-      targetRevision: "0.54.0"
-      chart: fluent-bit
-      helm:
-        valuesObject:
-          kind: Deployment
-          replicaCount: 1
+  source:
+    repoURL: "https://fluent.github.io/helm-charts"
+    targetRevision: "0.54.0"
+    chart: fluent-bit
+    helm:
+      valuesObject:
+        kind: Deployment
+        replicaCount: 1
 
-          service:
-            type: ClusterIP
-
-          extraPorts:
-            - containerPort: 5140
-              protocol: TCP
+        service:
+          type: LoadBalancer
+          port: 5140
+          annotations:
+            io.cilium/lb-ipam-ips: "172.16.100.249"
 
         config:
           service: |
@@ -78,9 +77,6 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
-    - repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
-      path: manifests/fluent-bit-syslog
   syncPolicy:
     automated:
       prune: true
