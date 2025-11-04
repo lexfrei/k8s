@@ -1,0 +1,121 @@
+# System Upgrade Plan: Hardware Watchdog Setup
+#
+# Purpose: Install and configure hardware watchdog for automatic node recovery
+#
+# What it does:
+#   - Installs watchdog package for hardware watchdog support
+#   - Configures watchdog daemon to monitor system health (load, processes)
+#   - Loads bcm2835_wdt kernel module (Raspberry Pi hardware watchdog)
+#   - Enables automatic reboot if system becomes unresponsive
+#
+# Why it's needed:
+#   - Hardware watchdog provides automatic recovery from kernel panics and hangs
+#   - Critical for production reliability of Kubernetes nodes
+#   - Detected as MISSING in node audit (Critical priority)
+#
+# Idempotency: Checks if watchdog is already configured and running before making changes
+#
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: watchdog-setup-secret
+  namespace: system-upgrade
+type: Opaque
+stringData:
+  setup.sh: |
+    #!/bin/sh
+    set -e
+
+    echo "Setting up watchdog on $(hostname)"
+
+    # Check if watchdog is already configured and running
+    if systemctl is-active --quiet watchdog; then
+      echo "Watchdog is already active, checking configuration..."
+      if grep -q "^watchdog-device = /dev/watchdog" /etc/watchdog.conf 2>/dev/null && \
+         grep -q "^max-load-1 = 24" /etc/watchdog.conf 2>/dev/null; then
+        echo "Watchdog is already properly configured, skipping"
+        exit 0
+      fi
+    fi
+
+    # Update package lists
+    apt-get update
+
+    # Install watchdog package
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes watchdog
+
+    # Configure watchdog
+    cat > /etc/watchdog.conf <<'EOF'
+    # Watchdog configuration for Kubernetes nodes
+    watchdog-device = /dev/watchdog
+    watchdog-timeout = 60
+
+    # System load monitoring
+    max-load-1 = 24
+    max-load-5 = 18
+    max-load-15 = 12
+
+    # Check interval
+    interval = 10
+
+    # Logging
+    realtime = yes
+    priority = 1
+
+    # Repair actions
+    repair-binary = /usr/sbin/repair
+    test-binary = /usr/sbin/test
+    EOF
+
+    # Load bcm2835_wdt module (Raspberry Pi hardware watchdog)
+    if ! lsmod | grep -q bcm2835_wdt; then
+      modprobe bcm2835_wdt
+    fi
+
+    # Make watchdog module persistent
+    if ! grep -q "bcm2835_wdt" /etc/modules; then
+      echo "bcm2835_wdt" >> /etc/modules
+    fi
+
+    # Enable and start watchdog service
+    systemctl enable watchdog
+    systemctl restart watchdog
+
+    # Verify watchdog is running
+    if systemctl is-active --quiet watchdog; then
+      echo "Watchdog successfully configured and started"
+    else
+      echo "ERROR: Watchdog failed to start"
+      exit 1
+    fi
+---
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: watchdog-setup
+  namespace: system-upgrade
+spec:
+  concurrency: 1
+  cordon: true
+  nodeSelector:
+    matchExpressions:
+      - key: kubernetes.io/os
+        operator: In
+        values:
+          - linux
+  serviceAccountName: system-upgrade
+  secrets:
+    - name: watchdog-setup-secret
+      path: /host/run/system-upgrade/secrets
+  version: v1.0.0
+  tolerations:
+    - operator: Exists
+  upgrade:
+    image: ubuntu:plucky-20251001
+    command:
+      - chroot
+      - /host
+    args:
+      - sh
+      - /run/system-upgrade/secrets/setup.sh
