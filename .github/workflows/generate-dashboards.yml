@@ -1,0 +1,41 @@
+name: Generate Grafana Dashboards
+
+on:
+  push:
+    paths:
+      - 'dashboards/**/*.go'
+      - 'dashboards/**/go.mod'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: dashboards/ipmi/go.sum
+
+      - name: Generate IPMI dashboard
+        run: |
+          cd dashboards/ipmi
+          go mod download
+          go run main.go ipmi-dashboard.json
+
+      - name: Commit generated dashboards
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add dashboards/**/ipmi-dashboard.json
+          git diff --quiet && git diff --staged --quiet || \
+            (git commit --message "chore(dashboards): regenerate Grafana dashboards [skip ci]
+
+Co-Authored-By: GitHub Actions <actions@github.com>" && git push)
