@@ -31,7 +31,7 @@ spec:
           enabled: true
           namespace: monitoring
           mode: remote
-          metricsPath: /metrics
+          metricsPath: /ipmi
           modules:
             - default
           scrapeInterval: 1m
