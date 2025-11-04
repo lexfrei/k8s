@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://argoproj.github.io/argo-helm"
-      targetRevision: "2.4.16"
+      targetRevision: "2.4.17"
       chart: argo-events
       helm:
         valuesObject:
