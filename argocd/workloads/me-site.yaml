@@ -10,29 +10,21 @@ spec:
     namespace: me-site
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: "https://lexfrei.github.io/charts"
-    targetRevision: "0.4.0"
+    repoURL: oci://ghcr.io/lexfrei/charts/me-site
+    targetRevision: 0.5.0
     chart: me-site
     helm:
       valuesObject:
-        ingress:
-          enabled: false
         onionService:
           enabled: false
         httpRoute:
           enabled: true
-          annotations: {}
           parentRefs:
             - name: cilium-gateway
               namespace: kube-system
               sectionName: https-sviridk-in
           hostnames:
             - aleksei.sviridk.in
-          rules:
-            - matches:
-                - path:
-                    type: PathPrefix
-                    value: /
   project: workloads
   syncPolicy:
     automated:
