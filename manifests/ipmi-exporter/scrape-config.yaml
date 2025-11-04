@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: ipmi-exporter
+spec:
+  jobName: ipmi-exporter
+  metricsPath: /ipmi
+  params:
+    module:
+      - default
+  relabelings:
+    - action: replace
+      sourceLabels:
+        - __address__
+      targetLabel: __param_target
+    - action: replace
+      sourceLabels:
+        - __param_target
+      targetLabel: instance
+    - action: replace
+      replacement: ipmi-exporter-prometheus-ipmi-exporter.monitoring.svc:9290
+      targetLabel: __address__
+  scheme: HTTP
+  scrapeInterval: 1m
+  scrapeTimeout: 30s
+  staticConfigs:
+    - targets:
+        - "172.16.10.23"
