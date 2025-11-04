@@ -52,7 +52,8 @@ func main() {
 		Refresh("1m").
 		// Add datasource variable
 		WithVariable(dashboard.NewDatasourceVariableBuilder("datasource").
-			Label("Datasource")).
+			Label("Datasource").
+			Type("prometheus")).
 		// Add instance variable
 		WithVariable(dashboard.NewQueryVariableBuilder("instance").
 			Label("Instance").

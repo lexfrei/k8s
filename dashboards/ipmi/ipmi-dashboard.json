@@ -240,6 +240,7 @@
         "label": "Datasource",
         "hide": 0,
         "skipUrlSync": false,
+        "query": "prometheus",
         "multi": false,
         "includeAll": false,
         "auto": false,
