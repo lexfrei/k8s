@@ -24,6 +24,10 @@ spec:
           annotations:
             io.cilium/lb-ipam-ips: "172.16.100.249"
           ports:
+            - name: http
+              protocol: TCP
+              port: 2020
+              targetPort: 2020
             - name: syslog-tcp
               protocol: TCP
               port: 514
@@ -35,6 +39,7 @@ spec:
                 Daemon Off
                 Flush 1
                 Log_Level info
+                Parsers_File /fluent-bit/etc/parsers.conf
                 HTTP_Server On
                 HTTP_Listen 0.0.0.0
                 HTTP_Port 2020
@@ -54,7 +59,6 @@ spec:
                 Name modify
                 Match ilo
                 Add job ilo-syslog
-                Add host ${HOSTNAME}
 
           outputs: |
             [OUTPUT]
@@ -66,7 +70,7 @@ spec:
                 line_format json
                 auto_kubernetes_labels off
 
-          parsers: |
+          customParsers: |
             [PARSER]
                 Name syslog-rfc3164
                 Format regex
