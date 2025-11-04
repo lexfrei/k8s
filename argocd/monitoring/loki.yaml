@@ -49,6 +49,12 @@ spec:
           persistence:
             enabled: true
             size: 10Gi
+          podSecurityContext:
+            fsGroup: 10001
+            fsGroupChangePolicy: OnRootMismatch
+            runAsGroup: 10001
+            runAsNonRoot: true
+            runAsUser: 10001
           resources:
             requests:
               cpu: 100m
