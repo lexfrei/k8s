@@ -11,10 +11,6 @@ spec:
   hostnames:
     - jellyfin.home.lex.la
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      backendRefs:
+    - backendRefs:
         - name: jellyfin
           port: 8096
