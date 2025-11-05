@@ -41,6 +41,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: minecraft-operator-system
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: jellyfin
   to:
     - group: ""
       kind: Service
