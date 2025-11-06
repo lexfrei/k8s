@@ -4,24 +4,6 @@
         ":pinDependencies",
         ":semanticCommits"
     ],
-    "regexManagers": [
-        {
-            "fileMatch": ["^argocd/.+\\.yaml$"],
-            "matchStrings": [
-                "repoURL:\\s*oci://(?<depName>[^\\s]+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>[^\\s]+)"
-            ],
-            "datasourceTemplate": "docker",
-            "versioningTemplate": "semver"
-        }
-    ],
-    "packageRules": [
-        {
-            "matchManagers": ["argocd"],
-            "matchDatasources": ["git-tags"],
-            "matchDepPatterns": ["^oci://"],
-            "enabled": false
-        }
-    ],
     "major": {
         "minimumReleaseAge": "5 days",
         "labels": [
