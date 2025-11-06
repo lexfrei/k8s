@@ -11,9 +11,9 @@ spec:
     namespace: transmission-system
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: oci://ghcr.io/lexfrei/charts/transmission
+    chart: lexfrei/charts/transmission
+    repoURL: oci://ghcr.io
     targetRevision: 1.2.0
-    path: .
     helm:
       valuesObject:
         securityContext:

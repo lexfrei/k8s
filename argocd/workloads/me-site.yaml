@@ -10,9 +10,9 @@ spec:
     namespace: me-site
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: oci://ghcr.io/lexfrei/charts/me-site
+    chart: lexfrei/charts/me-site
+    repoURL: oci://ghcr.io
     targetRevision: 0.5.0
-    path: .
     helm:
       valuesObject:
         onionService:
