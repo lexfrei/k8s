@@ -59,5 +59,8 @@ spec:
             securityContext:
               runAsUser: 0
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
