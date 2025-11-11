@@ -4,48 +4,74 @@ metadata:
   name: argo-workflow
   namespace: argo
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-workflow
+  namespace: argo-events
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: argo-workflow-executor
 rules:
+  # Argo Workflows internal resources
   - apiGroups:
-      - ""
+      - argoproj.io
     resources:
-      - secrets
+      - workflowtaskresults
+      - workflowtasksets
+      - workflowtemplates
+      - workflows
     verbs:
       - get
       - list
+      - watch
+      - create
+      - update
+      - patch
+
+  # Kubernetes core resources
   - apiGroups:
       - ""
     resources:
       - pods
       - pods/log
+      - pods/exec
     verbs:
       - get
       - list
       - watch
+      - create
+      - delete
+
   - apiGroups:
       - ""
     resources:
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
       - configmaps
     verbs:
       - get
       - list
-      - create
-      - update
-      - patch
+
+  # Allow privileged pod creation for node upgrades
   - apiGroups:
-      - upgrade.cattle.io
+      - policy
     resources:
-      - plans
+      - podsecuritypolicies
     verbs:
-      - get
-      - list
-      - create
-      - update
-      - patch
-      - apply
+      - use
+    resourceNames:
+      - privileged
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -59,3 +85,6 @@ subjects:
   - kind: ServiceAccount
     name: argo-workflow
     namespace: argo
+  - kind: ServiceAccount
+    name: argo-workflow
+    namespace: argo-events
