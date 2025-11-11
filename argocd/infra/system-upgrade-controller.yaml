@@ -11,8 +11,8 @@ spec:
     namespace: system-upgrade
     server: "https://kubernetes.default.svc"
   source:
-    chart: lexfrei/charts/system-upgrade-controller
-    repoURL: oci://ghcr.io
+    chart: system-upgrade-controller
+    repoURL: oci://ghcr.io/lexfrei/charts
     targetRevision: 0.2.0
   syncPolicy:
     automated:
