@@ -12,7 +12,7 @@ spec:
       eventName: system-upgrade-weekly
   triggers:
     - template:
-        name: system-upgrade-workflow
+        name: node-upgrade-control-plane
         argoWorkflow:
           operation: submit
           source:
@@ -20,15 +20,38 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: system-upgrade-
+                generateName: node-upgrade-cp-
                 namespace: argo-events
                 labels:
-                  workflows.argoproj.io/workflow-template: system-upgrade
+                  workflows.argoproj.io/workflow-template: node-upgrade
+                  node-role: control-plane
               spec:
                 workflowTemplateRef:
-                  name: system-upgrade
-          parameters:
-            - src:
-                dependencyName: calendar-event
-                dataKey: eventTime
-              dest: spec.arguments.parameters.0.value
+                  name: node-upgrade
+                arguments:
+                  parameters:
+                    - name: node-role
+                      value: control-plane
+
+    - template:
+        name: node-upgrade-workers
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: node-upgrade-worker-
+                namespace: argo-events
+                labels:
+                  workflows.argoproj.io/workflow-template: node-upgrade
+                  node-role: worker
+              spec:
+                workflowTemplateRef:
+                  name: node-upgrade
+                arguments:
+                  parameters:
+                    - name: node-role
+                      value: worker
+                suspend: true  # require manual approval before upgrading workers
