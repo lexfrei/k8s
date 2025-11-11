@@ -11,8 +11,8 @@ spec:
     namespace: kube-system
     server: "https://kubernetes.default.svc"
   source:
-    chart: lexfrei/charts/vipalived
-    repoURL: oci://ghcr.io
+    chart: vipalived
+    repoURL: oci://ghcr.io/lexfrei/charts
     targetRevision: 0.4.0
   syncPolicy:
     automated:
