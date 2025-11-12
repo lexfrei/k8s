@@ -11,5 +11,11 @@ spec:
       storageClassName: longhorn
       accessMode: ReadWriteOnce
       volumeSize: 1Gi
-    streamConfig:
+    streamConfig: |
+      maxMsgs: 1000000
+      maxAge: 72h
+      maxBytes: 1GB
       replicas: 1
+      duplicates: 300s
+      retention: 0
+      discard: 0
