@@ -4,12 +4,6 @@ metadata:
   name: argo-workflow
   namespace: argo
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: argo-workflow
-  namespace: argo-events
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -85,6 +79,3 @@ subjects:
   - kind: ServiceAccount
     name: argo-workflow
     namespace: argo
-  - kind: ServiceAccount
-    name: argo-workflow
-    namespace: argo-events

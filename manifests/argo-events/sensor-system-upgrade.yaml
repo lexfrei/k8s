@@ -21,7 +21,7 @@ spec:
               kind: Workflow
               metadata:
                 generateName: node-upgrade-all-
-                namespace: argo-events
+                namespace: argo
                 labels:
                   workflows.argoproj.io/workflow-template: node-upgrade
               spec:

@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: node-upgrade
-  namespace: argo-events
+  namespace: argo
 spec:
   serviceAccountName: argo-workflow
 
