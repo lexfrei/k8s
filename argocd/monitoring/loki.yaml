@@ -39,6 +39,10 @@ spec:
           limits_config:
             retention_period: 24h
             split_queries_by_interval: 1h
+            retention_stream:
+              - selector: '{job="systemd-journal"}'
+                priority: 1
+                period: 336h
           compactor:
             retention_enabled: true
             retention_delete_delay: 1h
