@@ -19,12 +19,7 @@ spec:
           server:
             extraArgs:
               - --auth-mode=server
-              - --managed-namespace=argo
-              - --managed-namespace=argo-events
           controller:
-            workflowNamespaces:
-              - argo
-              - argo-events
             workflowDefaults:
               spec:
                 serviceAccountName: argo-workflow
