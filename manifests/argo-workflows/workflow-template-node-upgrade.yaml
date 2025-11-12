@@ -11,9 +11,6 @@ spec:
       - name: node-role
         value: ""  # empty = all nodes, or specify "control-plane" / "worker"
 
-      - name: concurrency
-        value: "1"  # process nodes one by one
-
       - name: upgrade-script
         value: |
           #!/bin/bash
@@ -60,8 +57,8 @@ spec:
                 - name: node
                   value: "{{item}}"
             withParam: "{{steps.get-nodes.outputs.result}}"
-            # This controls how many nodes to upgrade in parallel
-            # withItems will respect workflow-level parallelism setting
+            # Limit parallelism - default is 1 (sequential upgrades)
+            parallelism: 1
 
     # Get list of nodes with specific role (or all nodes if role is empty)
     - name: list-nodes
