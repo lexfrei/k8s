@@ -41,6 +41,7 @@ Calendar EventSource → Sensor → Argo Workflow (privileged pods)
 ### WorkflowTemplate: node-upgrade
 
 Файл: `manifests/argo-workflows/workflow-template-node-upgrade.yaml`
+Namespace: `argo`
 
 **Параметры:**
 - `node-role`: `control-plane` или `worker`
@@ -58,25 +59,32 @@ Calendar EventSource → Sensor → Argo Workflow (privileged pods)
 ### Sensor: system-upgrade
 
 Файл: `manifests/argo-events/sensor-system-upgrade.yaml`
+Namespace: `argo-events`
 
 **Triggers:**
-1. **node-upgrade-control-plane** - автоматически обновляет control plane ноды
-2. **node-upgrade-workers** - создаёт Workflow с `suspend: true` для ручного approve
+1. **node-upgrade-all** - автоматически обновляет все ноды (control-plane + workers)
+
+Workflows создаются в namespace `argo`.
 
 ## Usage
 
 ### Автоматическое обновление (еженедельно)
 
-Calendar EventSource запускает оба Workflow:
-- Control plane ноды обновляются автоматически
-- Worker ноды требуют ручного approve в Argo UI
+Calendar EventSource запускает один Workflow для всех нод автоматически.
+
+### Ручное обновление всех нод
+
+```bash
+argo submit --from workflowtemplate/node-upgrade \
+  --namespace argo
+```
 
 ### Ручное обновление control plane
 
 ```bash
 argo submit --from workflowtemplate/node-upgrade \
   --parameter node-role=control-plane \
-  --namespace argo-events
+  --namespace argo
 ```
 
 ### Ручное обновление workers
@@ -84,7 +92,7 @@ argo submit --from workflowtemplate/node-upgrade \
 ```bash
 argo submit --from workflowtemplate/node-upgrade \
   --parameter node-role=worker \
-  --namespace argo-events
+  --namespace argo
 ```
 
 ### Кастомный скрипт
