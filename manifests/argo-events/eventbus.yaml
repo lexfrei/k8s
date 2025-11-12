@@ -11,3 +11,5 @@ spec:
       storageClassName: longhorn
       accessMode: ReadWriteOnce
       volumeSize: 1Gi
+    streamConfig:
+      replicas: 1
