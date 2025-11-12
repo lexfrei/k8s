@@ -18,6 +18,10 @@ spec:
         valuesObject:
           controller:
             replicas: 1
+          configs:
+            jetstream:
+              streamConfig:
+                replicas: 1
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/argo-events
