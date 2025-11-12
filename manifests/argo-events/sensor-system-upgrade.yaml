@@ -54,4 +54,3 @@ spec:
                   parameters:
                     - name: node-role
                       value: worker
-                suspend: true  # require manual approval before upgrading workers
