@@ -534,6 +534,91 @@ kubectl delete validatingwebhookconfigurations \
 
 **Lesson**: Fail-closed admission webhooks can block critical cluster operations when the webhook service is unavailable. For non-critical policy enforcement, consider fail-open webhooks or add proper health checks and PodDisruptionBudgets for webhook pods.
 
+### Error 13: Watchdog Configuration Causing Infinite Reboot Loop
+**Error**: Nodes entering infinite reboot cycle after watchdog installation via system-upgrade plan
+
+**Symptoms**:
+- Nodes continuously rebooting every ~2 minutes
+- Watchdog service starts but crashes after 11 seconds
+- Journal shows: `watchdog.service: Failed with result 'exit-code'`
+- System unable to maintain uptime
+
+**Root Causes**:
+1. **Idempotency check bug** in `plans/watchdog-setup.yaml` (line 36):
+   - Checked for OLD value `max-load-1 = 24` instead of NEW value `max-load-1 = 40`
+   - Plan detected "already configured" and skipped `systemctl enable watchdog`
+   - Watchdog installed but not enabled to start on boot
+
+2. **Initial bad configuration** (before Error 9 fix):
+   - Referenced non-existent `test-binary` and `repair-binary` files
+   - Watchdog timed out after 70 seconds waiting for missing binaries
+   - Timeout triggered hardware reboot
+   - Boot → watchdog starts → timeout → reboot → repeat
+
+**Investigation Steps**:
+```bash
+# Check watchdog service status
+ssh user@node "systemctl status watchdog"
+# Output: disabled; preset: enabled
+#         Active: inactive (dead)
+
+# Check watchdog logs around failure time
+journalctl --unit=watchdog --since '2025-11-04 05:37:00'
+# Shows: Started at 05:37:29, stopped at 05:37:40 (11 seconds)
+
+# Check if watchdog was enabled
+systemctl is-enabled watchdog
+# Output: disabled
+
+# Verify configuration applied but service not enabled
+cat /etc/watchdog.conf  # Config exists with correct values
+lsmod | grep bcm2835_wdt  # Module NOT loaded (should be loaded)
+```
+
+**Fix Applied**:
+```bash
+# Manual fix on both nodes
+ssh user@node "sudo systemctl enable watchdog && sudo systemctl start watchdog"
+
+# Verify
+systemctl status watchdog
+# Should show: enabled; preset: enabled
+#              Active: active (running)
+```
+
+**Permanent Fix Required**:
+Update `plans/watchdog-setup.yaml` line 36 idempotency check:
+```yaml
+# WRONG (checks old value):
+if grep -q "^max-load-1 = 24" /etc/watchdog.conf 2>/dev/null; then
+
+# CORRECT (checks new value):
+if grep -q "^max-load-1 = 40" /etc/watchdog.conf 2>/dev/null; then
+```
+
+**Why Reboot Loop Occurred**:
+1. System upgrade plan applied watchdog configuration
+2. Idempotency check found OLD config → exited early (exit 0)
+3. `systemctl enable watchdog` was NEVER executed
+4. Watchdog installed but not enabled
+5. After manual testing, watchdog was started but not enabled
+6. Next boot: watchdog doesn't auto-start
+7. If watchdog was manually started with bad config → reboot loop
+
+**Lessons**:
+1. **Idempotency checks MUST verify desired END STATE, not starting state** (Error 11 pattern)
+2. **Hardware watchdog misconfiguration can brick nodes via infinite reboot loops**
+3. **Always verify `systemctl enable` succeeded for critical services**
+4. **Test watchdog configuration on single node before cluster-wide rollout**
+5. **Document why services are manually disabled** (user disabled watchdog due to reboot loops)
+6. **System upgrade plans need comprehensive integration tests, not just syntax validation**
+
+**Prevention**:
+- Add post-installation verification to system upgrade plans
+- Require idempotency checks to validate NEW configuration values
+- Test critical services (watchdog, storage drivers) on single node first
+- Monitor for boot loops (node unavailable > 5 minutes after plan application)
+
 ## Node Optimization Summary
 
 After troubleshooting and applying all system upgrade plans, the cluster nodes have these optimizations:
