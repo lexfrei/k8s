@@ -23,6 +23,10 @@ spec:
             workflowDefaults:
               spec:
                 serviceAccountName: argo-workflow
+                ttlStrategy:
+                  secondsAfterCompletion: 3600  # Clean up 1 hour after completion
+                  secondsAfterSuccess: 3600     # Clean up successful workflows after 1 hour
+                  secondsAfterFailure: 86400    # Keep failed workflows for 24 hours (debugging)
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/argo-workflows
