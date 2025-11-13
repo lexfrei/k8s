@@ -224,14 +224,14 @@ spec:
               DEBIAN_FRONTEND=noninteractive apt-get install --yes watchdog
             fi
 
-            cat > /etc/watchdog.conf <<EOF
-# Minimal watchdog configuration - heartbeat only
-watchdog-device = /dev/watchdog
-watchdog-timeout = 120
-interval = 30
-realtime = yes
-priority = 1
-EOF
+            {
+              echo "# Minimal watchdog configuration - heartbeat only"
+              echo "watchdog-device = /dev/watchdog"
+              echo "watchdog-timeout = 120"
+              echo "interval = 30"
+              echo "realtime = yes"
+              echo "priority = 1"
+            } > /etc/watchdog.conf
 
             nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl enable watchdog
             nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart watchdog
