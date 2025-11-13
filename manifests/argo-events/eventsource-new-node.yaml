@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: new-node
+  namespace: argo-events
+spec:
+  resource:
+    new-node:
+      # Watch for new Node resources
+      namespace: ""  # cluster-scoped resource
+      group: ""
+      version: v1
+      resource: nodes
+
+      # Only trigger on CREATE events (new nodes added to cluster)
+      eventTypes:
+        - ADD
+
+      # Filter to only real nodes (not virtual nodes from autoscalers)
+      filter:
+        # Exclude nodes that are being deleted
+        expression: "true"

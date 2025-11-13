@@ -1,0 +1,90 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: new-node-setup
+  namespace: argo-events
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+
+  dependencies:
+    - name: new-node-added
+      eventSourceName: new-node
+      eventName: new-node
+
+  triggers:
+    # Trigger 1: Configure watchdog on new node
+    - template:
+        name: watchdog-setup
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: auto-watchdog-setup-
+                namespace: argo
+                labels:
+                  auto-triggered: "true"
+                  trigger-type: new-node
+                annotations:
+                  triggered-by-node: "{{.Input.body.metadata.name}}"
+              spec:
+                workflowTemplateRef:
+                  name: watchdog-setup
+                arguments:
+                  parameters:
+                    - name: node-role
+                      # Run on all nodes - idempotent, only new node will be configured
+                      value: ""
+
+    # Trigger 2: Optimize filesystem on new node
+    - template:
+        name: filesystem-optimization
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: auto-filesystem-optimization-
+                namespace: argo
+                labels:
+                  auto-triggered: "true"
+                  trigger-type: new-node
+                annotations:
+                  triggered-by-node: "{{.Input.body.metadata.name}}"
+              spec:
+                workflowTemplateRef:
+                  name: filesystem-optimization
+                arguments:
+                  parameters:
+                    - name: node-role
+                      value: ""
+
+    # Trigger 3: Configure kernel panic settings on new node
+    - template:
+        name: kernel-panic-settings
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: auto-kernel-panic-settings-
+                namespace: argo
+                labels:
+                  auto-triggered: "true"
+                  trigger-type: new-node
+                annotations:
+                  triggered-by-node: "{{.Input.body.metadata.name}}"
+              spec:
+                workflowTemplateRef:
+                  name: kernel-panic-settings
+                arguments:
+                  parameters:
+                    - name: node-role
+                      value: ""
