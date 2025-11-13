@@ -212,31 +212,31 @@ spec:
             chroot /host /bin/bash -c '
             set -e
 
-            if systemctl is-active --quiet watchdog; then
-              if grep -q "^watchdog-device = /dev/watchdog" /etc/watchdog.conf 2>/dev/null && \
-                 grep -q "^watchdog-timeout = 120" /etc/watchdog.conf 2>/dev/null && \
-                 ! grep -q "^max-load" /etc/watchdog.conf 2>/dev/null; then
-                echo "Watchdog already configured, skipping"
-                exit 0
-              fi
+            if grep -q "^watchdog-device = /dev/watchdog" /etc/watchdog.conf 2>/dev/null && \
+               grep -q "^watchdog-timeout = 120" /etc/watchdog.conf 2>/dev/null && \
+               ! grep -q "^max-load" /etc/watchdog.conf 2>/dev/null; then
+              echo "Watchdog already configured with heartbeat-only mode, skipping"
+              exit 0
             fi
 
-            apt-get update
-            DEBIAN_FRONTEND=noninteractive apt-get install --yes watchdog
+            if ! command -v watchdog >/dev/null 2>&1; then
+              apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install --yes watchdog
+            fi
 
             cat > /etc/watchdog.conf <<EOF
-            # Minimal watchdog configuration - heartbeat only
-            watchdog-device = /dev/watchdog
-            watchdog-timeout = 120
-            interval = 30
-            realtime = yes
-            priority = 1
-            EOF
+# Minimal watchdog configuration - heartbeat only
+watchdog-device = /dev/watchdog
+watchdog-timeout = 120
+interval = 30
+realtime = yes
+priority = 1
+EOF
 
-            systemctl enable watchdog
-            systemctl restart watchdog
+            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl enable watchdog
+            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart watchdog
 
-            if systemctl is-active --quiet watchdog; then
+            if nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl is-active --quiet watchdog; then
               echo "✓ Watchdog configured"
             else
               echo "ERROR: Watchdog failed to start"
