@@ -16,19 +16,18 @@ spec:
   templates:
     - name: main
       steps:
-        # Get list of nodes matching the role
+        # Get list of nodes
         - - name: get-nodes
             template: list-nodes
 
-        # Process each node sequentially or with limited parallelism
+        # Upgrade each node sequentially (upgrade + wait for ready)
         - - name: upgrade-node
-            template: upgrade-single-node
+            template: upgrade-node
             arguments:
               parameters:
                 - name: node
                   value: "{{item}}"
             withParam: "{{steps.get-nodes.outputs.result}}"
-            # Limit parallelism - default is 1 (sequential upgrades)
             parallelism: 1
 
     # Get list of nodes with specific role (or all nodes if role is empty)
@@ -38,34 +37,28 @@ spec:
         command: [bash]
         source: |
           if [ -z "{{workflow.parameters.node-role}}" ]; then
-            # Get all nodes
             kubectl get nodes \
               -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | \
               jq -R . | jq -s .
           else
-            # Get nodes with specific role
             kubectl get nodes \
               -l node-role.kubernetes.io/{{workflow.parameters.node-role}}=true \
               -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | \
               jq -R . | jq -s .
           fi
 
-    # Upgrade a single node
-    - name: upgrade-single-node
+    # Upgrade single node (run upgrade + wait for ready)
+    - name: upgrade-node
       inputs:
         parameters:
           - name: node
-
       steps:
-        # Run upgrade script on the node
         - - name: run-upgrade
             template: privileged-pod
             arguments:
               parameters:
                 - name: node
                   value: "{{inputs.parameters.node}}"
-
-        # Wait for node to come back after potential reboot
         - - name: wait-ready
             template: wait-node-ready
             arguments:
