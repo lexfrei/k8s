@@ -33,7 +33,7 @@ stringData:
     if systemctl is-active --quiet watchdog; then
       echo "Watchdog is already active, checking configuration..."
       if grep -q "^watchdog-device = /dev/watchdog" /etc/watchdog.conf 2>/dev/null && \
-         grep -q "^max-load-1 = 24" /etc/watchdog.conf 2>/dev/null; then
+         grep -q "^max-load-1 = 40" /etc/watchdog.conf 2>/dev/null; then
         echo "Watchdog is already properly configured, skipping"
         exit 0
       fi
