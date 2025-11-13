@@ -29,22 +29,15 @@ spec:
                   value: "{{item}}"
             withParam: "{{steps.get-nodes.outputs.result}}"
 
-    # Get list of nodes with specific role (or all nodes if role is empty)
+    # Get list of all nodes (simplified - always returns all nodes)
     - name: list-nodes
-      script:
-        image: rancher/kubectl:v1.34.1
-        command: [bash]
-        source: |
-          if [ -z "{{workflow.parameters.node-role}}" ]; then
-            kubectl get nodes \
-              -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | \
-              jq -R . | jq -s .
-          else
-            kubectl get nodes \
-              -l node-role.kubernetes.io/{{workflow.parameters.node-role}}=true \
-              -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | \
-              jq -R . | jq -s .
-          fi
+      container:
+        image: alpine/k8s:1.34.1
+        command: [sh, -c]
+        args:
+          - |
+            kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | \
+            jq -R . | jq -s .
 
     # Setup single node (all configurations)
     - name: setup-single-node
