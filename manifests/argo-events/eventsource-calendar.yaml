@@ -6,7 +6,7 @@ metadata:
 spec:
   calendar:
     system-upgrade-weekly:
-      schedule: "0 4 * * 3"
+      schedule: "0 5 * * 5"
       timezone: "Asia/Tbilisi"
       exclusionDates: []
       metadata:
