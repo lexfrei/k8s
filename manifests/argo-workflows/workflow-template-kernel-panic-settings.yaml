@@ -1,0 +1,154 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: kernel-panic-settings
+  namespace: argo
+spec:
+  serviceAccountName: argo-workflow
+
+  arguments:
+    parameters:
+      - name: node-role
+        value: ""  # empty = all nodes, or specify "control-plane" / "worker"
+
+  entrypoint: main
+
+  templates:
+    - name: main
+      steps:
+        - - name: get-nodes
+            template: list-nodes
+
+        - - name: configure-node
+            template: configure-single-node
+            arguments:
+              parameters:
+                - name: node
+                  value: "{{item}}"
+            withParam: "{{steps.get-nodes.outputs.result}}"
+            parallelism: 1
+
+    - name: list-nodes
+      script:
+        image: rancher/kubectl:v1.31.3
+        command: [bash]
+        source: |
+          if [ -z "{{workflow.parameters.node-role}}" ]; then
+            kubectl get nodes \
+              --output jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' \
+              | jq -R -s -c 'split("\n") | map(select(length > 0))'
+          else
+            kubectl get nodes \
+              --selector node-role.kubernetes.io/{{workflow.parameters.node-role}}= \
+              --output jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' \
+              | jq -R -s -c 'split("\n") | map(select(length > 0))'
+          fi
+
+    - name: configure-single-node
+      inputs:
+        parameters:
+          - name: node
+
+      steps:
+        - - name: run-configuration
+            template: privileged-pod
+            arguments:
+              parameters:
+                - name: node
+                  value: "{{inputs.parameters.node}}"
+
+    - name: privileged-pod
+      inputs:
+        parameters:
+          - name: node
+
+      script:
+        image: ubuntu:noble
+        command: [bash]
+        source: |
+          #!/bin/bash
+          set -e
+
+          echo "==================================="
+          echo "Configuring kernel panic on: {{inputs.parameters.node}}"
+          echo "==================================="
+
+          cat > /tmp/setup.sh <<'SCRIPT'
+          #!/bin/sh
+          set -e
+
+          echo "Configuring kernel panic settings on $(hostname)"
+
+          SYSCTL_FILE="/etc/sysctl.d/99-k8s-panic.conf"
+
+          # Check if already configured
+          if [ -f "$SYSCTL_FILE" ]; then
+            if grep -q "^kernel.panic = 10" "$SYSCTL_FILE" && \
+               grep -q "^kernel.panic_on_oops = 1" "$SYSCTL_FILE"; then
+              echo "Kernel panic settings already configured, verifying runtime values..."
+              CURRENT_PANIC=$(sysctl -n kernel.panic)
+              CURRENT_PANIC_ON_OOPS=$(sysctl -n kernel.panic_on_oops)
+              if [ "$CURRENT_PANIC" = "10" ] && [ "$CURRENT_PANIC_ON_OOPS" = "1" ]; then
+                echo "Runtime values already correct, skipping"
+                exit 0
+              fi
+            fi
+          fi
+
+          # Create sysctl configuration
+          cat > "$SYSCTL_FILE" <<'EOF'
+          # Kernel panic configuration for Kubernetes nodes
+          # Automatically reboot on kernel panic for failover
+
+          # Reboot 10 seconds after kernel panic
+          kernel.panic = 10
+
+          # Treat kernel oops as panic (automatic recovery)
+          kernel.panic_on_oops = 1
+
+          # Panic on out-of-memory condition
+          vm.panic_on_oom = 0
+
+          # Panic on hung task (disabled to avoid false positives)
+          kernel.hung_task_panic = 0
+          EOF
+
+          # Apply settings immediately
+          sysctl --system
+
+          # Verify settings
+          FINAL_PANIC=$(sysctl -n kernel.panic)
+          FINAL_PANIC_ON_OOPS=$(sysctl -n kernel.panic_on_oops)
+
+          if [ "$FINAL_PANIC" = "10" ] && [ "$FINAL_PANIC_ON_OOPS" = "1" ]; then
+            echo "Kernel panic settings successfully configured:"
+            echo "  kernel.panic = $FINAL_PANIC"
+            echo "  kernel.panic_on_oops = $FINAL_PANIC_ON_OOPS"
+          else
+            echo "ERROR: Failed to configure kernel panic settings"
+            echo "  kernel.panic = $FINAL_PANIC (expected: 10)"
+            echo "  kernel.panic_on_oops = $FINAL_PANIC_ON_OOPS (expected: 1)"
+            exit 1
+          fi
+          SCRIPT
+
+          chmod +x /tmp/setup.sh
+          chroot /host /tmp/setup.sh
+
+          echo "Kernel panic configuration completed on {{inputs.parameters.node}}"
+
+      nodeSelector:
+        kubernetes.io/hostname: "{{inputs.parameters.node}}"
+
+      securityContext:
+        privileged: true
+
+      volumeMounts:
+        - name: host-root
+          mountPath: /host
+
+      volumes:
+        - name: host-root
+          hostPath:
+            path: /
+            type: Directory
