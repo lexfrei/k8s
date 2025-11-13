@@ -63,7 +63,7 @@ spec:
           - name: node
 
       script:
-        image: ubuntu:noble
+        image: ubuntu:questing
         command: [bash]
         source: |
           #!/bin/bash

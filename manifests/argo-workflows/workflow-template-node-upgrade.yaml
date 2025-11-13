@@ -79,7 +79,7 @@ spec:
         - operator: Exists  # tolerate all taints
 
       container:
-        image: ubuntu:noble
+        image: ubuntu:questing
         securityContext:
           privileged: true
 
