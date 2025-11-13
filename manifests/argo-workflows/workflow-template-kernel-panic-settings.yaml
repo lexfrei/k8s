@@ -9,7 +9,7 @@ spec:
   arguments:
     parameters:
       - name: node-role
-        value: ""  # empty = all nodes, or specify "control-plane" / "worker"
+        value: "" # empty = all nodes, or specify "control-plane" / "worker"
 
   entrypoint: main
 
@@ -84,7 +84,7 @@ spec:
           # Check if already configured
           if [ -f "$SYSCTL_FILE" ]; then
             if grep -q "^kernel.panic = 10" "$SYSCTL_FILE" && \
-               grep -q "^kernel.panic_on_oops = 1" "$SYSCTL_FILE"; then
+              grep -q "^kernel.panic_on_oops = 1" "$SYSCTL_FILE"; then
               echo "Kernel panic settings already configured, verifying runtime values..."
               CURRENT_PANIC=$(sysctl -n kernel.panic)
               CURRENT_PANIC_ON_OOPS=$(sysctl -n kernel.panic_on_oops)
