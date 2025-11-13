@@ -222,7 +222,8 @@ spec:
 
             if systemctl is-active --quiet watchdog; then
               if grep -q "^watchdog-device = /dev/watchdog" /etc/watchdog.conf 2>/dev/null && \
-                 grep -q "^max-load-1 = 40" /etc/watchdog.conf 2>/dev/null; then
+                 grep -q "^watchdog-timeout = 120" /etc/watchdog.conf 2>/dev/null && \
+                 ! grep -q "^max-load" /etc/watchdog.conf 2>/dev/null; then
                 echo "Watchdog already configured, skipping"
                 exit 0
               fi
@@ -232,23 +233,13 @@ spec:
             DEBIAN_FRONTEND=noninteractive apt-get install --yes watchdog
 
             cat > /etc/watchdog.conf <<EOF
+            # Minimal watchdog configuration - heartbeat only
             watchdog-device = /dev/watchdog
             watchdog-timeout = 120
-            max-load-1 = 40
-            max-load-5 = 30
-            max-load-15 = 20
             interval = 30
             realtime = yes
             priority = 1
             EOF
-
-            if ! lsmod | grep -q bcm2835_wdt; then
-              modprobe bcm2835_wdt
-            fi
-
-            if ! grep -q "bcm2835_wdt" /etc/modules; then
-              echo "bcm2835_wdt" >> /etc/modules
-            fi
 
             systemctl enable watchdog
             systemctl restart watchdog
