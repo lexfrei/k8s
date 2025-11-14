@@ -340,6 +340,10 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
   - EventSources define event triggers (calendar, resource, webhook, GitHub, etc.)
   - Sensors watch EventBus and submit Workflows when events match
   - Current setup: Calendar EventSource triggers weekly system-plan.yaml application
+- **NFS Storage**: TrueNAS NFS server (truenas.home.lex.la) for persistent storage
+  - **CRITICAL**: Uses soft mount (not hard) to prevent kernel freeze on NFS unavailability
+  - Timeout: timeo=100 (10 seconds) for fast failure detection
+  - Hard mount can cause D state hangs and complete node freeze (see Error 14)
 
 ## Renovate Configuration
 
@@ -619,6 +623,87 @@ if grep -q "^max-load-1 = 40" /etc/watchdog.conf 2>/dev/null; then
 - Test critical services (watchdog, storage drivers) on single node first
 - Monitor for boot loops (node unavailable > 5 minutes after plan application)
 
+### Error 14: NFS Hard Mount Causing Node Freeze
+**Error**: Control plane node (k8s-cp-01) completely unresponsive, requiring hard power cycle
+
+**Symptoms**:
+- Node stops responding to ping, SSH, and all network traffic
+- VIP 172.16.101.101 unreachable
+- Cluster API unavailable
+- Node requires physical power cycle to recover
+
+**Root Cause**:
+- Loki StatefulSet writing to NFS storage (truenas.home.lex.la)
+- NFS server became unavailable at 02:57:18
+- **NFS hard mount configuration** caused kernel to retry indefinitely
+- Loki process entered D state (uninterruptible sleep) for 368+ seconds
+- Kernel RCU stalls began spreading across subsystems
+- Watchdog timeout (120s) triggered hard reboot at ~03:00
+
+**Investigation**:
+```bash
+# Check logs from previous boot
+journalctl --boot=-1 --unit=kubelet
+
+# Key log entries:
+Nov 14 02:54:55 k8s-cp-01 kernel: INFO: task loki:25860 blocked for more than 122 seconds.
+Nov 14 02:57:18 k8s-cp-01 kernel: nfs: server truenas.home.lex.la not responding, still trying
+Nov 14 02:59:00 k8s-cp-01 kernel: INFO: task loki:25860 blocked for more than 368 seconds.
+State: D (uninterruptible sleep)
+Call trace: nfs_file_write → folio_wait_writeback
+```
+
+**Technical Explanation**:
+- **Hard mount** (default): Kernel retries I/O operations indefinitely when NFS server is unavailable
+  - Process enters D state (uninterruptible sleep) - cannot be killed by any signal
+  - Timeout period is very long (~10 minutes by default)
+  - Multiple processes can pile up in D state, freezing the entire system
+  - Leads to kernel RCU stalls and complete system freeze
+
+- **Soft mount**: Returns error (EIO) after timeout, process can handle error or crash
+  - Process receives error after ~20 seconds (timeo=100 = 10 deciseconds)
+  - Application can crash/restart, but kernel remains responsive
+  - System continues functioning, only affected pod fails
+
+**Fix**: Change NFS StorageClass from hard to soft mount in `manifests/csi-driver-nfs/truenas-sc.yaml`:
+```yaml
+mountOptions:
+  - nfsvers=4.1
+  - rsize=1048576
+  - wsize=1048576
+  - soft          # Changed from: hard
+  - timeo=100     # Changed from: timeo=600 (10s instead of 60s)
+  - retrans=2
+  - noresvport
+  - noatime
+  - tcp
+```
+
+**Important**: Existing PersistentVolumes do NOT automatically inherit StorageClass changes
+```bash
+# Must manually edit PV mount options
+kubectl edit pv PV_NAME
+
+# Then recreate pod to apply new mount
+kubectl delete pod POD_NAME
+```
+
+**Lessons**:
+1. **NFS hard mount is DANGEROUS in Kubernetes** - can freeze entire nodes
+2. **Always use soft mount for NFS in Kubernetes** - prefer application restart over kernel freeze
+3. **D state processes cannot be killed** - only option is reboot
+4. **Watchdog cannot prevent D state hangs** - it's a kernel-level freeze, not userspace hang
+5. **PV mount options are immutable** - require manual edit and pod recreation
+6. **Network storage failures should not take down compute nodes** - soft mount ensures isolation
+7. **StorageClass changes don't apply to existing PVs** - need manual migration
+
+**Prevention**:
+- Use soft mount for all NFS StorageClasses
+- Set reasonable timeout values (timeo=100 = 10 seconds)
+- Monitor NFS server availability proactively
+- Consider using distributed storage (Longhorn, Ceph) instead of centralized NFS for critical workloads
+- Test storage failure scenarios before production deployment
+
 ## Node Optimization Summary
 
 After troubleshooting and applying all system upgrade plans, the cluster nodes have these optimizations:
@@ -640,3 +725,4 @@ After troubleshooting and applying all system upgrade plans, the cluster nodes h
 3. System upgrade plan idempotency checks must match NEW configuration values
 4. Fail-closed webhooks can block critical operations - plan for webhook unavailability
 5. Home environment priorities (noise) differ from production (performance)
+6. **NFS hard mount can freeze entire nodes** - always use soft mount in Kubernetes
