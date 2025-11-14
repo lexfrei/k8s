@@ -56,6 +56,35 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: argo-events-workflow-trigger
+rules:
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtemplates
+      - workflows
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argo-events-workflow-trigger
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-events-workflow-trigger
+subjects:
+  - kind: ServiceAccount
+    name: argo-events-sa
+    namespace: argo-events
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
   name: argo-workflow-executor-events
 rules:
   - apiGroups:
