@@ -19,7 +19,7 @@ spec:
         podSecurityStandard: baseline
         validationFailureAction: Audit
     repoURL: https://kyverno.github.io/kyverno/
-    targetRevision: 3.5.2
+    targetRevision: 3.6.0
   syncPolicy:
     automated:
       prune: true
