@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: internal-dns
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: internal-dns
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://kubernetes-sigs.github.io/external-dns/"
+      targetRevision: "1.19.0"
+      chart: external-dns
+      helm:
+        valuesObject:
+          image:
+            repository: registry.k8s.io/external-dns/external-dns
+            tag: v0.20.0
+          provider:
+            name: webhook
+            webhook:
+              image:
+                repository: ghcr.io/lexfrei/external-dns-unifios-webhook
+                tag: pr-16
+              env:
+                - name: WEBHOOK_UNIFI_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: unifi-api-key
+                      key: api-key
+                - name: WEBHOOK_UNIFI_HOST
+                  value: "https://172.16.0.1"
+                - name: WEBHOOK_UNIFI_SITE
+                  value: "default"
+                - name: WEBHOOK_UNIFI_SKIP_TLS_VERIFY
+                  value: "true"
+                - name: WEBHOOK_SERVER_HOST
+                  value: "localhost"
+                - name: WEBHOOK_SERVER_PORT
+                  value: "8888"
+                - name: WEBHOOK_HEALTH_HOST
+                  value: "localhost"
+                - name: WEBHOOK_HEALTH_PORT
+                  value: "8080"
+                - name: WEBHOOK_LOGGING_LEVEL
+                  value: "info"
+                - name: WEBHOOK_LOGGING_FORMAT
+                  value: "json"
+              livenessProbe:
+                httpGet:
+                  path: /healthz
+                  port: 8080
+                initialDelaySeconds: 10
+                periodSeconds: 10
+              readinessProbe:
+                httpGet:
+                  path: /readyz
+                  port: 8080
+                initialDelaySeconds: 10
+                periodSeconds: 10
+          policy: sync
+          sources:
+            - gateway-httproute
+            - service
+          txtOwnerId: unifi
+          extraArgs:
+            - --annotation-prefix=internal-dns
+          logLevel: info
+          logFormat: json
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
