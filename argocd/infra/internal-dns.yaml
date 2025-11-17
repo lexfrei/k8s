@@ -67,7 +67,7 @@ spec:
             - service
           txtOwnerId: unifi
           extraArgs:
-            - --annotation-prefix=internal-dns
+            - --annotation-prefix=internal-dns/
           logLevel: info
           logFormat: json
   syncPolicy:
