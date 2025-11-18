@@ -33,22 +33,8 @@ spec:
                       key: api-key
                 - name: WEBHOOK_UNIFI_HOST
                   value: "https://172.16.0.1"
-                - name: WEBHOOK_UNIFI_SITE
-                  value: "default"
-                - name: WEBHOOK_UNIFI_SKIP_TLS_VERIFY
+                - name: WEBHOOK_DEBUG_PPROF_ENABLED
                   value: "true"
-                - name: WEBHOOK_SERVER_HOST
-                  value: "localhost"
-                - name: WEBHOOK_SERVER_PORT
-                  value: "8888"
-                - name: WEBHOOK_HEALTH_HOST
-                  value: "0.0.0.0"
-                - name: WEBHOOK_HEALTH_PORT
-                  value: "8080"
-                - name: WEBHOOK_LOGGING_LEVEL
-                  value: "info"
-                - name: WEBHOOK_LOGGING_FORMAT
-                  value: "json"
               livenessProbe:
                 httpGet:
                   path: /healthz
