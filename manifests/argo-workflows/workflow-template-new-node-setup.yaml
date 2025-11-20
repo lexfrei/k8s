@@ -95,7 +95,7 @@ spec:
         kubernetes.io/hostname: "{{inputs.parameters.node}}"
 
       container:
-        image: ubuntu:questing
+        image: ubuntu:questing-20251007
         securityContext:
           privileged: true
         volumeMounts:
@@ -149,7 +149,7 @@ spec:
         kubernetes.io/hostname: "{{inputs.parameters.node}}"
 
       container:
-        image: ubuntu:questing
+        image: ubuntu:questing-20251007
         securityContext:
           privileged: true
         volumeMounts:
@@ -213,7 +213,7 @@ spec:
         kubernetes.io/hostname: "{{inputs.parameters.node}}"
 
       container:
-        image: ubuntu:questing
+        image: ubuntu:questing-20251007
         securityContext:
           privileged: true
         volumeMounts:
@@ -275,7 +275,7 @@ spec:
         kubernetes.io/hostname: "{{inputs.parameters.node}}"
 
       container:
-        image: ubuntu:questing
+        image: ubuntu:questing-20251007
         securityContext:
           privileged: true
         volumeMounts:
@@ -328,7 +328,7 @@ spec:
         kubernetes.io/hostname: "{{inputs.parameters.node}}"
 
       container:
-        image: ubuntu:questing
+        image: ubuntu:questing-20251007
         securityContext:
           privileged: true
         volumeMounts:
