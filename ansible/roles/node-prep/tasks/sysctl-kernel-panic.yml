@@ -1,0 +1,48 @@
+---
+# Configure kernel panic behavior
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-new-node-setup.yaml
+# These settings control how the system responds to kernel panics and critical errors
+
+- name: Configure kernel panic timeout
+  ansible.posix.sysctl:
+    name: kernel.panic
+    value: "{{ node_prep_kernel_panic }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-panic.conf
+    reload: true
+  tags:
+    - sysctl
+    - kernel-panic
+
+- name: Configure panic on kernel oops
+  ansible.posix.sysctl:
+    name: kernel.panic_on_oops
+    value: "{{ node_prep_kernel_panic_on_oops }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-panic.conf
+    reload: true
+  tags:
+    - sysctl
+    - kernel-panic
+
+- name: Configure panic on OOM
+  ansible.posix.sysctl:
+    name: vm.panic_on_oom
+    value: "{{ node_prep_vm_panic_on_oom }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-panic.conf
+    reload: true
+  tags:
+    - sysctl
+    - kernel-panic
+
+- name: Configure panic on hung tasks
+  ansible.posix.sysctl:
+    name: kernel.hung_task_panic
+    value: "{{ node_prep_kernel_hung_task_panic }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-panic.conf
+    reload: true
+  tags:
+    - sysctl
+    - kernel-panic

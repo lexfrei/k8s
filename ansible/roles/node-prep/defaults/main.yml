@@ -1,0 +1,82 @@
+---
+# Node preparation role - Default package lists
+# These variables can be overridden in group_vars or host_vars
+
+# Kubernetes dependencies
+# Required for K3s storage and networking functionality
+node_prep_k8s_packages:
+  - nfs-common          # NFS client for NFS-based storage (documented in Error 14)
+  - multipath-tools     # Device mapper multipath support for storage
+  - open-iscsi          # iSCSI initiator (required by Longhorn distributed storage)
+
+# Quality of life tools
+# Useful utilities for cluster management and troubleshooting
+node_prep_qol_packages:
+  - vim                 # Text editor for configuration
+  - etcd-client         # etcdctl command-line tool for K3s embedded etcd
+
+# System utilities
+# Hardware and system monitoring tools
+node_prep_system_packages:
+  - cpufrequtils        # CPU frequency scaling utilities (see Error 9 for governor config)
+  - watchdog            # Hardware watchdog daemon (configured in Error 9, 13)
+  - smartmontools       # SMART disk health monitoring
+
+# Combined package list (all categories)
+# This is what gets installed by apt-packages.yml
+node_prep_apt_packages: "{{ node_prep_k8s_packages + node_prep_qol_packages + node_prep_system_packages }}"
+
+# APT configuration
+node_prep_apt_cache_valid_time: 3600  # Cache validity in seconds (1 hour)
+node_prep_apt_retries: 3              # Number of retry attempts
+node_prep_apt_retry_delay: 10         # Delay between retries in seconds
+
+# Sysctl - Kernel panic settings
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-new-node-setup.yaml
+node_prep_kernel_panic: 10                    # Reboot after 10 seconds on kernel panic
+node_prep_kernel_panic_on_oops: 1            # Panic on kernel oops
+node_prep_vm_panic_on_oom: 0                 # Do not panic on OOM
+node_prep_kernel_hung_task_panic: 0          # Do not panic on hung tasks
+
+# Sysctl - Filesystem optimization
+# Converted from Argo Workflows
+node_prep_vm_swappiness: 1                   # Minimal swap usage
+node_prep_vm_dirty_background_ratio: 5       # Start writeback at 5% dirty pages
+node_prep_vm_dirty_ratio: 10                 # Force writeback at 10% dirty pages
+node_prep_vm_dirty_expire_centisecs: 1500    # 15 seconds
+node_prep_vm_dirty_writeback_centisecs: 500  # 5 seconds
+node_prep_fs_file_max: 2097152               # Maximum open files
+node_prep_fs_inotify_max_user_watches: 524288  # inotify watches (K8s needs this)
+node_prep_fs_inotify_max_user_instances: 512   # inotify instances
+node_prep_fs_inotify_max_queued_events: 65536  # inotify queue size
+node_prep_fs_aio_max_nr: 1048576             # Async I/O limit
+node_prep_vm_overcommit_memory: 0            # Heuristic overcommit
+
+# DNS configuration (systemd-resolved)
+# Converted from Argo Workflows
+node_prep_dns_primary: "172.16.0.1"          # Primary DNS server
+node_prep_dns_fallback: "8.8.8.8 1.1.1.1"   # Fallback DNS servers
+
+# DNS timeouts and caching
+node_prep_dns_stub_listener_extra: "127.0.0.54"  # Additional DNS stub listener
+node_prep_dns_cache: "yes"                       # Enable DNS caching
+node_prep_dns_cache_from_localhost: "no"         # Don't cache localhost queries
+node_prep_dns_over_tls: "no"                     # Disable DNS over TLS
+node_prep_dns_multicast: "no"                    # Disable mDNS
+node_prep_dns_llmnr: "no"                        # Disable LLMNR
+node_prep_dns_read_etc_hosts: "yes"              # Use /etc/hosts
+node_prep_dns_resolve_unicast_single_label: "no"  # Don't resolve single-label names
+node_prep_dns_stale_retention_sec: 3600          # Keep stale entries for 1 hour
+
+# Watchdog configuration
+# Converted from Argo Workflows (heartbeat-only mode)
+# Note: watchdog package is installed via node_prep_system_packages
+node_prep_watchdog_device: "/dev/watchdog"
+node_prep_watchdog_timeout: 120              # 2 minutes timeout
+node_prep_watchdog_interval: 30              # Check every 30 seconds
+node_prep_watchdog_realtime: "yes"
+node_prep_watchdog_priority: 1
+
+# System upgrade configuration
+node_prep_system_upgrade_enabled: false      # Upgrade disabled by default (use playbook)
+node_prep_reboot_if_required: true           # Auto-reboot enabled by default

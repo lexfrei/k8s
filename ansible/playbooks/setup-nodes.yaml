@@ -1,0 +1,43 @@
+---
+# Setup K3s nodes with required packages and configurations
+# This playbook applies the node-prep role to prepare nodes for K3s
+#
+# Usage:
+#   ansible-playbook playbooks/setup-nodes.yaml
+#   ansible-playbook playbooks/setup-nodes.yaml --limit server
+#   ansible-playbook playbooks/setup-nodes.yaml --limit k8s-cp-01
+
+- name: Prepare K3s cluster nodes
+  hosts: k3s_cluster
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Display target hosts
+      ansible.builtin.debug:
+        msg: "Preparing node: {{ inventory_hostname }} ({{ ansible_host }})"
+      tags:
+        - always
+
+    - name: Verify OS compatibility
+      ansible.builtin.fail:
+        msg: "This role only supports Debian/Ubuntu. Detected: {{ ansible_distribution }}"
+      when: ansible_os_family != 'Debian'
+      tags:
+        - always
+
+  roles:
+    - role: node-prep
+      tags:
+        - node-prep
+        - packages
+
+  post_tasks:
+    - name: Display completion message
+      ansible.builtin.debug:
+        msg: |
+          ✓ Node {{ inventory_hostname }} preparation complete
+          ✓ All required packages installed
+          ✓ Ready for K3s installation
+      tags:
+        - always

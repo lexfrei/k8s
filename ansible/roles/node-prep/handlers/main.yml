@@ -1,0 +1,26 @@
+---
+# Node preparation handlers
+# Handlers for restarting services after configuration changes
+
+- name: Restart watchdog service
+  ansible.builtin.systemd:
+    name: watchdog
+    state: started
+  listen: restart watchdog
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  listen: reload systemd
+
+- name: Restart open-iscsi service
+  ansible.builtin.systemd:
+    name: open-iscsi
+    state: restarted
+  listen: restart open-iscsi
+
+- name: Restart systemd-resolved service
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: restarted
+  listen: restart systemd-resolved

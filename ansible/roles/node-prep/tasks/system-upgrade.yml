@@ -1,0 +1,77 @@
+---
+# System upgrade tasks
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-node-upgrade.yaml
+# Performs apt upgrade with automatic package cleanup
+# Optionally reboots if required (controlled by node_prep_reboot_if_required variable)
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: "{{ node_prep_apt_cache_valid_time }}"
+  when: node_prep_system_upgrade_enabled | bool
+  tags:
+    - system-upgrade
+    - apt
+
+- name: Perform system upgrade
+  ansible.builtin.apt:
+    upgrade: dist
+    force_apt_get: true
+    dpkg_options: 'force-confdef,force-confold'
+  when: node_prep_system_upgrade_enabled | bool
+  register: apt_upgrade_result
+  tags:
+    - system-upgrade
+    - apt
+
+- name: Autoremove unnecessary packages
+  ansible.builtin.apt:
+    autoremove: true
+    purge: true
+  when: node_prep_system_upgrade_enabled | bool
+  tags:
+    - system-upgrade
+    - apt
+
+- name: Autoclean apt cache
+  ansible.builtin.apt:
+    autoclean: true
+  when: node_prep_system_upgrade_enabled | bool
+  tags:
+    - system-upgrade
+    - apt
+
+- name: Check if reboot is required
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: reboot_required_file
+  when: node_prep_system_upgrade_enabled | bool
+  tags:
+    - system-upgrade
+    - reboot
+
+- name: Display reboot requirement status
+  ansible.builtin.debug:
+    msg: >-
+      {%- if reboot_required_file.stat.exists -%}
+      ⚠️  Reboot is required on {{ inventory_hostname }}
+      {%- else -%}
+      ✓ No reboot required on {{ inventory_hostname }}
+      {%- endif -%}
+  when: node_prep_system_upgrade_enabled | bool
+  tags:
+    - system-upgrade
+    - reboot
+
+- name: Reboot node if required
+  ansible.builtin.reboot:
+    msg: "Reboot triggered by system upgrade (Ansible node-prep role)"
+    reboot_timeout: 600
+    post_reboot_delay: 30
+  when:
+    - node_prep_system_upgrade_enabled | bool
+    - node_prep_reboot_if_required | bool
+    - reboot_required_file.stat.exists
+  tags:
+    - system-upgrade
+    - reboot

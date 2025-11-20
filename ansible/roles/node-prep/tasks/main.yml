@@ -1,0 +1,81 @@
+---
+# Node preparation main tasks
+# Prepares K3s cluster nodes with required packages and configurations
+
+- name: Node preparation
+  block:
+    - name: Update APT cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: "{{ node_prep_apt_cache_valid_time }}"
+      tags:
+        - packages
+        - apt-cache
+
+    - name: Install required packages
+      ansible.builtin.include_tasks: apt-packages.yml
+      when: node_prep_apt_packages | length > 0
+      tags:
+        - packages
+
+    - name: Configure sysctl - kernel panic settings
+      ansible.builtin.include_tasks: sysctl-kernel-panic.yml
+      tags:
+        - sysctl
+        - kernel-panic
+
+    - name: Configure sysctl - filesystem optimization
+      ansible.builtin.include_tasks: sysctl-filesystem.yml
+      tags:
+        - sysctl
+        - filesystem
+
+    - name: Configure DNS fallback servers
+      ansible.builtin.include_tasks: dns-fallback.yml
+      tags:
+        - dns
+
+    - name: Configure DNS timeouts and caching
+      ansible.builtin.include_tasks: dns-timeouts.yml
+      tags:
+        - dns
+
+    - name: Configure watchdog
+      ansible.builtin.include_tasks: watchdog.yml
+      tags:
+        - watchdog
+
+    - name: Perform system upgrade (optional)
+      ansible.builtin.include_tasks: system-upgrade.yml
+      when: node_prep_system_upgrade_enabled | bool
+      tags:
+        - system-upgrade
+
+    - name: Display node preparation summary
+      ansible.builtin.debug:
+        msg: |
+          Node {{ inventory_hostname }} prepared successfully:
+          - {{ node_prep_k8s_packages | length }} K8s dependency packages installed
+          - {{ node_prep_qol_packages | length }} QoL packages installed
+          - {{ node_prep_system_packages | length }} system utility packages installed
+          - Kernel panic settings configured
+          - Filesystem optimization applied
+          - DNS fallback and caching configured
+          - Watchdog configured and running
+          {% if node_prep_system_upgrade_enabled | bool -%}
+          - System upgrade completed
+          {% endif -%}
+      tags:
+        - always
+
+  rescue:
+    - name: Display error message
+      ansible.builtin.debug:
+        msg: "Node preparation failed on {{ inventory_hostname }}. Check apt logs."
+
+    - name: Fail the play
+      ansible.builtin.fail:
+        msg: "Node preparation failed. See error above."
+
+  tags:
+    - node-prep

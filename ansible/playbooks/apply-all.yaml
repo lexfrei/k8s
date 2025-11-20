@@ -1,0 +1,21 @@
+---
+# Master playbook to apply all node configurations and upgrades
+#
+# Usage: ansible-playbook playbooks/apply-all.yaml
+#
+# This playbook sequentially executes:
+# 1. Node preparation (sysctl, DNS, watchdog) - idempotent
+# 2. System package upgrades - may reboot if required
+# 3. K3s version upgrade - only if version changed
+#
+# To skip automatic reboot after system upgrade:
+#   ansible-playbook playbooks/apply-all.yaml --extra-vars "auto_reboot=false"
+
+- name: Apply node preparation configuration
+  ansible.builtin.import_playbook: setup-nodes.yaml
+
+- name: Upgrade system packages
+  ansible.builtin.import_playbook: upgrade-nodes.yaml
+
+- name: Upgrade K3s cluster
+  ansible.builtin.import_playbook: k3s-upgrade.yaml

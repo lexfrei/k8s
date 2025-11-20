@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+# DNS caching and timeout configuration for systemd-resolved
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-dns-configuration.yaml
+#
+# Optimizes DNS caching behavior and disables unnecessary protocols
+# This file is placed in /etc/systemd/resolved.conf.d/timeouts.conf
+
+[Resolve]
+DNSStubListenerExtra={{ node_prep_dns_stub_listener_extra }}
+Cache={{ node_prep_dns_cache }}
+CacheFromLocalhost={{ node_prep_dns_cache_from_localhost }}
+DNSOverTLS={{ node_prep_dns_over_tls }}
+MulticastDNS={{ node_prep_dns_multicast }}
+LLMNR={{ node_prep_dns_llmnr }}
+ReadEtcHosts={{ node_prep_dns_read_etc_hosts }}
+ResolveUnicastSingleLabel={{ node_prep_dns_resolve_unicast_single_label }}
+StaleRetentionSec={{ node_prep_dns_stale_retention_sec }}
