@@ -249,8 +249,8 @@ spec:
               echo "priority = 1"
             } > /etc/watchdog.conf
 
-            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl enable watchdog
-            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart watchdog
+            nsenter --target 1 --mount --uts --ipc --net --pid -- /usr/bin/systemctl enable watchdog
+            nsenter --target 1 --mount --uts --ipc --net --pid -- /usr/bin/systemctl restart watchdog
 
             if nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl is-active --quiet watchdog; then
               echo "✓ Watchdog configured"
@@ -308,7 +308,7 @@ spec:
             FallbackDNS=8.8.8.8 1.1.1.1
             EOF
 
-            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart systemd-resolved
+            nsenter --target 1 --mount --uts --ipc --net --pid -- /usr/bin/systemctl restart systemd-resolved
 
             echo "✓ DNS fallback configured"
             '
@@ -369,7 +369,7 @@ spec:
             StaleRetentionSec=3600
             EOF
 
-            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart systemd-resolved
+            nsenter --target 1 --mount --uts --ipc --net --pid -- /usr/bin/systemctl restart systemd-resolved
 
             echo "✓ DNS timeouts configured"
             '
