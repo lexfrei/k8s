@@ -1,6 +1,6 @@
 ---
 # K3s cluster upgrade playbook
-# Wrapper for k3s-ansible upgrade.yml with custom configuration
+# Wrapper for k3s.orchestration.upgrade with custom configuration
 #
 # Usage: ansible-playbook playbooks/k3s-upgrade.yaml
 #
@@ -12,40 +12,5 @@
 #
 # IMPORTANT: Update k3s_version in group_vars/k3s_cluster.yaml before running
 
-- name: Upgrade K3s cluster
-  hosts: k3s_cluster
-  become: true
-  gather_facts: true
-
-  pre_tasks:
-    - name: Display current K3s version
-      ansible.builtin.command: k3s --version
-      register: current_version
-      changed_when: false
-      failed_when: false
-
-    - name: Display target K3s version
-      ansible.builtin.debug:
-        msg: "Upgrading from {{ current_version.stdout | default('not installed') }} to {{ k3s_version }}"
-
-    - name: Confirm upgrade
-      ansible.builtin.pause:
-        prompt: "Press Enter to continue with upgrade, Ctrl+C to abort"
-      when: current_version.rc == 0
-      run_once: true
-
-  tasks:
-    - name: Include k3s-ansible upgrade role
-      ansible.builtin.include_role:
-        name: k3s_upgrade
-      when: current_version.rc == 0
-
-  post_tasks:
-    - name: Verify new K3s version
-      ansible.builtin.command: k3s --version
-      register: new_version
-      changed_when: false
-
-    - name: Display upgrade result
-      ansible.builtin.debug:
-        msg: "K3s upgraded successfully to {{ new_version.stdout }}"
+- name: Upgrade K3s cluster using k3s.orchestration collection
+  ansible.builtin.import_playbook: k3s.orchestration.upgrade
