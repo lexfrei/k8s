@@ -5,7 +5,7 @@
 - name: Restart watchdog service
   ansible.builtin.systemd:
     name: watchdog
-    state: restarted
+    state: started
   listen: restart watchdog
 
 - name: Reload systemd
