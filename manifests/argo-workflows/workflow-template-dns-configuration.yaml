@@ -71,7 +71,7 @@ spec:
         kubernetes.io/hostname: "{{inputs.parameters.node}}"
 
       container:
-        image: ubuntu:questing-20251007
+        image: ubuntu:questing
         securityContext:
           privileged: true
         volumeMounts:
@@ -104,7 +104,7 @@ spec:
             FallbackDNS=8.8.8.8 1.1.1.1
             EOF
 
-            nsenter --target 1 --mount --uts --ipc --net --pid -- /usr/bin/systemctl restart systemd-resolved
+            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart systemd-resolved
 
             echo "✓ DNS fallback configured"
             '
@@ -124,7 +124,7 @@ spec:
         kubernetes.io/hostname: "{{inputs.parameters.node}}"
 
       container:
-        image: ubuntu:questing-20251007
+        image: ubuntu:questing
         securityContext:
           privileged: true
         volumeMounts:
@@ -165,7 +165,7 @@ spec:
             StaleRetentionSec=3600
             EOF
 
-            nsenter --target 1 --mount --uts --ipc --net --pid -- /usr/bin/systemctl restart systemd-resolved
+            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart systemd-resolved
 
             echo "✓ DNS timeouts configured"
             '
