@@ -1,0 +1,18 @@
+---
+# Kubernetes cluster inventory (k3s-ansible format)
+# Groups: server (control plane), agent (workers)
+all:
+  children:
+    k3s_cluster:
+      children:
+        # K3s server nodes (control plane)
+        server:
+          hosts:
+            k8s-cp-01:
+              ansible_host: 172.16.101.1
+
+        # K3s agent nodes (workers)
+        agent:
+          hosts:
+            k8s-worker-01:
+              ansible_host: 172.16.101.2

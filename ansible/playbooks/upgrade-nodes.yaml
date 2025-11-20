@@ -1,0 +1,73 @@
+---
+# Upgrade system packages on K3s nodes
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-node-upgrade.yaml
+#
+# This playbook performs apt upgrade on cluster nodes, with optional automatic reboot.
+# Nodes are upgraded sequentially (serial: 1) to maintain cluster availability.
+#
+# Usage:
+#   # Upgrade all nodes with automatic reboot if required (default)
+#   ansible-playbook playbooks/upgrade-nodes.yaml
+#
+#   # Upgrade all nodes without automatic reboot
+#   ansible-playbook playbooks/upgrade-nodes.yaml --extra-vars "auto_reboot=false"
+#
+#   # Upgrade only control plane nodes
+#   ansible-playbook playbooks/upgrade-nodes.yaml --limit server
+#
+#   # Upgrade only worker nodes
+#   ansible-playbook playbooks/upgrade-nodes.yaml --limit agent
+#
+#   # Upgrade specific node
+#   ansible-playbook playbooks/upgrade-nodes.yaml --limit k8s-cp-01
+
+- name: Upgrade K3s cluster nodes
+  hosts: k3s_cluster
+  become: true
+  gather_facts: true
+  serial: 1  # Upgrade nodes sequentially to maintain cluster availability
+
+  vars:
+    # Override defaults to enable system upgrade
+    node_prep_system_upgrade_enabled: true
+    # Automatic reboot can be controlled via --extra-vars "auto_reboot=false"
+    node_prep_reboot_if_required: "{{ auto_reboot | default(true) }}"
+
+  pre_tasks:
+    - name: Display upgrade target
+      ansible.builtin.debug:
+        msg: |
+          ════════════════════════════════════════════════════════
+          Upgrading node: {{ inventory_hostname }} ({{ ansible_host }})
+          Automatic reboot: {{ node_prep_reboot_if_required | bool }}
+          ════════════════════════════════════════════════════════
+      tags:
+        - always
+
+    - name: Verify OS compatibility
+      ansible.builtin.fail:
+        msg: "This playbook only supports Debian/Ubuntu. Detected: {{ ansible_distribution }}"
+      when: ansible_os_family != 'Debian'
+      tags:
+        - always
+
+  tasks:
+    - name: Perform system upgrade
+      ansible.builtin.include_role:
+        name: node-prep
+        tasks_from: system-upgrade.yml
+      tags:
+        - system-upgrade
+
+  post_tasks:
+    - name: Display completion message
+      ansible.builtin.debug:
+        msg: |
+          ✓ Node {{ inventory_hostname }} upgrade complete
+          {% if node_prep_reboot_if_required | bool -%}
+          ✓ Automatic reboot was enabled
+          {% else -%}
+          ⚠️  If reboot was required, please reboot manually
+          {% endif -%}
+      tags:
+        - always

@@ -1,0 +1,10 @@
+---
+# Ansible Collections Requirements
+# Install with: ansible-galaxy collection install -r requirements.yaml
+
+collections:
+  # k3s-ansible - Official K3s Ansible collection
+  # Provides roles and playbooks for K3s cluster management
+  - name: https://github.com/k3s-io/k3s-ansible.git
+    type: git
+    version: f06b042aab0e6041837d730e9727e80421a9d17c

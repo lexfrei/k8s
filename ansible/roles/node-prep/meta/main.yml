@@ -1,0 +1,34 @@
+---
+# Node preparation role metadata
+
+galaxy_info:
+  role_name: node_prep
+  author: Aleksei Sviridkin
+  description: Prepares K3s cluster nodes with required packages and configurations
+  company: SRE
+  license: MIT
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+
+  galaxy_tags:
+    - kubernetes
+    - k3s
+    - cluster
+    - node-preparation
+    - arm64
+    - raspberry-pi
+
+dependencies: []
+
+# Role allows these tags
+allow_duplicates: false

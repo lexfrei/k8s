@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+# DNS fallback configuration for systemd-resolved
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-dns-configuration.yaml
+#
+# Primary DNS server and fallback servers configuration
+# This file is placed in /etc/systemd/resolved.conf.d/fallback.conf
+
+[Resolve]
+DNS={{ node_prep_dns_primary }}
+FallbackDNS={{ node_prep_dns_fallback }}
