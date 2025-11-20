@@ -7,10 +7,8 @@ ansible_user: ansible
 ansible_python_interpreter: /usr/bin/python3
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
-# K3s version (required by k3s-ansible)
-# Note: k3s-ansible requires explicit version, cannot use "stable" or "latest"
-# renovate: datasource=github-releases depName=k3s-io/k3s
-k3s_version: v1.34.1+k3s1
+# K3s version is now defined in inventory/production.yaml vars section
+# to ensure proper inheritance by server and agent groups
 
 # Cluster token (retrieved from existing cluster)
 # Get from: sudo cat /var/lib/rancher/k3s/server/token

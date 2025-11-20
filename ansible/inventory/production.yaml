@@ -16,3 +16,9 @@ all:
           hosts:
             k8s-worker-01:
               ansible_host: 172.16.101.2
+
+      vars:
+        # K3s version for upgrades
+        # Note: k3s-ansible requires explicit version, cannot use "stable" or "latest"
+        # renovate: datasource=github-releases depName=k3s-io/k3s
+        k3s_version: v1.34.1+k3s1
