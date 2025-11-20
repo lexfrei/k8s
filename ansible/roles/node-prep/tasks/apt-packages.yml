@@ -1,0 +1,24 @@
+---
+# Install APT packages for K3s node preparation
+# Uses ansible.builtin.apt (not package) for Debian/Ubuntu systems
+
+- name: Install APT packages
+  ansible.builtin.apt:
+    name: "{{ node_prep_apt_packages }}"
+    state: present
+    update_cache: false  # Cache updated in main.yml
+  register: apt_install_result
+  until: apt_install_result is succeeded
+  retries: "{{ node_prep_apt_retries }}"
+  delay: "{{ node_prep_apt_retry_delay }}"
+  tags:
+    - packages
+    - apt-packages
+
+- name: Display installed packages count
+  ansible.builtin.debug:
+    msg: "Installed {{ node_prep_apt_packages | length }} APT packages on {{ inventory_hostname }}"
+  when: apt_install_result.changed
+  tags:
+    - packages
+    - apt-packages

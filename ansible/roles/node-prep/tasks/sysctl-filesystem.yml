@@ -1,0 +1,125 @@
+---
+# Configure filesystem and memory management optimization
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-new-node-setup.yaml
+# These settings optimize disk I/O, memory usage, and file handling for K8s workloads
+
+- name: Configure swap usage (minimize swapping)
+  ansible.posix.sysctl:
+    name: vm.swappiness
+    value: "{{ node_prep_vm_swappiness }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure dirty page background writeback ratio
+  ansible.posix.sysctl:
+    name: vm.dirty_background_ratio
+    value: "{{ node_prep_vm_dirty_background_ratio }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure dirty page forced writeback ratio
+  ansible.posix.sysctl:
+    name: vm.dirty_ratio
+    value: "{{ node_prep_vm_dirty_ratio }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure dirty page expiration time
+  ansible.posix.sysctl:
+    name: vm.dirty_expire_centisecs
+    value: "{{ node_prep_vm_dirty_expire_centisecs }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure dirty page writeback interval
+  ansible.posix.sysctl:
+    name: vm.dirty_writeback_centisecs
+    value: "{{ node_prep_vm_dirty_writeback_centisecs }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure maximum open files limit
+  ansible.posix.sysctl:
+    name: fs.file-max
+    value: "{{ node_prep_fs_file_max }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure inotify max user watches
+  ansible.posix.sysctl:
+    name: fs.inotify.max_user_watches
+    value: "{{ node_prep_fs_inotify_max_user_watches }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure inotify max user instances
+  ansible.posix.sysctl:
+    name: fs.inotify.max_user_instances
+    value: "{{ node_prep_fs_inotify_max_user_instances }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure inotify max queued events
+  ansible.posix.sysctl:
+    name: fs.inotify.max_queued_events
+    value: "{{ node_prep_fs_inotify_max_queued_events }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure async I/O maximum limit
+  ansible.posix.sysctl:
+    name: fs.aio-max-nr
+    value: "{{ node_prep_fs_aio_max_nr }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem
+
+- name: Configure memory overcommit behavior
+  ansible.posix.sysctl:
+    name: vm.overcommit_memory
+    value: "{{ node_prep_vm_overcommit_memory }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-filesystem.conf
+    reload: true
+  tags:
+    - sysctl
+    - filesystem

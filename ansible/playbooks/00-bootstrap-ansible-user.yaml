@@ -1,0 +1,79 @@
+---
+# Bootstrap Ansible user on all nodes
+# This playbook creates the ansible user with SSH key and sudo access
+# Run with: ansible-playbook -i inventory/production.yaml playbooks/00-bootstrap-ansible-user.yaml
+#
+# IMPORTANT: This playbook connects as 'lex' user to bootstrap 'ansible' user
+# After this playbook completes, all future playbooks will use 'ansible' user
+
+- name: Bootstrap ansible user on all nodes
+  hosts: all
+  become: true
+  # Override ansible.cfg remote_user for bootstrap
+  vars:
+    ansible_user: lex
+    ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+    ansible_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINGuz/3Jnqn6kpR7zJLwzvs2WaGkb3CfNvzhH3LA2sUD ansible@k8s-cluster"
+
+  tasks:
+    - name: Check if ansible user already exists
+      getent:
+        database: passwd
+        key: ansible
+      register: ansible_user_check
+      failed_when: false
+
+    - name: Create ansible user
+      user:
+        name: ansible
+        comment: "Ansible automation user"
+        shell: /bin/bash
+        create_home: true
+        home: /home/ansible
+        state: present
+      when: ansible_user_check.ansible_facts.getent_passwd is not defined
+
+    - name: Ensure .ssh directory exists
+      file:
+        path: /home/ansible/.ssh
+        state: directory
+        owner: ansible
+        group: ansible
+        mode: '0700'
+
+    - name: Add ansible SSH public key
+      authorized_key:
+        user: ansible
+        key: "{{ ansible_public_key }}"
+        state: present
+        exclusive: false
+
+    - name: Configure passwordless sudo for ansible user
+      copy:
+        content: |
+          # Ansible automation user - passwordless sudo
+          ansible ALL=(ALL) NOPASSWD:ALL
+        dest: /etc/sudoers.d/ansible
+        owner: root
+        group: root
+        mode: '0440'
+        validate: 'visudo -cf %s'
+
+    - name: Lock ansible user password
+      user:
+        name: ansible
+        password_lock: true
+
+    - name: Verify ansible user can sudo
+      become: true
+      become_user: ansible
+      command: sudo -n true
+      changed_when: false
+
+    - name: Display success message
+      debug:
+        msg: |
+          ✓ Ansible user successfully bootstrapped on {{ inventory_hostname }}
+          ✓ SSH key deployed
+          ✓ Passwordless sudo configured
+          ✓ User password locked (SSH key only authentication)

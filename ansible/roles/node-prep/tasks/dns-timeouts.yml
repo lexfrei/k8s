@@ -1,0 +1,28 @@
+---
+# Configure DNS caching and timeouts
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-dns-configuration.yaml
+# Configures systemd-resolved with caching and timeout optimizations
+
+- name: Ensure systemd-resolved configuration directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags:
+    - dns
+    - config
+
+- name: Deploy DNS timeouts and caching configuration
+  ansible.builtin.template:
+    src: resolved-timeouts.conf.j2
+    dest: /etc/systemd/resolved.conf.d/timeouts.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  notify: restart systemd-resolved
+  tags:
+    - dns
+    - config

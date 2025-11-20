@@ -1,0 +1,40 @@
+---
+# Configure hardware watchdog
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-new-node-setup.yaml
+# NOTE: watchdog package is installed via apt-packages.yml (node_prep_system_packages)
+# This task only handles configuration and service management
+
+- name: Deploy watchdog configuration
+  ansible.builtin.template:
+    src: watchdog.conf.j2
+    dest: /etc/watchdog.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  notify: restart watchdog
+  tags:
+    - watchdog
+    - config
+
+- name: Enable watchdog service
+  ansible.builtin.systemd:
+    name: watchdog
+    enabled: true
+  tags:
+    - watchdog
+
+- name: Start watchdog service
+  ansible.builtin.systemd:
+    name: watchdog
+    state: started
+  tags:
+    - watchdog
+
+- name: Verify watchdog service is running
+  ansible.builtin.systemd:
+    name: watchdog
+  register: watchdog_status
+  failed_when: watchdog_status.status.ActiveState != 'active'
+  tags:
+    - watchdog

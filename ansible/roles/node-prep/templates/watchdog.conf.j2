@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+# Minimal watchdog configuration - heartbeat only
+# Converted from Argo Workflows manifests/argo-workflows/workflow-template-new-node-setup.yaml
+#
+# This configuration enables hardware watchdog in heartbeat-only mode.
+# It does NOT monitor system load or other metrics - only provides periodic heartbeat
+# to prevent hardware watchdog from triggering automatic reboot.
+
+watchdog-device = {{ node_prep_watchdog_device }}
+watchdog-timeout = {{ node_prep_watchdog_timeout }}
+interval = {{ node_prep_watchdog_interval }}
+realtime = {{ node_prep_watchdog_realtime }}
+priority = {{ node_prep_watchdog_priority }}
