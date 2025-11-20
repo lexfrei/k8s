@@ -6,7 +6,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: truenas.home.lex.la
+  server: 172.16.10.19
   share: /mnt/pool/k8s
 reclaimPolicy: Delete
 volumeBindingMode: Immediate

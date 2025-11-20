@@ -9,7 +9,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: truenas.home.lex.la
+    server: 172.16.10.19
     path: /mnt/pool/Transmission
   mountOptions:
     - nfsvers=4.1
