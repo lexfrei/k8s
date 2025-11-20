@@ -69,6 +69,22 @@ spec:
                 - name: node
                   value: "{{inputs.parameters.node}}"
 
+        # Step 4: DNS fallback configuration
+        - - name: dns-fallback
+            template: configure-dns-fallback
+            arguments:
+              parameters:
+                - name: node
+                  value: "{{inputs.parameters.node}}"
+
+        # Step 5: DNS timeouts optimization
+        - - name: dns-timeouts
+            template: configure-dns-timeouts
+            arguments:
+              parameters:
+                - name: node
+                  value: "{{inputs.parameters.node}}"
+
     # Configure kernel panic settings
     - name: configure-kernel-panic
       inputs:
@@ -242,6 +258,120 @@ spec:
               echo "ERROR: Watchdog failed to start"
               exit 1
             fi
+            '
+
+      volumes:
+        - name: host-root
+          hostPath:
+            path: /
+
+    # Configure DNS fallback servers
+    - name: configure-dns-fallback
+      inputs:
+        parameters:
+          - name: node
+
+      nodeSelector:
+        kubernetes.io/hostname: "{{inputs.parameters.node}}"
+
+      container:
+        image: ubuntu:questing-20251007
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: host-root
+            mountPath: /host
+        command: [/bin/bash, -c]
+        args:
+          - |
+            set -e
+            echo "=== Configuring DNS fallback on: {{inputs.parameters.node}} ==="
+
+            chroot /host /bin/bash -c '
+            set -e
+            CONF_DIR="/etc/systemd/resolved.conf.d"
+            CONF_FILE="$CONF_DIR/fallback.conf"
+
+            if [ -f "$CONF_FILE" ]; then
+              if grep -q "^DNS=172.16.0.1" "$CONF_FILE" && \
+                 grep -q "^FallbackDNS=8.8.8.8 1.1.1.1" "$CONF_FILE"; then
+                echo "DNS fallback already configured, skipping"
+                exit 0
+              fi
+            fi
+
+            mkdir -p "$CONF_DIR"
+
+            cat > "$CONF_FILE" <<EOF
+            [Resolve]
+            DNS=172.16.0.1
+            FallbackDNS=8.8.8.8 1.1.1.1
+            EOF
+
+            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart systemd-resolved
+
+            echo "✓ DNS fallback configured"
+            '
+
+      volumes:
+        - name: host-root
+          hostPath:
+            path: /
+
+    # Configure DNS timeouts
+    - name: configure-dns-timeouts
+      inputs:
+        parameters:
+          - name: node
+
+      nodeSelector:
+        kubernetes.io/hostname: "{{inputs.parameters.node}}"
+
+      container:
+        image: ubuntu:questing-20251007
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: host-root
+            mountPath: /host
+        command: [/bin/bash, -c]
+        args:
+          - |
+            set -e
+            echo "=== Configuring DNS timeouts on: {{inputs.parameters.node}} ==="
+
+            chroot /host /bin/bash -c '
+            set -e
+            CONF_DIR="/etc/systemd/resolved.conf.d"
+            CONF_FILE="$CONF_DIR/timeouts.conf"
+
+            if [ -f "$CONF_FILE" ]; then
+              if grep -q "^DNSStubListenerExtra=127.0.0.54" "$CONF_FILE" && \
+                 grep -q "^Cache=yes" "$CONF_FILE" && \
+                 grep -q "^StaleRetentionSec=3600" "$CONF_FILE"; then
+                echo "DNS timeouts already configured, skipping"
+                exit 0
+              fi
+            fi
+
+            mkdir -p "$CONF_DIR"
+
+            cat > "$CONF_FILE" <<EOF
+            [Resolve]
+            DNSStubListenerExtra=127.0.0.54
+            Cache=yes
+            CacheFromLocalhost=no
+            DNSOverTLS=no
+            MulticastDNS=no
+            LLMNR=no
+            ReadEtcHosts=yes
+            ResolveUnicastSingleLabel=no
+            StaleRetentionSec=3600
+            EOF
+
+            nsenter --target 1 --mount --uts --ipc --net --pid -- systemctl restart systemd-resolved
+
+            echo "✓ DNS timeouts configured"
             '
 
       volumes:
