@@ -15,8 +15,8 @@ A cascade failure caused by NFS hard mount blocking led to complete cluster netw
 
 ## Timeline (UTC)
 
-| Time | Event |
-|------|-------|
+| Time     | Event   |
+| -------- | ------- |
 | 02:54:55 | NFS write operations begin blocking (`nfs_write_begin` in D state) |
 | 02:57:18 | NFS server `truenas.home.lex.la` stops responding |
 | 02:58:40 | **DNS resolution fails** - all image pulls fail with `lookup quay.io: Try again`, `lookup ghcr.io: Try again` |
@@ -183,6 +183,7 @@ mountOptions:
 ```
 
 **Soft mount behavior**:
+
 - Returns I/O error (EIO) after timeout
 - Application crashes/restarts, but kernel remains responsive
 - System continues functioning, only affected pod fails
@@ -211,7 +212,6 @@ kubectl delete pod POD_NAME
 - **External impact**: Public services (eta.lex.la, job.lex.la, map.lex.la, aleksei.sviridk.in) were unavailable
 - **SSH access**: Completely blocked - no remote recovery possible
 - **Recovery method**: Hardware watchdog automatic reboot
-
 
 ---
 
@@ -298,7 +298,6 @@ kubectl delete pod POD_NAME
    - Endpoint creation rate
    - API response codes (watch for 429)
    - eBPF program regeneration failures
-
 
 ---
 
