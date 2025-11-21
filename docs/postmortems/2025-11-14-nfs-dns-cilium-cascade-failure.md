@@ -15,8 +15,8 @@ A cascade failure caused by NFS hard mount blocking led to complete cluster netw
 
 ## Timeline (UTC)
 
-| Time     | Event   |
-| -------- | ------- |
+| Time | Event |
+| ---- | ----- |
 | 02:54:55 | NFS write operations begin blocking (`nfs_write_begin` in D state) |
 | 02:57:18 | NFS server `truenas.home.lex.la` stops responding |
 | 02:58:40 | **DNS resolution fails** - all image pulls fail with `lookup quay.io: Try again`, `lookup ghcr.io: Try again` |
