@@ -189,6 +189,21 @@ mountOptions:
 - System continues functioning, only affected pod fails
 - Node stays operational - no SSH lockout
 
+Added **fallback DNS servers** via systemd-resolved configuration in `/etc/systemd/resolved.conf.d/fallback.conf`:
+
+```ini
+[Resolve]
+DNS=172.16.0.1
+FallbackDNS=8.8.8.8 1.1.1.1
+```
+
+**Fallback DNS behavior**:
+
+- Primary DNS: 172.16.0.1 (local network DNS)
+- Fallback to Google DNS (8.8.8.8) and Cloudflare DNS (1.1.1.1) if primary fails
+- Prevents complete DNS resolution failure when local DNS is unavailable
+- Ensures external connectivity for critical services (Cilium, image pulls)
+
 ### Additional Fixes Required
 
 **Existing PersistentVolumes do NOT automatically inherit StorageClass changes**:
@@ -236,6 +251,7 @@ kubectl delete pod POD_NAME
 
 - [x] Change all NFS StorageClasses to soft mount (2025-11-14)
 - [x] Reduce NFS timeout from 60s to 10s for faster failure detection (2025-11-14)
+- [x] Add fallback DNS servers (8.8.8.8, 1.1.1.1) via systemd-resolved (2025-11-21)
 - [x] Document NFS hard mount danger in CLAUDE.md Error 14 (2025-11-14)
 - [x] Created Ansible role for node preparation (2025-11-21)
 - [x] Migrated Argo Workflows configs to Ansible (2025-11-21)
