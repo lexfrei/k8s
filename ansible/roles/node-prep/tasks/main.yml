@@ -40,6 +40,11 @@
       tags:
         - dns
 
+    - name: Configure timezone
+      ansible.builtin.include_tasks: timezone.yml
+      tags:
+        - timezone
+
     - name: Configure watchdog
       ansible.builtin.include_tasks: watchdog.yml
       tags:
@@ -61,6 +66,7 @@
           - Kernel panic settings configured
           - Filesystem optimization applied
           - DNS fallback and caching configured
+          - Timezone set to {{ node_prep_timezone }}
           - Watchdog configured and running
           {% if node_prep_system_upgrade_enabled | bool -%}
           - System upgrade completed

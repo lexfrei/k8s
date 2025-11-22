@@ -24,3 +24,9 @@
     name: systemd-resolved
     state: restarted
   listen: restart systemd-resolved
+
+- name: Restart systemd-timesyncd service
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    state: restarted
+  listen: Restart systemd-timesyncd

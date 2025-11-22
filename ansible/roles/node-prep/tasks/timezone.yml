@@ -1,0 +1,13 @@
+---
+# Configure system timezone
+# Ensures consistent timestamps across all cluster nodes for log correlation
+
+- name: Set timezone to {{ node_prep_timezone }}
+  community.general.timezone:
+    name: "{{ node_prep_timezone }}"
+  notify: Restart systemd-timesyncd
+
+- name: Ensure NTP synchronization is enabled
+  ansible.builtin.command:
+    cmd: timedatectl set-ntp true
+  changed_when: false
