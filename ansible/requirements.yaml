@@ -3,6 +3,10 @@
 # Install with: ansible-galaxy collection install -r requirements.yaml
 
 collections:
+  # community.general - Community maintained modules
+  # Provides timezone, modprobe, and other system modules
+  - name: community.general
+
   # k3s-ansible - Official K3s Ansible collection
   # Provides roles and playbooks for K3s cluster management
   - name: https://github.com/k3s-io/k3s-ansible.git
