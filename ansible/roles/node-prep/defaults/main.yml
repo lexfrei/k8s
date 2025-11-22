@@ -77,6 +77,10 @@ node_prep_watchdog_interval: 30              # Check every 30 seconds
 node_prep_watchdog_realtime: "yes"
 node_prep_watchdog_priority: 1
 
+# Timezone configuration
+# UTC is standard for servers - ensures consistent log timestamps across cluster
+node_prep_timezone: "Etc/UTC"
+
 # System upgrade configuration
 node_prep_system_upgrade_enabled: false      # Upgrade disabled by default (use playbook)
 node_prep_reboot_if_required: true           # Auto-reboot enabled by default
