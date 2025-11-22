@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transmission-bot
+  namespace: transmission-system
+  labels:
+    app.kubernetes.io/name: transmission-bot
+    app.kubernetes.io/component: telegram-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: transmission-bot
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: transmission-bot
+        app.kubernetes.io/component: telegram-bot
+    spec:
+      containers:
+        # renovate: datasource=docker depName=ghcr.io/lexfrei/transmission-bot
+        - name: transmission-bot
+          image: ghcr.io/lexfrei/transmission-bot:0.0.1
+          env:
+            - name: TB_TELEGRAM_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: transmission-bot-secrets
+                  key: TB_TELEGRAM_TOKEN
+            - name: TB_TELEGRAM_ALLOWED_USERS
+              value: "74194657"
+            - name: TB_TRANSMISSION_URL
+              value: "https://transmission.home.lex.la/transmission/rpc"
+            - name: TB_LOG_LEVEL
+              value: "info"
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "10m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            capabilities:
+              drop:
+                - ALL
