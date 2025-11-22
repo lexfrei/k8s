@@ -30,7 +30,7 @@ spec:
             - name: TB_TELEGRAM_ALLOWED_USERS
               value: "74194657"
             - name: TB_TRANSMISSION_URL
-              value: "https://transmission.home.lex.la/transmission/rpc"
+              value: "http://transmission:9091/transmission/rpc"
             - name: TB_LOG_LEVEL
               value: "info"
           resources:
