@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: transmission-bot
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  destination:
+    namespace: transmission-system
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: https://github.com/lexfrei/k8s.git
+    targetRevision: HEAD
+    path: manifests/transmission-bot
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
