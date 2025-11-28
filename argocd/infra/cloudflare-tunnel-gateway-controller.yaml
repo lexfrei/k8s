@@ -27,6 +27,9 @@ spec:
               enabled: true
               awg:
                 secretName: "awg-config"
+          image:
+            repository: ttl.sh/cloudflare-tunnel-gateway-controller
+            tag: 1h
           podSecurityContext:
             runAsNonRoot: false
             runAsUser: 0
