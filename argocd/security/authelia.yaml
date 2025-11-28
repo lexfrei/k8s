@@ -60,7 +60,7 @@ spec:
               period: 30
 
             webauthn:
-              enabled: false
+              disable: true
 
             duo_api:
               enabled: false
@@ -119,10 +119,9 @@ spec:
 
             identity_validation:
               reset_password:
-                jwt:
-                  hmac:
-                    secret_name: authelia-secrets
-                    path: JWT_SECRET
+                secret:
+                  secret_name: authelia-secrets
+                  path: JWT_SECRET
 
             identity_providers:
               oidc:
