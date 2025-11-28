@@ -5,7 +5,24 @@ configs:
     server.insecure: true
   cm:
     accounts.admin: apiKey, login
+    url: https://argocd.home.lex.la
+    oidc.config: |
+      name: Authelia
+      issuer: https://authelia.home.lex.la
+      clientID: argocd
+      clientSecret: $oidc.authelia.clientSecret
+      requestedScopes:
+        - openid
+        - profile
+        - email
+        - groups
     application.resourceTrackingMethod: annotation
+  rbac:
+    policy.csv: |
+      g, admins, role:admin
+  secret:
+    extra:
+      oidc.authelia.clientSecret: c6d255b2b92e2fec47c1b56dea8ab2bff77a7a7c7f46ef3c99859779c7932afd
     resource.compareoptions: |
       ignoreAggregatedRoles: true
     resource.exclusions: |
