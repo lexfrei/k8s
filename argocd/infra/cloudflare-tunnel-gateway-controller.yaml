@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: ghcr.io/lexfrei/cloudflare-tunnel-gateway-controller/chart
-      targetRevision: 0.7.2
+      targetRevision: 0.7.3
       helm:
         valuesObject:
           gatewayClassConfig:
