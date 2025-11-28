@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authelia-users
+  namespace: security
+data:
+  users_database.yml: |
+    users:
+      lex:
+        disabled: false
+        displayname: "Aleksei Sviridkin"
+        password: "$argon2id$v=19$m=65536,t=3,p=4$DS9fw97Gbzo/CgXawnMkCw$ttPBHxG3utPuZAlOSJYd+CbqbOSPYCOakH0EjVsz/pE"
+        email: "f@lex.la"
+        groups:
+          - admins
+          - users

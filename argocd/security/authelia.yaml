@@ -27,15 +27,19 @@ spec:
               limits:
                 cpu: 500m
                 memory: 256Mi
+            extraVolumeMounts:
+              - name: users-config
+                mountPath: /config/users_database.yml
+                subPath: users_database.yml
+                readOnly: true
+            extraVolumes:
+              - name: users-config
+                configMap:
+                  name: authelia-users
 
           secret:
-            existingSecret: authelia-secrets
-            jwt:
-              key: JWT_SECRET
-            session:
-              key: SESSION_SECRET
-            storageEncryptionKey:
-              key: STORAGE_ENCRYPTION_KEY
+            additionalSecrets:
+              authelia-secrets: {}
 
           persistence:
             enabled: true
@@ -56,10 +60,10 @@ spec:
               period: 30
 
             webauthn:
-              disable: true
+              enabled: false
 
             duo_api:
-              disable: true
+              enabled: false
 
             authentication_backend:
               password_reset:
@@ -68,7 +72,7 @@ spec:
                 enabled: true
                 path: /config/users_database.yml
                 password:
-                  algorithm: argon2id
+                  algorithm: argon2
 
             session:
               name: authelia_session
@@ -76,6 +80,9 @@ spec:
               inactivity: 5m
               expiration: 1h
               remember_me: 1M
+              encryption_key:
+                secret_name: authelia-secrets
+                path: SESSION_SECRET
               cookies:
                 - domain: home.lex.la
                   authelia_url: https://authelia.home.lex.la
@@ -87,6 +94,9 @@ spec:
               ban_time: 5m
 
             storage:
+              encryption_key:
+                secret_name: authelia-secrets
+                path: STORAGE_ENCRYPTION_KEY
               local:
                 enabled: true
                 path: /data/db.sqlite3
@@ -107,6 +117,13 @@ spec:
                 - domain: "*.home.lex.la"
                   policy: two_factor
 
+            identity_validation:
+              reset_password:
+                jwt:
+                  hmac:
+                    secret_name: authelia-secrets
+                    path: JWT_SECRET
+
             identity_providers:
               oidc:
                 enabled: true
@@ -115,7 +132,7 @@ spec:
                   path: OIDC_HMAC_SECRET
                 jwks:
                   - key:
-                      path: /secrets/OIDC_PRIVATE_KEY
+                      path: /secrets/authelia-secrets/OIDC_PRIVATE_KEY
                 clients:
                   - client_id: grafana
                     client_name: Grafana
@@ -142,17 +159,6 @@ spec:
                       - email
                       - groups
 
-          configMapExtraConfigFiles:
-            users_database.yml: |
-              users:
-                lex:
-                  disabled: false
-                  displayname: "Aleksei Sviridkin"
-                  password: "$argon2id$v=19$m=65536,t=3,p=4$DS9fw97Gbzo/CgXawnMkCw$ttPBHxG3utPuZAlOSJYd+CbqbOSPYCOakH0EjVsz/pE"
-                  email: "f@lex.la"
-                  groups:
-                    - admins
-                    - users
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/authelia
