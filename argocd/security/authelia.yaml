@@ -49,16 +49,13 @@ spec:
 
           configMap:
             theme: auto
-            default_2fa_method: totp
+            default_2fa_method: webauthn
 
             log:
               level: info
 
             totp:
-              issuer: home.lex.la
-              algorithm: sha1
-              digits: 6
-              period: 30
+              disable: true
 
             webauthn:
               disable: false
