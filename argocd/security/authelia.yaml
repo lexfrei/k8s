@@ -62,10 +62,9 @@ spec:
 
             webauthn:
               disable: false
+              enable_passkey_login: true
               display_name: home.lex.la
-              attestation_conveyance_preference: indirect
-              user_verification: preferred
-              timeout: 60s
+              timeout: 60 seconds
 
             duo_api:
               enabled: false
