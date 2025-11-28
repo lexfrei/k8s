@@ -1,0 +1,164 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authelia
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: security
+  destination:
+    namespace: security
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://charts.authelia.com"
+      targetRevision: "0.10.49"
+      chart: authelia
+      helm:
+        valuesObject:
+          pod:
+            replicas: 1
+            strategy:
+              type: Recreate
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                cpu: 500m
+                memory: 256Mi
+
+          secret:
+            existingSecret: authelia-secrets
+            jwt:
+              key: JWT_SECRET
+            session:
+              key: SESSION_SECRET
+            storageEncryptionKey:
+              key: STORAGE_ENCRYPTION_KEY
+
+          persistence:
+            enabled: true
+            storageClass: longhorn
+            size: 1Gi
+
+          configMap:
+            theme: auto
+            default_2fa_method: totp
+
+            log:
+              level: info
+
+            totp:
+              issuer: home.lex.la
+              algorithm: sha1
+              digits: 6
+              period: 30
+
+            webauthn:
+              disable: true
+
+            duo_api:
+              disable: true
+
+            authentication_backend:
+              password_reset:
+                disable: true
+              file:
+                enabled: true
+                path: /config/users_database.yml
+                password:
+                  algorithm: argon2id
+
+            session:
+              name: authelia_session
+              same_site: lax
+              inactivity: 5m
+              expiration: 1h
+              remember_me: 1M
+              cookies:
+                - domain: home.lex.la
+                  authelia_url: https://authelia.home.lex.la
+                  default_redirection_url: https://grafana.home.lex.la
+
+            regulation:
+              max_retries: 3
+              find_time: 2m
+              ban_time: 5m
+
+            storage:
+              local:
+                enabled: true
+                path: /data/db.sqlite3
+
+            notifier:
+              disable_startup_check: true
+              filesystem:
+                enabled: true
+                filename: /data/notification.txt
+
+            access_control:
+              default_policy: two_factor
+              rules:
+                - domain: "*.home.lex.la"
+                  policy: one_factor
+                  resources:
+                    - "^/api([/?].*)?$"
+                - domain: "*.home.lex.la"
+                  policy: two_factor
+
+            identity_providers:
+              oidc:
+                enabled: true
+                hmac_secret:
+                  secret_name: authelia-secrets
+                  path: OIDC_HMAC_SECRET
+                jwks:
+                  - key:
+                      path: /secrets/OIDC_PRIVATE_KEY
+                clients:
+                  - client_id: grafana
+                    client_name: Grafana
+                    client_secret:
+                      value: "$plaintext$a7faa0e83cf7c4354a9429204bdc1114439b48edf016dbf82def055791df6cda"
+                    authorization_policy: two_factor
+                    redirect_uris:
+                      - https://grafana.home.lex.la/login/generic_oauth
+                    scopes:
+                      - openid
+                      - profile
+                      - email
+                      - groups
+                  - client_id: argocd
+                    client_name: ArgoCD
+                    client_secret:
+                      value: "$plaintext$c6d255b2b92e2fec47c1b56dea8ab2bff77a7a7c7f46ef3c99859779c7932afd"
+                    authorization_policy: two_factor
+                    redirect_uris:
+                      - https://argocd.home.lex.la/auth/callback
+                    scopes:
+                      - openid
+                      - profile
+                      - email
+                      - groups
+
+          configMapExtraConfigFiles:
+            users_database.yml: |
+              users:
+                lex:
+                  disabled: false
+                  displayname: "Aleksei Sviridkin"
+                  password: "$argon2id$v=19$m=65536,t=3,p=4$DS9fw97Gbzo/CgXawnMkCw$ttPBHxG3utPuZAlOSJYd+CbqbOSPYCOakH0EjVsz/pE"
+                  email: "f@lex.la"
+                  groups:
+                    - admins
+                    - users
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/authelia
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
