@@ -17,6 +17,7 @@ spec:
       helm:
         valuesObject:
           pod:
+            kind: Deployment
             replicas: 1
             strategy:
               type: Recreate
