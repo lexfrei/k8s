@@ -69,13 +69,14 @@ node_prep_dns_resolve_unicast_single_label: "no"  # Don't resolve single-label n
 node_prep_dns_stale_retention_sec: 3600          # Keep stale entries for 1 hour
 
 # Watchdog configuration
-# Converted from Argo Workflows (heartbeat-only mode)
+# Converted from Argo Workflows
 # Note: watchdog package is installed via node_prep_system_packages
 node_prep_watchdog_device: "/dev/watchdog"
 node_prep_watchdog_timeout: 120              # 2 minutes timeout
 node_prep_watchdog_interval: 30              # Check every 30 seconds
 node_prep_watchdog_realtime: "yes"
 node_prep_watchdog_priority: 1
+node_prep_watchdog_interface: "eth0"         # Monitor network interface (reboot if down/stuck)
 
 # Timezone configuration
 # UTC is standard for servers - ensures consistent log timestamps across cluster
