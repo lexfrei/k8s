@@ -3,8 +3,9 @@
 # Converted from Argo Workflows manifests/argo-workflows/workflow-template-new-node-setup.yaml
 #
 # This configuration enables hardware watchdog with network interface monitoring.
-# If the monitored interface goes down or stops responding, watchdog will reboot the node.
-# This helps recover from network stack hangs (see Error 15 in CLAUDE.md).
+# If the monitored interface goes down or stops responding, watchdog will attempt
+# repair first, then reboot after retry-timeout if repair fails.
+# See Error 15 in CLAUDE.md for context.
 
 watchdog-device = {{ node_prep_watchdog_device }}
 watchdog-timeout = {{ node_prep_watchdog_timeout }}
@@ -14,5 +15,17 @@ priority = {{ node_prep_watchdog_priority }}
 
 # Network interface monitoring
 # Watchdog checks if interface is up and has traffic
-# Reboot triggered if interface appears stuck/down
 interface = {{ node_prep_watchdog_interface }}
+
+# Graceful error handling
+# Wait retry-timeout seconds before taking action (allows transient issues to clear)
+retry-timeout = {{ node_prep_watchdog_retry_timeout }}
+
+# Repair script - attempt to fix issues before rebooting
+# Script should try: ip link set eth0 down && ip link set eth0 up
+repair-binary = {{ node_prep_watchdog_repair_binary }}
+repair-timeout = {{ node_prep_watchdog_repair_timeout }}
+
+# Maximum repair attempts before forcing reboot
+# After this many failed repairs, reboot anyway
+repair-maximum = {{ node_prep_watchdog_repair_maximum }}

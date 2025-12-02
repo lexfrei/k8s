@@ -77,6 +77,10 @@ node_prep_watchdog_interval: 30              # Check every 30 seconds
 node_prep_watchdog_realtime: "yes"
 node_prep_watchdog_priority: 1
 node_prep_watchdog_interface: "eth0"         # Monitor network interface (reboot if down/stuck)
+node_prep_watchdog_retry_timeout: 300        # Wait 5 minutes before reboot on error
+node_prep_watchdog_repair_binary: "/usr/local/bin/watchdog-repair.sh"
+node_prep_watchdog_repair_timeout: 60        # Repair script timeout
+node_prep_watchdog_repair_maximum: 3         # Max repair attempts before reboot
 
 # Timezone configuration
 # UTC is standard for servers - ensures consistent log timestamps across cluster

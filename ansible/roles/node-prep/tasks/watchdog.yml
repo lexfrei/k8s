@@ -4,6 +4,17 @@
 # NOTE: watchdog package is installed via apt-packages.yml (node_prep_system_packages)
 # This task only handles configuration and service management
 
+- name: Deploy watchdog repair script
+  ansible.builtin.template:
+    src: watchdog-repair.sh.j2
+    dest: "{{ node_prep_watchdog_repair_binary }}"
+    owner: root
+    group: root
+    mode: '0755'
+  tags:
+    - watchdog
+    - config
+
 - name: Deploy watchdog configuration
   ansible.builtin.template:
     src: watchdog.conf.j2

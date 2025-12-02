@@ -1,0 +1,55 @@
+#!/bin/bash
+# {{ ansible_managed }}
+# Watchdog repair script - attempt to recover network before reboot
+#
+# Called by watchdog daemon when interface check fails.
+# Exit 0 = repair successful (watchdog will re-check)
+# Exit non-zero = repair failed (watchdog will reboot after retry-timeout)
+
+INTERFACE="{{ node_prep_watchdog_interface }}"
+LOG_TAG="watchdog-repair"
+
+log() {
+    logger -t "$LOG_TAG" "$1"
+    echo "$1"
+}
+
+log "Attempting to repair interface $INTERFACE"
+
+# Check if interface exists
+if ! ip link show "$INTERFACE" &>/dev/null; then
+    log "ERROR: Interface $INTERFACE does not exist, cannot repair"
+    exit 1
+fi
+
+# Try to bounce the interface
+log "Bringing $INTERFACE down..."
+ip link set "$INTERFACE" down
+sleep 2
+
+log "Bringing $INTERFACE up..."
+ip link set "$INTERFACE" up
+sleep 5
+
+# Verify interface is up
+if ip link show "$INTERFACE" | grep -q "state UP"; then
+    log "Interface $INTERFACE is UP"
+else
+    log "WARNING: Interface $INTERFACE not in UP state after bounce"
+fi
+
+# Try to ping gateway (if we can determine it)
+GATEWAY=$(ip route | grep "default via" | head -1 | awk '{print $3}')
+if [ -n "$GATEWAY" ]; then
+    log "Pinging gateway $GATEWAY..."
+    if ping -c 3 -W 5 "$GATEWAY" &>/dev/null; then
+        log "SUCCESS: Gateway $GATEWAY reachable"
+        exit 0
+    else
+        log "ERROR: Gateway $GATEWAY unreachable after interface bounce"
+        exit 1
+    fi
+else
+    log "WARNING: No default gateway found, assuming repair successful"
+    exit 0
+fi
