@@ -229,6 +229,47 @@ kubectl get eventbus --namespace argo-events
 
 Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar tool is used.
 
+### Ansible Node Management
+
+The `ansible/` directory contains Ansible playbooks for node management. **Always use Ansible for node operations** instead of ad-hoc SSH commands.
+
+```bash
+# IMPORTANT: All ansible commands must be run from the ansible/ directory
+cd ansible/
+
+# Upgrade all nodes with automatic reboot if required (TRUSTED - use this by default)
+ansible-playbook playbooks/upgrade-nodes.yaml
+
+# Upgrade without automatic reboot (only if you need manual control)
+ansible-playbook playbooks/upgrade-nodes.yaml --extra-vars "auto_reboot=false"
+
+# Upgrade only control plane
+ansible-playbook playbooks/upgrade-nodes.yaml --limit server
+
+# Upgrade only workers
+ansible-playbook playbooks/upgrade-nodes.yaml --limit agent
+
+# Upgrade specific node
+ansible-playbook playbooks/upgrade-nodes.yaml --limit k8s-cp-01
+
+# Ad-hoc commands (must be from ansible/ directory for inventory and become)
+ansible k3s_cluster --module-name shell --args "uname -r"
+ansible k3s_cluster --module-name apt --args "name=PACKAGE state=latest"
+```
+
+**Configuration:**
+- Inventory: `ansible/inventory/production.yaml`
+- SSH user: `ansible` (with dedicated key `~/.ssh/ansible_ed25519`)
+- Become: enabled by default (passwordless sudo)
+- Serial execution: nodes upgraded one at a time to maintain cluster availability
+
+**Trust auto_reboot:**
+- The `upgrade-nodes.yaml` playbook handles reboots safely
+- Nodes are upgraded sequentially (serial: 1)
+- Reboot only happens if `/var/run/reboot-required` exists
+- Post-reboot delay ensures node is ready before proceeding
+- **Use `auto_reboot=true` (default) for routine upgrades**
+
 ## Development Workflow
 
 ### Adding a New Application

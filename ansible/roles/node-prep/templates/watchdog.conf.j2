@@ -1,13 +1,18 @@
 # {{ ansible_managed }}
-# Minimal watchdog configuration - heartbeat only
+# Watchdog configuration with network interface monitoring
 # Converted from Argo Workflows manifests/argo-workflows/workflow-template-new-node-setup.yaml
 #
-# This configuration enables hardware watchdog in heartbeat-only mode.
-# It does NOT monitor system load or other metrics - only provides periodic heartbeat
-# to prevent hardware watchdog from triggering automatic reboot.
+# This configuration enables hardware watchdog with network interface monitoring.
+# If the monitored interface goes down or stops responding, watchdog will reboot the node.
+# This helps recover from network stack hangs (see Error 15 in CLAUDE.md).
 
 watchdog-device = {{ node_prep_watchdog_device }}
 watchdog-timeout = {{ node_prep_watchdog_timeout }}
 interval = {{ node_prep_watchdog_interval }}
 realtime = {{ node_prep_watchdog_realtime }}
 priority = {{ node_prep_watchdog_priority }}
+
+# Network interface monitoring
+# Watchdog checks if interface is up and has traffic
+# Reboot triggered if interface appears stuck/down
+interface = {{ node_prep_watchdog_interface }}
