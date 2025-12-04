@@ -30,3 +30,10 @@
     name: systemd-timesyncd
     state: restarted
   listen: Restart systemd-timesyncd
+
+- name: Restart cpufrequtils service
+  ansible.builtin.systemd:
+    name: cpufrequtils
+    state: restarted
+  listen: Restart cpufrequtils
+  ignore_errors: true

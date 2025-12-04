@@ -82,6 +82,12 @@ node_prep_watchdog_repair_binary: "/usr/local/bin/watchdog-repair.sh"
 node_prep_watchdog_repair_timeout: 60        # Repair script timeout
 node_prep_watchdog_repair_maximum: 3         # Max repair attempts before reboot
 
+# CPU frequency governor
+# Set to "performance" to avoid RCU stalls from frequency scaling
+# on Raspberry Pi 5 with RP1 southbridge (kernel 6.17+)
+# See: https://github.com/lexfrei/k8s/issues/526
+node_prep_cpu_governor: "performance"
+
 # Timezone configuration
 # UTC is standard for servers - ensures consistent log timestamps across cluster
 node_prep_timezone: "Etc/UTC"
