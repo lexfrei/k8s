@@ -50,6 +50,11 @@
       tags:
         - watchdog
 
+    - name: Configure CPU governor
+      ansible.builtin.include_tasks: cpu-governor.yml
+      tags:
+        - cpu-governor
+
     - name: Perform system upgrade (optional)
       ansible.builtin.include_tasks: system-upgrade.yml
       when: node_prep_system_upgrade_enabled | bool
@@ -68,6 +73,7 @@
           - DNS fallback and caching configured
           - Timezone set to {{ node_prep_timezone }}
           - Watchdog configured and running
+          - CPU governor set to {{ node_prep_cpu_governor }}
           {% if node_prep_system_upgrade_enabled | bool -%}
           - System upgrade completed
           {% endif -%}
