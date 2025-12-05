@@ -33,6 +33,12 @@ extra_server_args: >-
   --flannel-backend=none
   --tls-san=172.16.101.101
   --tls-san=172.16.101.1
+  --etcd-arg=quota-backend-bytes=536870912
+  --etcd-arg=auto-compaction-mode=periodic
+  --etcd-arg=auto-compaction-retention=1h
+  --etcd-arg=snapshot-count=5000
+  --etcd-snapshot-retention=3
+  --etcd-snapshot-schedule-cron="0 */6 * * *"
 
 # Custom K3s agent arguments
 extra_agent_args: >-
