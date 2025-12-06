@@ -13,7 +13,7 @@ spec:
   source:
     chart: vipalived
     repoURL: ghcr.io/lexfrei/charts
-    targetRevision: 0.4.0
+    targetRevision: 0.5.2
   syncPolicy:
     automated:
       prune: true
