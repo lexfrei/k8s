@@ -44,9 +44,8 @@ spec:
             enabled: true
             spec:
               parentRefs:
-                - name: cilium-gateway
-                  namespace: kube-system
-                  sectionName: https-map-lex-la
+                - name: cloudflare-tunnel
+                  namespace: cloudflare-tunnel-system
               hostnames:
                 - map.lex.la
               rules:

@@ -5,9 +5,8 @@ metadata:
   annotations: {}
 spec:
   parentRefs:
-    - name: cilium-gateway
-      namespace: kube-system
-      sectionName: https-eta-lex-la
+    - name: cloudflare-tunnel
+      namespace: cloudflare-tunnel-system
   hostnames:
     - eta.lex.la
   rules:
