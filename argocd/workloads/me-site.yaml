@@ -20,9 +20,8 @@ spec:
         httpRoute:
           enabled: true
           parentRefs:
-            - name: cilium-gateway
-              namespace: kube-system
-              sectionName: https-sviridk-in
+            - name: cloudflare-tunnel
+              namespace: cloudflare-tunnel-system
           hostnames:
             - aleksei.sviridk.in
   project: workloads
