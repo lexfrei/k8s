@@ -3,6 +3,8 @@ kind: Gateway
 metadata:
   name: cloudflare-tunnel
   namespace: cloudflare-tunnel-system
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   gatewayClassName: cloudflare-tunnel
   listeners:
