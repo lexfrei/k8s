@@ -11,7 +11,8 @@ spec:
     namespace: paper
     server: "https://kubernetes.default.svc"
   sources:
-    - repoURL: oci://ghcr.io/lexfrei/papermc
+    - chart: papermc
+      repoURL: ghcr.io/lexfrei
       targetRevision: 0.1.0
       helm:
         values: |
