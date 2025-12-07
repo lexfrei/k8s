@@ -19,6 +19,8 @@ spec:
           enabled: false
         httpRoute:
           enabled: true
+          annotations:
+            external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           parentRefs:
             - name: cloudflare-tunnel
               namespace: cloudflare-tunnel-system
