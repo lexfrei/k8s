@@ -42,6 +42,8 @@ spec:
 
           httpRoute:
             enabled: true
+            annotations:
+              external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
             spec:
               parentRefs:
                 - name: cloudflare-tunnel
