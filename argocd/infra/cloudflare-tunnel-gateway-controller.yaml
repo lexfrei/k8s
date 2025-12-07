@@ -13,7 +13,7 @@ spec:
   sources:
     - repoURL: oci://ghcr.io/lexfrei/cloudflare-tunnel-gateway-controller/chart
       path: "."
-      targetRevision: 0.9.3
+      targetRevision: 0.9.4
       helm:
         valuesObject:
           gatewayClassConfig:
