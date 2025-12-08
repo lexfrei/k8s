@@ -9,6 +9,9 @@ spec:
   scrapeInterval: 20s
   remoteWrite:
     - url: http://vmsingle-vmsingle.monitoring.svc:8428/api/v1/write
+      maxDiskUsage: 2GB
+  remoteWriteSettings:
+    tmpDataPath: /vmagent-queue
   resources:
     requests:
       cpu: 50m
@@ -19,7 +22,11 @@ spec:
   extraArgs:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
-    remoteWrite.maxDiskUsagePerURL: "2147483648"
-  # NOTE: volumes/volumeMounts don't work in DaemonSetMode due to operator bug
-  # See: https://github.com/VictoriaMetrics/operator/issues/1677
-  # WAL uses emptyDir (lost on pod restart, but survives network outage)
+  volumes:
+    - name: vmagent-queue
+      hostPath:
+        path: /var/lib/vmagent-queue
+        type: DirectoryOrCreate
+  volumeMounts:
+    - name: vmagent-queue
+      mountPath: /vmagent-queue
