@@ -1,0 +1,183 @@
+---
+- name: Setup network death diagnostics
+  hosts: k3s_cluster
+  become: true
+  serial: 1
+
+  tasks:
+    - name: Create diagnostics directory
+      ansible.builtin.file:
+        path: /var/log/network-diagnostics
+        state: directory
+        mode: "0755"
+
+    - name: Create ethtool stats collection script
+      ansible.builtin.copy:
+        dest: /usr/local/bin/collect-ethtool-stats.sh
+        mode: "0755"
+        content: |
+          #!/bin/bash
+          LOGFILE="/var/log/network-diagnostics/ethtool-stats.log"
+          TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+          # Rotate if > 10MB
+          if [ -f "$LOGFILE" ] && [ $(stat -f%z "$LOGFILE" 2>/dev/null || stat -c%s "$LOGFILE") -gt 10485760 ]; then
+            mv "$LOGFILE" "$LOGFILE.1"
+          fi
+
+          echo "=== $TIMESTAMP ===" >> "$LOGFILE"
+          ethtool -S eth0 2>&1 >> "$LOGFILE"
+          echo "" >> "$LOGFILE"
+
+    - name: Create systemd timer for ethtool collection
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/collect-ethtool-stats.timer
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Collect ethtool stats every minute
+
+          [Timer]
+          OnBootSec=1min
+          OnUnitActiveSec=1min
+          AccuracySec=10s
+
+          [Install]
+          WantedBy=timers.target
+
+    - name: Create systemd service for ethtool collection
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/collect-ethtool-stats.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Collect ethtool stats
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/collect-ethtool-stats.sh
+
+    - name: Enable and start ethtool stats timer
+      ansible.builtin.systemd:
+        name: collect-ethtool-stats.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Create macb debug logging script (run at boot)
+      ansible.builtin.copy:
+        dest: /usr/local/bin/enable-macb-debug.sh
+        mode: "0755"
+        content: |
+          #!/bin/bash
+          # Enable verbose logging for Cadence macb ethernet driver
+
+          # Set kernel log level to debug
+          echo 7 > /proc/sys/kernel/printk
+
+          # Enable dynamic debug for macb driver if available
+          if [ -f /sys/kernel/debug/dynamic_debug/control ]; then
+            echo "file drivers/net/ethernet/cadence/* +p" > /sys/kernel/debug/dynamic_debug/control 2>/dev/null || true
+          fi
+
+          # Log that debug was enabled
+          logger -t macb-debug "macb driver debug logging enabled"
+
+    - name: Create systemd service for macb debug at boot
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/macb-debug.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Enable macb ethernet driver debug logging
+          After=network-pre.target
+          Before=network.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/enable-macb-debug.sh
+          RemainAfterExit=yes
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable macb debug service
+      ansible.builtin.systemd:
+        name: macb-debug.service
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Create link state monitoring script
+      ansible.builtin.copy:
+        dest: /usr/local/bin/monitor-link-state.sh
+        mode: "0755"
+        content: |
+          #!/bin/bash
+          LOGFILE="/var/log/network-diagnostics/link-state.log"
+          TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+          # Rotate if > 5MB
+          if [ -f "$LOGFILE" ] && [ $(stat -f%z "$LOGFILE" 2>/dev/null || stat -c%s "$LOGFILE") -gt 5242880 ]; then
+            mv "$LOGFILE" "$LOGFILE.1"
+          fi
+
+          echo "=== $TIMESTAMP ===" >> "$LOGFILE"
+
+          # Link state
+          ip link show eth0 >> "$LOGFILE" 2>&1
+
+          # Carrier state
+          cat /sys/class/net/eth0/carrier >> "$LOGFILE" 2>&1 || echo "carrier: unavailable" >> "$LOGFILE"
+
+          # Operstate
+          cat /sys/class/net/eth0/operstate >> "$LOGFILE" 2>&1
+
+          # Routing table
+          ip route >> "$LOGFILE" 2>&1
+
+          echo "" >> "$LOGFILE"
+
+    - name: Create systemd timer for link state monitoring
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/monitor-link-state.timer
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Monitor network link state every 30 seconds
+
+          [Timer]
+          OnBootSec=30s
+          OnUnitActiveSec=30s
+          AccuracySec=5s
+
+          [Install]
+          WantedBy=timers.target
+
+    - name: Create systemd service for link state monitoring
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/monitor-link-state.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Monitor network link state
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/monitor-link-state.sh
+
+    - name: Enable and start link state timer
+      ansible.builtin.systemd:
+        name: monitor-link-state.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Verify timers are active
+      ansible.builtin.command: systemctl list-timers --no-pager
+      register: timer_status
+      changed_when: false
+
+    - name: Show timer status
+      ansible.builtin.debug:
+        var: timer_status.stdout_lines
