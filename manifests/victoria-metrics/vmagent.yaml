@@ -19,13 +19,7 @@ spec:
   extraArgs:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
-    remoteWrite.tmpDataPath: /vmagent-wal
     remoteWrite.maxDiskUsagePerURL: "2147483648"
-  volumes:
-    - name: vmagent-wal-host
-      hostPath:
-        path: /var/lib/vmagent-wal
-        type: DirectoryOrCreate
-  volumeMounts:
-    - name: vmagent-wal-host
-      mountPath: /vmagent-wal
+  # NOTE: volumes/volumeMounts don't work in DaemonSetMode due to operator bug
+  # See: https://github.com/VictoriaMetrics/operator/issues/1677
+  # WAL uses emptyDir (lost on pod restart, but survives network outage)
