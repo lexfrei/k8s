@@ -2,11 +2,16 @@
 
 **Component:** victoria-metrics-operator v0.66.1
 **Date discovered:** 2025-12-08
-**Status:** Open (not reported upstream yet)
+**Status:** Reported upstream
+**Upstream issue:** https://github.com/VictoriaMetrics/operator/issues/1677
 
 ## Summary
 
-VictoriaMetrics operator ignores user-provided `volumes` configuration in DaemonSetMode and always creates `persistent-queue-data` volume as `emptyDir`, despite documentation stating hostPath should work.
+Multiple issues with volume configuration in DaemonSetMode:
+
+1. **`extraVolumes`/`extraVolumeMounts` ignored** - CRD accepts them, but code reads `cr.Spec.Volumes`
+2. **`volumes` doesn't override default** - operator always creates `persistent-queue-data` as `emptyDir` first
+3. **`volumeMounts` not applied** - lost somewhere between `newPodSpec()` and DaemonSet creation
 
 ## Expected Behavior
 
