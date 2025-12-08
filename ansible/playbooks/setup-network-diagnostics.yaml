@@ -20,8 +20,8 @@
           LOGFILE="/var/log/network-diagnostics/ethtool-stats.log"
           TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
-          # Rotate if > 10MB
-          if [ -f "$LOGFILE" ] && [ $(stat -f%z "$LOGFILE" 2>/dev/null || stat -c%s "$LOGFILE") -gt 10485760 ]; then
+          # Rotate if > 1GB
+          if [ -f "$LOGFILE" ] && [ $(stat -f%z "$LOGFILE" 2>/dev/null || stat -c%s "$LOGFILE") -gt 1073741824 ]; then
             mv "$LOGFILE" "$LOGFILE.1"
           fi
 
@@ -117,8 +117,8 @@
           LOGFILE="/var/log/network-diagnostics/link-state.log"
           TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
-          # Rotate if > 5MB
-          if [ -f "$LOGFILE" ] && [ $(stat -f%z "$LOGFILE" 2>/dev/null || stat -c%s "$LOGFILE") -gt 5242880 ]; then
+          # Rotate if > 500MB
+          if [ -f "$LOGFILE" ] && [ $(stat -f%z "$LOGFILE" 2>/dev/null || stat -c%s "$LOGFILE") -gt 536870912 ]; then
             mv "$LOGFILE" "$LOGFILE.1"
           fi
 
