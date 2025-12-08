@@ -21,11 +21,11 @@ spec:
     promscrape.dropOriginalLabels: "true"
     remoteWrite.tmpDataPath: /vmagent-wal
     remoteWrite.maxDiskUsagePerURL: "2147483648"
-  extraVolumes:
-    - name: vmagent-wal
+  volumes:
+    - name: persistent-queue-data
       hostPath:
         path: /var/lib/vmagent-wal
         type: DirectoryOrCreate
-  extraVolumeMounts:
-    - name: vmagent-wal
+  volumeMounts:
+    - name: persistent-queue-data
       mountPath: /vmagent-wal
