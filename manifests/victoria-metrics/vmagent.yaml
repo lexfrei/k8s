@@ -4,6 +4,7 @@ metadata:
   name: vmagent
   namespace: monitoring
 spec:
+  daemonSetMode: true
   selectAllByDefault: true
   scrapeInterval: 20s
   remoteWrite:
@@ -18,3 +19,13 @@ spec:
   extraArgs:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
+    remoteWrite.tmpDataPath: /vmagent-wal
+    remoteWrite.maxDiskUsagePerURL: "2147483648"
+  extraVolumes:
+    - name: vmagent-wal
+      hostPath:
+        path: /var/lib/vmagent-wal
+        type: DirectoryOrCreate
+  extraVolumeMounts:
+    - name: vmagent-wal
+      mountPath: /vmagent-wal

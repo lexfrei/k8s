@@ -16,6 +16,8 @@ spec:
       chart: prometheus-node-exporter
       helm:
         valuesObject:
+          extraArgs:
+            - --collector.ethtool
           serviceMonitor:
             enabled: true
             namespace: monitoring
