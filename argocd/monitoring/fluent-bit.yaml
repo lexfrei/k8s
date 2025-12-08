@@ -28,6 +28,11 @@ spec:
                 HTTP_Listen 0.0.0.0
                 HTTP_Port 2020
                 Health_Check On
+                storage.path /var/lib/fluent-bit/
+                storage.sync normal
+                storage.checksum off
+                storage.max_chunks_up 128
+                storage.backlog.mem_limit 5M
 
           inputs: |
             [INPUT]
@@ -37,12 +42,14 @@ spec:
                 Tag kube.*
                 Mem_Buf_Limit 5MB
                 Skip_Long_Lines On
+                storage.type filesystem
 
             [INPUT]
                 Name systemd
                 Tag host.*
                 Read_From_Tail On
                 Strip_Underscores On
+                storage.type filesystem
 
           filters: |
             [FILTER]
@@ -72,6 +79,8 @@ spec:
                 label_keys $kubernetes['namespace_name'],$kubernetes['pod_name'],$kubernetes['container_name']
                 remove_keys kubernetes,stream
                 line_format json
+                storage.total_limit_size 2G
+                Retry_Limit False
 
             [OUTPUT]
                 Name loki
@@ -80,6 +89,8 @@ spec:
                 port 3100
                 labels job=systemd-journal
                 line_format json
+                storage.total_limit_size 2G
+                Retry_Limit False
 
         resources:
           requests:
@@ -100,6 +111,10 @@ spec:
           readOnlyRootFilesystem: false
 
         daemonSetVolumes:
+          - name: fluentbit-storage
+            hostPath:
+              path: /var/lib/fluent-bit
+              type: DirectoryOrCreate
           - name: varlog
             hostPath:
               path: /var/log
@@ -118,6 +133,8 @@ spec:
               path: /var/log/journal
 
         daemonSetVolumeMounts:
+          - name: fluentbit-storage
+            mountPath: /var/lib/fluent-bit
           - name: varlog
             mountPath: /var/log
             readOnly: true
