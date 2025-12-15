@@ -745,6 +745,45 @@ kubectl delete pod POD_NAME
 - Consider using distributed storage (Longhorn, Ceph) instead of centralized NFS for critical workloads
 - Test storage failure scenarios before production deployment
 
+### Error 15: Raspberry Pi 5 Network Death (RP1/macb)
+**Error**: Network interface dies silently on Raspberry Pi 5 with Ubuntu 25.10 + kernel 6.17
+
+**Symptoms**:
+- Network completely unreachable (no ping, no SSH)
+- No "Link is Down" message in logs - PHY reports link UP
+- No errors from macb/GEM driver
+- NFS timeouts and RCU stalls appear as **symptoms, not causes**
+- Only power cycle recovers
+
+**Root Cause**: Under investigation. Related to bug https://bugs.launchpad.net/ubuntu/+source/linux-raspi/+bug/2133877
+
+**Key Finding**: rp1-pio firmware communication failure on affected node:
+```
+rp1-pio 1f00178000.pio: failed to contact RP1 firmware
+rp1-pio 1f00178000.pio: probe with driver rp1-pio failed with error -2
+```
+- This happens on EVERY boot of affected node
+- Does NOT happen on identical hardware (control plane node)
+- May indicate RP1 southbridge instability (RP1 manages ethernet)
+
+**IMPORTANT - Symptom vs Cause**:
+- **NFS timeouts** are SYMPTOM - network already dead when they appear
+- **RCU stalls** are SYMPTOM - CPU stalls caused by network/IRQ issues
+- **Actual cause** - silent macb/GEM or RP1 failure without logging
+
+**Timeline pattern**:
+1. Network dies silently (no log entries)
+2. NFS timeouts start appearing (first visible symptom)
+3. RCU stalls may occur
+4. Node continues running locally but unreachable
+5. Eventually hangs completely
+
+**Workaround attempted**:
+- CPU governor set to `performance` - did NOT prevent network death
+- (Bug #2133877 suggests this helps with RCU stalls, but network still dies)
+
+**Investigation file**: `network-death-investigation.md`
+
 ## Node Optimization Summary
 
 After troubleshooting and applying all system upgrade plans, the cluster nodes have these optimizations:
