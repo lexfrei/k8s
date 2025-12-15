@@ -16,6 +16,8 @@ all:
           hosts:
             k8s-worker-01:
               ansible_host: 172.16.101.2
+            k8s-worker-02:
+              ansible_host: 172.16.101.3
 
       vars:
         # K3s version for upgrades
