@@ -5,7 +5,7 @@
 # Ansible connection settings
 ansible_user: ansible
 ansible_python_interpreter: /usr/bin/python3
-ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
 
 # K3s version is now defined in inventory/production.yaml vars section
 # to ensure proper inheritance by server and agent groups
@@ -40,13 +40,6 @@ extra_server_args: >-
   --etcd-snapshot-retention=3
   --etcd-snapshot-schedule-cron="0 */6 * * *"
 
-# Custom K3s agent arguments
-extra_agent_args: >-
-  --disable=traefik
-  --disable=local-storage
-  --disable=servicelb
-  --disable=metrics-server
-
 # Cluster context name for kubeconfig
 cluster_context: k3s-home
 
@@ -57,7 +50,6 @@ kubeconfig: "~/.kube/config"
 # K3s installation paths
 k3s_server_location: "/var/lib/rancher/k3s"
 systemd_dir: "/etc/systemd/system"
-
 # Cluster configuration
 # Note: --cluster-init is automatically added for HA when server count > 1
 # Note: vipalived manages VIP 172.16.101.101 outside of k3s-ansible

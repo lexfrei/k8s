@@ -4,6 +4,11 @@
 
 - name: Node preparation
   block:
+    - name: Set system hostname
+      ansible.builtin.include_tasks: set-hostname.yml
+      tags:
+        - hostname
+
     - name: Update APT cache
       ansible.builtin.apt:
         update_cache: true
@@ -65,6 +70,7 @@
       ansible.builtin.debug:
         msg: |
           Node {{ inventory_hostname }} prepared successfully:
+          - Hostname set to {{ inventory_hostname }}
           - {{ node_prep_k8s_packages | length }} K8s dependency packages installed
           - {{ node_prep_qol_packages | length }} QoL packages installed
           - {{ node_prep_system_packages | length }} system utility packages installed
