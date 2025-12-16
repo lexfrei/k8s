@@ -1,0 +1,32 @@
+---
+# Set the system hostname based on the inventory hostname
+
+- name: Set system hostname from inventory
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  become: true
+  tags:
+    - hostname
+
+- name: Ensure hostname is present in /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^(127\.0\.1\.1\s+)'
+    line: "127.0.1.1 {{ inventory_hostname }}"
+    create: true
+    state: present
+  become: true
+  tags:
+    - hostname
+
+- name: Protect hostname from cloud-init
+  ansible.builtin.lineinfile:
+    path: /etc/cloud/cloud.cfg
+    regexp: "^preserve_hostname:"
+    line: "preserve_hostname: true"
+    create: false
+    state: present
+  become: true
+  tags:
+    - hostname
+    - cloud-init

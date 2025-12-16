@@ -6,7 +6,7 @@ galaxy_info:
   author: Aleksei Sviridkin
   description: Prepares K3s cluster nodes with required packages and configurations
   company: SRE
-  license: MIT
+  license: BSD-3-Clause
   min_ansible_version: "2.15"
 
   platforms:

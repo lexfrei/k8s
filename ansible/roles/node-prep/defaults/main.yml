@@ -21,6 +21,7 @@ node_prep_system_packages:
   - cpufrequtils        # CPU frequency scaling utilities (see Error 9 for governor config)
   - watchdog            # Hardware watchdog daemon (configured in Error 9, 13)
   - smartmontools       # SMART disk health monitoring
+  - systemd-timesyncd   # Time synchronization daemon
 
 # Combined package list (all categories)
 # This is what gets installed by apt-packages.yml
