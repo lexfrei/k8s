@@ -7,34 +7,34 @@ This directory contains Ansible automation for managing the Kubernetes cluster i
 ```
 ansible/
 ├── inventory/
-│   └── production.yaml          # Cluster node inventory
+│   └── production.yaml          # Cluster node inventory (k3s-ansible format)
+├── group_vars/
+│   └── k3s_cluster.yaml         # Cluster-wide variables
 ├── playbooks/
-│   └── 00-bootstrap-ansible-user.yaml  # Bootstrap ansible user
-├── roles/                       # Ansible roles (to be implemented)
-│   ├── node-prep/              # Node preparation tasks
-│   ├── k3s-bootstrap/          # K3s installation
-│   └── system-hardening/       # System hardening
-├── ansible.cfg                 # Ansible configuration
-└── README.md                   # This file
+│   ├── 00-bootstrap-ansible-user.yaml  # Bootstrap ansible user (one-time)
+│   ├── setup-nodes.yaml                # Node preparation (node-prep role)
+│   ├── upgrade-nodes.yaml              # System package upgrades
+│   └── setup-network-diagnostics.yaml  # Network debugging tools
+├── roles/
+│   └── node-prep/               # Node preparation role
+├── ansible.cfg                  # Ansible configuration
+├── requirements.yaml            # Ansible collections
+└── README.md                    # This file
 ```
 
 ## Scope and Responsibilities
 
 ### Ansible manages (OS level):
-- ✅ Node preparation (sysctl, packages, kernel params)
-- ✅ User and SSH key management
-- ✅ System-level configuration (watchdog, cloud-init, etc.)
-- ✅ K3s installation and bootstrap
-- ✅ Secrets distribution (SOPS keys, certificates)
+- Node preparation (sysctl, packages, kernel params)
+- User and SSH key management
+- System-level configuration (watchdog, cloud-init, etc.)
+- K3s installation and upgrades (via k3s-ansible collection)
+- System package upgrades
 
 ### ArgoCD manages (K8s level):
-- ✅ All Kubernetes resources (Deployments, Services, etc.)
-- ✅ Helm releases
-- ✅ Application lifecycle
-
-### system-upgrade-controller manages:
-- ✅ K3s version upgrades
-- ✅ OS package updates
+- All Kubernetes resources (Deployments, Services, etc.)
+- Helm releases
+- Application lifecycle
 
 ## Initial Setup
 
@@ -56,7 +56,7 @@ ansible-playbook playbooks/00-bootstrap-ansible-user.yaml
 **Prerequisites:**
 - SSH access to nodes as user `lex` (current bootstrap user)
 - `lex` user must have sudo privileges
-- SSH key `~/.ssh/ansible_ed25519` must exist (already generated)
+- SSH key `~/.ssh/ansible_ed25519` must exist
 
 ### 2. Verify Connection
 
@@ -78,12 +78,6 @@ cd ansible
 ansible-galaxy collection install -r requirements.yaml
 ```
 
-**What this provides:**
-- Official K3s installation and upgrade roles
-- Automated cluster token management
-- HA cluster support
-- Sequential server upgrades (prevents etcd quorum loss)
-
 ## k3s-ansible Integration
 
 This cluster uses k3s-ansible collection for K3s lifecycle management while preserving custom configuration (Cilium CNI, vipalived VIP, disabled default components).
@@ -91,8 +85,8 @@ This cluster uses k3s-ansible collection for K3s lifecycle management while pres
 ### Inventory Format
 
 Inventory follows k3s-ansible convention:
-- `server`: Control plane nodes (was: control_plane)
-- `agent`: Worker nodes (was: workers)
+- `server`: Control plane nodes
+- `agent`: Worker nodes
 - `k3s_cluster`: Parent group containing all nodes
 
 ### Custom Configuration
@@ -104,25 +98,27 @@ All custom K3s flags are defined in `group_vars/k3s_cluster.yaml`:
 - **kube-proxy**: Disabled (Cilium replacement)
 - **TLS SANs**: vipalived VIP (172.16.101.101) + server IP
 
+### Run Full Site Playbook
+
+Run the complete k3s-ansible site playbook (safe to run, idempotent):
+
+```bash
+ansible-playbook ~/.ansible/collections/ansible_collections/k3s/orchestration/playbooks/site.yml
+```
+
 ### Upgrade K3s Version
 
 To upgrade K3s across the cluster:
 
-1. Update version in `group_vars/k3s_cluster.yaml`:
+1. Update version in `inventory/production.yaml` (k3s_cluster vars):
    ```yaml
-   k3s_version: v1.32.0+k3s1
+   k3s_version: v1.34.2+k3s1
    ```
 
-2. Run upgrade playbook:
+2. Run upgrade playbook from k3s-ansible collection:
    ```bash
-   ansible-playbook playbooks/k3s-upgrade.yaml
+   ansible-playbook ~/.ansible/collections/ansible_collections/k3s/orchestration/playbooks/upgrade.yml
    ```
-
-**What happens:**
-- Servers upgrade sequentially (one at a time, prevents etcd issues)
-- Agents upgrade in parallel
-- Custom configuration preserved
-- Services automatically restarted with new version
 
 ### Add New Worker Node
 
@@ -141,26 +137,24 @@ To add a new worker node to the cluster:
    ansible-playbook playbooks/00-bootstrap-ansible-user.yaml --limit k8s-worker-02
    ```
 
-3. Install K3s agent and join cluster:
+3. Prepare node with node-prep role:
    ```bash
-   ansible-playbook playbooks/k3s-add-agent.yaml --limit k8s-worker-02
+   ansible-playbook playbooks/setup-nodes.yaml --limit k8s-worker-02
    ```
 
-4. Verify node joined:
+4. Install K3s agent using k3s-ansible collection:
+   ```bash
+   ansible-playbook ~/.ansible/collections/ansible_collections/k3s/orchestration/playbooks/site.yml --limit k8s-worker-02
+   ```
+
+5. Verify node joined:
    ```bash
    kubectl get nodes
    ```
 
-### Important Notes
-
-- **Cluster token** is configured in `group_vars/k3s_cluster.yaml`
-- **Do NOT run** `k3s-ansible/playbooks/site.yml` directly - it may conflict with existing setup
-- **Use wrapper playbooks** in `playbooks/` directory - they handle custom configuration
-- **Custom components** (Cilium, vipalived, ArgoCD) are managed outside k3s-ansible
-
 ## Node Preparation Role
 
-The `node-prep` role prepares K3s cluster nodes with required packages and system configurations. Converted from Argo Workflows for better maintainability and idempotency.
+The `node-prep` role prepares K3s cluster nodes with required packages and system configurations.
 
 ### Features
 
@@ -189,40 +183,6 @@ Packages are organized by purpose in `roles/node-prep/defaults/main.yml`:
 - `cpufrequtils` - CPU frequency scaling
 - `watchdog` - Hardware watchdog daemon
 - `smartmontools` - Disk health monitoring (SMART)
-
-### Sysctl Configuration
-
-**Kernel Panic Settings** (`/etc/sysctl.d/99-k8s-panic.conf`):
-- `kernel.panic=10` - Reboot after 10 seconds on panic
-- `kernel.panic_on_oops=1` - Panic on kernel oops
-- `vm.panic_on_oom=0` - Do not panic on OOM
-- `kernel.hung_task_panic=0` - Do not panic on hung tasks
-
-**Filesystem Optimization** (`/etc/sysctl.d/99-k8s-filesystem.conf`):
-- `vm.swappiness=1` - Minimal swap usage
-- `vm.dirty_ratio=10` - Force writeback at 10% dirty pages
-- `fs.inotify.max_user_watches=524288` - inotify watches for K8s
-- `fs.file-max=2097152` - Maximum open files
-
-### DNS Configuration
-
-**Fallback Servers** (`/etc/systemd/resolved.conf.d/fallback.conf`):
-- Primary DNS: 172.16.0.1
-- Fallback DNS: 8.8.8.8, 1.1.1.1
-
-**Caching and Timeouts** (`/etc/systemd/resolved.conf.d/timeouts.conf`):
-- DNS caching enabled
-- Stale cache retention: 3600 seconds
-- mDNS and LLMNR disabled
-- DNS-over-TLS disabled
-
-### Watchdog Configuration
-
-Hardware watchdog configured in **heartbeat-only mode** (`/etc/watchdog.conf`):
-- Device: /dev/watchdog
-- Timeout: 120 seconds
-- Interval: 30 seconds
-- No load monitoring (prevents false-positive reboots)
 
 ### Usage
 
@@ -287,33 +247,24 @@ node_prep_dns_fallback: "8.8.8.8 1.1.1.1"
 # Watchdog
 node_prep_watchdog_timeout: 120
 node_prep_watchdog_interval: 30
-
-# System upgrades (disabled by default in setup-nodes.yaml)
-node_prep_system_upgrade_enabled: false
-node_prep_reboot_if_required: true  # Auto-reboot enabled by default
 ```
 
-### Important Notes
+## Network Diagnostics
 
-- **Watchdog** runs in heartbeat-only mode (no load monitoring) to prevent false-positive reboots
-- **System upgrades** are disabled by default in setup-nodes.yaml, use upgrade-nodes.yaml playbook
-- **Automatic reboot** is enabled by default, disable with `--extra-vars "auto_reboot=false"`
-- **Nodes are upgraded sequentially** (serial: 1) to maintain cluster availability
-- **Sysctl changes** are applied immediately and persisted to `/etc/sysctl.d/`
-- **DNS changes** require systemd-resolved restart (handled by role)
+The `setup-network-diagnostics.yaml` playbook sets up tools for investigating network issues, specifically the Raspberry Pi 5 network death bug.
 
-### Conversion from Argo Workflows
+**Usage:**
+```bash
+ansible-playbook playbooks/setup-network-diagnostics.yaml
+```
 
-This role replaces the following Argo Workflow templates:
-- `workflow-template-new-node-setup.yaml` - Initial node setup
-- `workflow-template-dns-configuration.yaml` - DNS configuration
-- `workflow-template-node-upgrade.yaml` - System upgrades
+**What it configures:**
+- ethtool stats collection (every 1 minute)
+- macb ethernet driver debug logging at boot
+- Network link state monitoring (every 30 seconds)
+- Systemd timers and scripts in `/usr/local/bin/`
 
-All configurations are now managed via Ansible for better:
-- **Idempotency** - Safe to run multiple times
-- **Maintainability** - YAML-based configuration instead of bash scripts
-- **Visibility** - Clear variable definitions in defaults/main.yml
-- **Testability** - Can test on single node before cluster-wide rollout
+This is a debugging tool, not part of standard cluster operations.
 
 ## SSH Keys
 
@@ -327,7 +278,7 @@ All configurations are now managed via Ansible for better:
 Nodes are organized in k3s-ansible format:
 
 - `server`: Control plane nodes (k8s-cp-01: 172.16.101.1)
-- `agent`: Worker nodes (k8s-worker-01: 172.16.101.2)
+- `agent`: Worker nodes (k8s-worker-01: 172.16.101.2, k8s-worker-02: 172.16.101.3)
 - `k3s_cluster`: Parent group containing all nodes
 
 ## Common Operations
@@ -404,15 +355,6 @@ ssh -i ~/.ssh/ansible_ed25519 ansible@172.16.101.1
 ### Sudo issues
 - Verify `/etc/sudoers.d/ansible` exists on nodes
 - Test manually: `ssh ansible@NODE "sudo -n true"`
-
-## Future Plans
-
-- [ ] Create node-prep role (replace system-upgrade plans)
-- [ ] Create k3s-bootstrap role (automate K3s installation)
-- [ ] Create system-hardening role (security configurations)
-- [ ] Add backup/restore playbooks
-- [ ] Add node addition playbook
-- [ ] Integrate with SOPS for secret management
 
 ## Notes
 
