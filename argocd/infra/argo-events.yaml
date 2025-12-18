@@ -10,21 +10,18 @@ spec:
   destination:
     namespace: argo-events
     server: "https://kubernetes.default.svc"
-  sources:
-    - repoURL: "https://argoproj.github.io/argo-helm"
-      targetRevision: "2.4.19"
-      chart: argo-events
-      helm:
-        valuesObject:
-          controller:
-            replicas: 1
-          configs:
-            jetstream:
-              streamConfig:
-                replicas: 1
-    - repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
-      path: manifests/argo-events
+  source:
+    repoURL: "https://argoproj.github.io/argo-helm"
+    targetRevision: "2.4.19"
+    chart: argo-events
+    helm:
+      valuesObject:
+        controller:
+          replicas: 1
+        configs:
+          jetstream:
+            streamConfig:
+              replicas: 1
   syncPolicy:
     automated:
       prune: true
