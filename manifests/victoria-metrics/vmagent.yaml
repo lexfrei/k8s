@@ -4,7 +4,6 @@ metadata:
   name: vmagent
   namespace: monitoring
 spec:
-  daemonSetMode: true
   selectAllByDefault: true
   scrapeInterval: 20s
   remoteWrite:
