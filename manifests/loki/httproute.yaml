@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: loki
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: cilium-gateway-internal
+      namespace: kube-system
+      sectionName: https-home-lex-la
+  hostnames:
+    - loki.home.lex.la
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: loki
+          port: 3100
