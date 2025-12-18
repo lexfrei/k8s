@@ -23,6 +23,18 @@ spec:
       role_attribute_path: "contains(groups[*], 'admins') && 'Admin' || 'Viewer'"
     server:
       root_url: "https://grafana.home.lex.la"
+  httpRoute:
+    spec:
+      parentRefs:
+        - name: cilium-gateway-internal
+          namespace: kube-system
+          sectionName: https-home-lex-la
+      hostnames:
+        - grafana.home.lex.la
+      rules:
+        - backendRefs:
+            - name: grafana-service
+              port: 3000
   deployment:
     spec:
       strategy:
