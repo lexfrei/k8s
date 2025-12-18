@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: vmsingle
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: cilium-gateway-internal
+      namespace: kube-system
+      sectionName: https-home-lex-la
+  hostnames:
+    - vmsingle.home.lex.la
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: vmsingle-vmsingle
+          port: 8428

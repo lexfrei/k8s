@@ -44,6 +44,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: jellyfin
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: monitoring
   to:
     - group: ""
       kind: Service
