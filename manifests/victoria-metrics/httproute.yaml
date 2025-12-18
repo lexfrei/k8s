@@ -9,7 +9,7 @@ spec:
       namespace: kube-system
       sectionName: https-home-lex-la
   hostnames:
-    - vmsingle.home.lex.la
+    - vm.home.lex.la
   rules:
     - matches:
         - path:
