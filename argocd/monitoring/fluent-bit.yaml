@@ -17,8 +17,6 @@ spec:
     helm:
       valuesObject:
         kind: DaemonSet
-        hostNetwork: true
-        dnsPolicy: ClusterFirstWithHostNet
 
         config:
           service: |
@@ -52,28 +50,6 @@ spec:
                 Read_From_Tail On
                 Strip_Underscores On
                 storage.type filesystem
-
-            [INPUT]
-                Name prometheus_scrape
-                Tag metrics.kubelet
-                Host 127.0.0.1
-                Port 10250
-                Scrape_Interval 30s
-                Metrics_Path /metrics
-                Tls On
-                Tls.Verify Off
-                Bearer_Token_File /var/run/secrets/kubernetes.io/serviceaccount/token
-
-            [INPUT]
-                Name prometheus_scrape
-                Tag metrics.cadvisor
-                Host 127.0.0.1
-                Port 10250
-                Scrape_Interval 30s
-                Metrics_Path /metrics/cadvisor
-                Tls On
-                Tls.Verify Off
-                Bearer_Token_File /var/run/secrets/kubernetes.io/serviceaccount/token
 
           filters: |
             [FILTER]
@@ -115,14 +91,6 @@ spec:
                 line_format json
                 storage.total_limit_size 2G
                 Retry_Limit False
-
-            [OUTPUT]
-                Name prometheus_remote_write
-                Match metrics.*
-                Host vmsingle-vmsingle.monitoring.svc
-                Port 8428
-                Uri /api/v1/write
-                Add_Label node ${HOSTNAME}
 
         resources:
           requests:
