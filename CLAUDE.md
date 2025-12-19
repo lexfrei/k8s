@@ -270,6 +270,38 @@ ansible k3s_cluster --module-name apt --args "name=PACKAGE state=latest"
 - Post-reboot delay ensures node is ready before proceeding
 - **Use `auto_reboot=true` (default) for routine upgrades**
 
+### K3s Cluster Management (k3s-ansible)
+
+K3s installation and upgrades use the `k3s.orchestration` collection.
+
+```bash
+# IMPORTANT: All ansible commands must be run from the ansible/ directory
+cd ansible/
+
+# Install/upgrade K3s cluster (full deployment)
+ansible-playbook k3s.orchestration.site
+
+# Upgrade K3s only (sequential server upgrade, then agents)
+ansible-playbook k3s.orchestration.upgrade
+
+# Reset K3s cluster (DESTRUCTIVE)
+ansible-playbook k3s.orchestration.reset
+
+# Reboot all nodes
+ansible-playbook k3s.orchestration.reboot
+```
+
+**K3s Version:**
+- Defined in `ansible/inventory/production.yaml` → `k3s_version`
+- Renovate auto-updates version via GitHub releases datasource
+- Collection playbooks use FQCN format: `k3s.orchestration.<playbook>`
+
+**Collection Installation:**
+```bash
+cd ansible/
+ansible-galaxy collection install --requirements-file requirements.yaml
+```
+
 ## Development Workflow
 
 ### Adding a New Application
