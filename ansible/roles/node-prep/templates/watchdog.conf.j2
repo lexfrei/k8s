@@ -1,11 +1,10 @@
 # {{ ansible_managed }}
-# Watchdog configuration with network interface monitoring
-# Converted from Argo Workflows manifests/argo-workflows/workflow-template-new-node-setup.yaml
+# Watchdog configuration with gateway ping monitoring
 #
-# This configuration enables hardware watchdog with network interface monitoring.
-# If the monitored interface goes down or stops responding, watchdog will attempt
-# repair first, then reboot after retry-timeout if repair fails.
-# See Error 15 in CLAUDE.md for context.
+# This configuration enables hardware watchdog with gateway reachability check.
+# If the gateway (172.16.0.1) is unreachable for more than retry-timeout seconds,
+# watchdog will reboot the system to recover network connectivity.
+# See Error 15 in CLAUDE.md for context (network death without link down).
 
 watchdog-device = {{ node_prep_watchdog_device }}
 watchdog-timeout = {{ node_prep_watchdog_timeout }}
@@ -13,19 +12,9 @@ interval = {{ node_prep_watchdog_interval }}
 realtime = {{ node_prep_watchdog_realtime }}
 priority = {{ node_prep_watchdog_priority }}
 
-# Network interface monitoring
-# Watchdog checks if interface is up and has traffic
-interface = {{ node_prep_watchdog_interface }}
+# Gateway ping monitoring
+# More reliable than interface monitoring - catches cases where link is UP but no traffic
+ping = {{ node_prep_watchdog_ping_target }}
 
-# Graceful error handling
-# Wait retry-timeout seconds before taking action (allows transient issues to clear)
+# Reboot if gateway unreachable for this many seconds
 retry-timeout = {{ node_prep_watchdog_retry_timeout }}
-
-# Repair script - attempt to fix issues before rebooting
-# Script should try: ip link set eth0 down && ip link set eth0 up
-repair-binary = {{ node_prep_watchdog_repair_binary }}
-repair-timeout = {{ node_prep_watchdog_repair_timeout }}
-
-# Maximum repair attempts before forcing reboot
-# After this many failed repairs, reboot anyway
-repair-maximum = {{ node_prep_watchdog_repair_maximum }}

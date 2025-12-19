@@ -70,18 +70,15 @@ node_prep_dns_resolve_unicast_single_label: "no"  # Don't resolve single-label n
 node_prep_dns_stale_retention_sec: 3600          # Keep stale entries for 1 hour
 
 # Watchdog configuration
-# Converted from Argo Workflows
 # Note: watchdog package is installed via node_prep_system_packages
+# Only reboots if gateway is unreachable - no other triggers (load, memory, etc.)
 node_prep_watchdog_device: "/dev/watchdog"
-node_prep_watchdog_timeout: 120              # 2 minutes timeout
-node_prep_watchdog_interval: 30              # Check every 30 seconds
+node_prep_watchdog_timeout: 120              # 2 minutes hardware timeout
+node_prep_watchdog_interval: 15              # Check gateway every 15 seconds
 node_prep_watchdog_realtime: "yes"
 node_prep_watchdog_priority: 1
-node_prep_watchdog_interface: "eth0"         # Monitor network interface (reboot if down/stuck)
-node_prep_watchdog_retry_timeout: 300        # Wait 5 minutes before reboot on error
-node_prep_watchdog_repair_binary: "/usr/local/bin/watchdog-repair.sh"
-node_prep_watchdog_repair_timeout: 60        # Repair script timeout
-node_prep_watchdog_repair_maximum: 3         # Max repair attempts before reboot
+node_prep_watchdog_ping_target: "172.16.0.1" # Gateway to ping
+node_prep_watchdog_retry_timeout: 60         # Reboot after 60 seconds of ping failure
 
 # CPU frequency governor
 # Set to "performance" to avoid RCU stalls from frequency scaling
