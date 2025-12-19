@@ -15,7 +15,7 @@
 
 - name: Perform system upgrade
   ansible.builtin.shell:
-    cmd: apt-get upgrade --with-new-pkgs --assume-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+    cmd: apt-get upgrade --with-new-pkgs --assume-yes --option Dpkg::Options::="--force-confdef" --option Dpkg::Options::="--force-confold"
   environment:
     DEBIAN_FRONTEND: noninteractive
   when: node_prep_system_upgrade_enabled | bool
