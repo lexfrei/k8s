@@ -14,12 +14,13 @@
     - apt
 
 - name: Perform system upgrade
-  ansible.builtin.apt:
-    upgrade: dist
-    force_apt_get: true
-    dpkg_options: 'force-confdef,force-confold'
+  ansible.builtin.shell:
+    cmd: apt-get upgrade --with-new-pkgs --assume-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
   when: node_prep_system_upgrade_enabled | bool
   register: apt_upgrade_result
+  changed_when: "'0 upgraded' not in apt_upgrade_result.stdout"
   tags:
     - system-upgrade
     - apt
