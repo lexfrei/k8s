@@ -1,8 +1,22 @@
 ---
-# Configure hardware watchdog with gateway ping monitoring
-# Only triggers reboot if gateway (172.16.0.1) is unreachable for 60+ seconds
+# Configure hardware watchdog with three-level protection
+# Level 1: Network repair - reload macb module on ping failure
+# Level 2: Software reboot - if repair fails
+# Level 3: Hardware failsafe - bcm2835_wdt triggers reboot on no heartbeat
 # See Error 15 in CLAUDE.md - network death without link down
 # NOTE: watchdog package is installed via apt-packages.yml (node_prep_system_packages)
+
+- name: Deploy watchdog network repair script
+  ansible.builtin.template:
+    src: watchdog-network-repair.sh.j2
+    dest: "{{ node_prep_watchdog_repair_binary }}"
+    owner: root
+    group: root
+    mode: '0755'
+  notify: restart watchdog
+  tags:
+    - watchdog
+    - scripts
 
 - name: Deploy watchdog configuration
   ansible.builtin.template:
