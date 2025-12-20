@@ -9,6 +9,9 @@ kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 # MTU configuration
 mtu: 1500
 
+# Devices for L2 announcements
+devices: "eth+"
+
 # Routing configuration
 # Native routing for better performance on same L2 network
 routingMode: "native"
