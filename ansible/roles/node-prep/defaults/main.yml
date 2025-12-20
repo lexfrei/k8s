@@ -71,14 +71,20 @@ node_prep_dns_stale_retention_sec: 3600          # Keep stale entries for 1 hour
 
 # Watchdog configuration
 # Note: watchdog package is installed via node_prep_system_packages
-# Only reboots if gateway is unreachable - no other triggers (load, memory, etc.)
+# Three-level protection:
+#   1. Ping failure -> repair script tries macb module reload
+#   2. If repair fails -> software reboot via watchdog daemon
+#   3. If system hangs (no heartbeat) -> hardware reboot via bcm2835_wdt
+# See Error 15 in CLAUDE.md for context (RPi5 network death without link down)
 node_prep_watchdog_device: "/dev/watchdog"
-node_prep_watchdog_timeout: 120              # 2 minutes hardware timeout
-node_prep_watchdog_interval: 15              # Check gateway every 15 seconds
+node_prep_watchdog_timeout: 60               # Hardware timeout: 60s (bcm2835_wdt failsafe)
+node_prep_watchdog_interval: 15              # Heartbeat and ping check every 15 seconds
 node_prep_watchdog_realtime: "yes"
 node_prep_watchdog_priority: 1
 node_prep_watchdog_ping_target: "172.16.0.1" # Gateway to ping
-node_prep_watchdog_retry_timeout: 60         # Reboot after 60 seconds of ping failure
+node_prep_watchdog_retry_timeout: 60         # Trigger repair after 60 seconds of ping failure
+node_prep_watchdog_repair_binary: "/usr/local/bin/watchdog-network-repair.sh"
+node_prep_watchdog_repair_timeout: 30        # Seconds for repair script to complete
 
 # CPU frequency governor
 # Set to "performance" to avoid RCU stalls from frequency scaling

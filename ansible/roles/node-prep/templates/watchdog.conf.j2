@@ -1,13 +1,26 @@
 # {{ ansible_managed }}
-# Watchdog configuration with gateway ping monitoring
+# Watchdog configuration with three-level protection
 #
-# This configuration enables hardware watchdog with gateway reachability check.
-# If the gateway (172.16.0.1) is unreachable for more than retry-timeout seconds,
-# watchdog will reboot the system to recover network connectivity.
-# See Error 15 in CLAUDE.md for context (network death without link down).
+# Level 1: Network repair
+#   - Ping gateway every {{ node_prep_watchdog_interval }}s
+#   - If unreachable for {{ node_prep_watchdog_retry_timeout }}s -> run repair script
+#   - Repair script reloads macb kernel module to recover network
+#
+# Level 2: Software reboot
+#   - If repair script fails (returns non-0) -> watchdog daemon triggers reboot
+#
+# Level 3: Hardware failsafe (bcm2835_wdt)
+#   - Heartbeat sent every {{ node_prep_watchdog_interval }}s
+#   - If no heartbeat for {{ node_prep_watchdog_timeout }}s -> hardware reboot
+#   - Works even during kernel panic or complete system lockup
+#
+# See Error 15 in CLAUDE.md for context (RPi5 network death without link down)
 
+# Hardware watchdog device
 watchdog-device = {{ node_prep_watchdog_device }}
 watchdog-timeout = {{ node_prep_watchdog_timeout }}
+
+# Daemon settings
 interval = {{ node_prep_watchdog_interval }}
 realtime = {{ node_prep_watchdog_realtime }}
 priority = {{ node_prep_watchdog_priority }}
@@ -16,5 +29,9 @@ priority = {{ node_prep_watchdog_priority }}
 # More reliable than interface monitoring - catches cases where link is UP but no traffic
 ping = {{ node_prep_watchdog_ping_target }}
 
-# Reboot if gateway unreachable for this many seconds
+# Trigger repair/reboot if gateway unreachable for this many seconds
 retry-timeout = {{ node_prep_watchdog_retry_timeout }}
+
+# Network repair script - attempts to recover by reloading macb module
+repair-binary = {{ node_prep_watchdog_repair_binary }}
+repair-timeout = {{ node_prep_watchdog_repair_timeout }}

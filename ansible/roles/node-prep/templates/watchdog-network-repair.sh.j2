@@ -1,0 +1,52 @@
+#!/bin/bash
+# {{ ansible_managed }}
+# Watchdog network repair script for Raspberry Pi 5
+#
+# Called by watchdog daemon when ping to gateway fails.
+# Attempts to recover network by reloading macb kernel module.
+# See Error 15 in CLAUDE.md for context (network death without link down).
+#
+# Arguments:
+#   $1 = error code from watchdog (100=ENETDOWN, 101=ENETUNREACH, etc.)
+#
+# Return codes:
+#   0 = network repaired, no reboot needed
+#   non-0 = repair failed, watchdog will trigger reboot
+
+set -euo pipefail
+
+readonly ERROR_CODE="${1:-unknown}"
+readonly GATEWAY="{{ node_prep_watchdog_ping_target }}"
+readonly WAIT_SECONDS=10
+readonly PING_COUNT=3
+readonly PING_TIMEOUT=5
+
+log() {
+    logger --tag watchdog-repair "$*"
+}
+
+log "Network repair started (error code: ${ERROR_CODE})"
+
+# Reload macb kernel module (Raspberry Pi 5 GEM/macb ethernet driver)
+log "Reloading macb kernel module..."
+if ! modprobe --remove macb 2>/dev/null; then
+    log "Warning: failed to unload macb module (may be in use)"
+fi
+sleep 2
+if ! modprobe macb; then
+    log "Error: failed to load macb module"
+    exit 1
+fi
+
+# Wait for interface to come up
+log "Waiting ${WAIT_SECONDS}s for interface to initialize..."
+sleep "${WAIT_SECONDS}"
+
+# Verify network connectivity
+if ping -c "${PING_COUNT}" -W "${PING_TIMEOUT}" "${GATEWAY}" >/dev/null 2>&1; then
+    log "Network recovered successfully after macb reload"
+    exit 0
+else
+    log "Network still unreachable after macb reload, reboot required"
+    exit 1
+fi
