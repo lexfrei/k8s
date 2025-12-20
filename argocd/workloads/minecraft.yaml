@@ -13,7 +13,7 @@ spec:
   sources:
     - chart: papermc
       repoURL: ghcr.io/lexfrei
-      targetRevision: 0.1.0
+      targetRevision: 0.2.0
       helm:
         values: |
           fullnameOverride: "papermc"
