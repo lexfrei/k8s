@@ -13,7 +13,34 @@ spec:
   source:
     chart: vipalived
     repoURL: ghcr.io/lexfrei/charts
-    targetRevision: 0.5.2
+    targetRevision: 0.6.0
+    helm:
+      valuesObject:
+        keepalived:
+          vrrpInstance:
+            # Workaround for keepalived issue 1847
+            # Forces FAULT state on interface down, ensuring proper recovery
+            trackInterface:
+              - eth0
+        startupProbe:
+          enabled: true
+          exec:
+            command:
+              - sh
+              - -c
+              - ip addr show eth0 | grep -q "172.16.101.101"
+          periodSeconds: 5
+          failureThreshold: 12
+        livenessProbe:
+          enabled: true
+          exec:
+            command:
+              - sh
+              - -c
+              - ip addr show eth0 | grep -q "172.16.101.101"
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          failureThreshold: 3
   syncPolicy:
     automated:
       prune: true
