@@ -31,8 +31,8 @@ spec:
               tcp: 25565
               udp: 25565
             extra:
-              - name: dynmap
-                port: 8123
+              - name: bluemap
+                port: 8100
                 protocol: TCP
 
           service:
@@ -55,7 +55,7 @@ spec:
                         value: /
                   backendRefs:
                     - name: papermc
-                      port: 8123
+                      port: 8100
 
           persistence:
             enabled: true
