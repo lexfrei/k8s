@@ -10,6 +10,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Pull requests are optional
 - This overrides global CLAUDE.md Git workflow rules
 
+## Kubectl Context
+
+**CRITICAL**: ALWAYS use the `homelab` kubectl context when working with this cluster.
+
+```bash
+# All kubectl commands MUST use --context homelab
+kubectl --context homelab get pods
+kubectl --context homelab apply --filename manifest.yaml
+
+# Or set context for session
+kubectl config use-context homelab
+```
+
+- Context name: `homelab`
+- API server: https://172.16.101.101:6443 (VIP)
+- Credentials: admin via client certificate
+
+**Never run kubectl commands without specifying context** — this prevents accidental operations on wrong clusters.
+
 ## Repository Purpose
 
 This is a Kubernetes cluster configuration for ARM64 systems (Raspberry Pi compatible) managed via GitOps with ArgoCD. The repository contains all Kubernetes manifests, Helm values, and ArgoCD application definitions for a production home cluster.
