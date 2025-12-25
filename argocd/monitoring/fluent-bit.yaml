@@ -79,8 +79,8 @@ spec:
                 label_keys $kubernetes['namespace_name'],$kubernetes['pod_name'],$kubernetes['container_name']
                 remove_keys kubernetes,stream
                 line_format json
-                storage.total_limit_size 2G
-                Retry_Limit False
+                storage.total_limit_size 500M
+                Retry_Limit 5
 
             [OUTPUT]
                 Name loki
@@ -89,8 +89,8 @@ spec:
                 port 3100
                 labels job=systemd-journal
                 line_format json
-                storage.total_limit_size 2G
-                Retry_Limit False
+                storage.total_limit_size 500M
+                Retry_Limit 5
 
         resources:
           requests:
