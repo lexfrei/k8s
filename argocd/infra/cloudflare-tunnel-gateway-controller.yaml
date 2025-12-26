@@ -16,6 +16,10 @@ spec:
       targetRevision: 0.1.0
       helm:
         valuesObject:
+          image:
+            repository: ttl.sh/lexfrei/cloudflare-tunnel-gateway-controller
+            tag: test
+            pullPolicy: Always
           gatewayClassConfig:
             create: true
             tunnelID: "59db961d-3851-468a-bf80-4d39f942b9e0"
