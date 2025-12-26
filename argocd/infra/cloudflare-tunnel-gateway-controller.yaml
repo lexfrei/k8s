@@ -18,7 +18,7 @@ spec:
         valuesObject:
           image:
             repository: ttl.sh/lexfrei/cloudflare-tunnel-gateway-controller
-            tag: test
+            tag: 1h
             pullPolicy: Always
           gatewayClassConfig:
             create: true
