@@ -11,9 +11,9 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    - repoURL: oci://ghcr.io/lexfrei/cloudflare-tunnel-gateway-controller/chart
+    - repoURL: oci://ttl.sh/lexfrei/cloudflare-tunnel-gateway-controller
       path: "."
-      targetRevision: 0.9.7
+      targetRevision: 0.1.0
       helm:
         valuesObject:
           gatewayClassConfig:
