@@ -47,15 +47,7 @@ envoy:
 
 # Hubble network observability
 hubble:
-  enabled: true
-  peerService:
-    clusterDomain: k8s.home.lex.la
-  relay:
-    enabled: true
-    replicas: 1
-  ui:
-    enabled: true
-    replicas: 1
+  enabled: false
 
 # Gateway API support
 gatewayAPI:
