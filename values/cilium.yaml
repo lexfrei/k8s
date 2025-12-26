@@ -47,7 +47,13 @@ envoy:
 
 # Hubble network observability
 hubble:
-  enabled: false
+  enabled: true
+  relay:
+    enabled: true
+    replicas: 1
+  ui:
+    enabled: true
+    replicas: 1
 
 # Gateway API support
 gatewayAPI:
