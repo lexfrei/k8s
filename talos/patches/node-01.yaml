@@ -1,0 +1,8 @@
+# Patch for k8s-cp-01 (172.16.101.1)
+machine:
+  network:
+    hostname: k8s-cp-01
+    interfaces:
+      - interface: eth0
+        addresses:
+          - 172.16.101.1/24
