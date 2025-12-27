@@ -33,15 +33,33 @@
 
 ```
 talos/
-├── controlplane.yaml.example    # Base config for all nodes
+├── controlplane.yaml.example    # Base config (manual approach)
 ├── patches/
 │   ├── node-01.yaml            # k8s-cp-01 specific (hostname, IP)
 │   ├── node-02.yaml            # k8s-cp-02 specific
 │   └── node-03.yaml            # k8s-cp-03 specific
+├── terraform/                   # IaC approach (recommended)
+│   ├── main.tf                 # Full cluster definition
+│   └── README.md               # Terraform usage
 └── README.md
 ```
 
-## Bootstrap Procedure
+## Approaches
+
+### Option 1: Terraform (Recommended)
+
+```bash
+cd terraform/
+terraform init
+terraform apply
+
+# Outputs kubeconfig and talosconfig automatically
+terraform output -raw kubeconfig > ~/.kube/config
+```
+
+See `terraform/README.md` for details.
+
+### Option 2: Manual (talosctl)
 
 ```bash
 # 1. Generate secrets (ONCE, keep safe!)
