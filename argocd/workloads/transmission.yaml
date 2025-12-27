@@ -20,18 +20,20 @@ spec:
           fsGroup: 1000
           fsGroupChangePolicy: OnRootMismatch
         livenessProbe:
-          exec:
-            command: ["true"]
-          initialDelaySeconds: 300
-          periodSeconds: 60
-          failureThreshold: 1
-        readinessProbe:
           tcpSocket:
             port: 9091
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 5
-          failureThreshold: 100
+          failureThreshold: 6
+        readinessProbe:
+          httpGet:
+            path: /transmission/web/
+            port: 9091
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
         resources:
           requests:
             cpu: 200m
