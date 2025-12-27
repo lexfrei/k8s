@@ -1,0 +1,63 @@
+# Talos Worker Node Configuration for RPi5
+# Apply with: talosctl apply-config --nodes NODE_IP --file worker.yaml
+
+machine:
+  type: worker
+
+  # Network - customize per node
+  network:
+    hostname: k8s-worker-01  # Change per node
+    interfaces:
+      - interface: eth0
+        addresses:
+          - 172.16.101.2/24  # Change per node
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 172.16.101.254
+    nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+
+  time:
+    servers:
+      - time.cloudflare.com
+
+  kubelet:
+    extraArgs:
+      rotate-server-certificates: "true"
+    nodeIP:
+      validSubnets:
+        - 172.16.101.0/24
+
+  # Same kernel modules as control plane
+  kernel:
+    modules:
+      - name: br_netfilter
+      - name: xt_socket
+
+  # Same sysctls
+  sysctls:
+    net.core.bpf_jit_enable: "1"
+    net.ipv4.ip_forward: "1"
+    net.ipv6.conf.all.forwarding: "1"
+    net.bridge.bridge-nf-call-iptables: "1"
+    net.bridge.bridge-nf-call-ip6tables: "1"
+    kernel.unprivileged_bpf_disabled: "1"
+    net.core.netdev_max_backlog: "5000"
+    fs.file-max: "2097152"
+    fs.inotify.max_user_watches: "524288"
+    fs.inotify.max_user_instances: "8192"
+
+  features:
+    rbac: true
+    stableHostname: true
+    kubePrism:
+      enabled: true
+      port: 7445
+
+  install:
+    disk: /dev/mmcblk0
+    image: ghcr.io/siderolabs/installer:v1.9.0
+
+# Worker inherits cluster config from control plane join
+# No cluster section needed - it's provided during join
