@@ -54,18 +54,6 @@ spec:
           downloads:
             type: pvc
             existingClaim: "transmission-downloads-nfs"
-        initContainers:
-          - name: init-permissions
-            image: busybox:latest
-            command:
-              - sh
-              - -c
-              - chown -R 1000:1000 /config
-            volumeMounts:
-              - name: config
-                mountPath: /config
-            securityContext:
-              runAsUser: 0
   syncPolicy:
     automated:
       prune: true
