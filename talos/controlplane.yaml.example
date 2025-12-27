@@ -32,7 +32,8 @@ machine:
         vip:
           ip: 172.16.101.100  # Shared VIP for API
     nameservers:
-      - 1.1.1.1
+      - 172.16.0.1  # Primary (from Ansible)
+      - 1.1.1.1     # Fallback
       - 8.8.8.8
 
   time:
@@ -76,9 +77,11 @@ machine:
     vm.dirty_writeback_centisecs: "500"
     vm.overcommit_memory: "0"
 
-    # Kernel panic
+    # Kernel panic (from Ansible sysctl-kernel-panic.yml)
     kernel.panic: "10"
     kernel.panic_on_oops: "1"
+    vm.panic_on_oom: "0"
+    kernel.hung_task_panic: "0"
 
   features:
     rbac: true
