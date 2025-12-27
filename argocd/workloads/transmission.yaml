@@ -57,12 +57,10 @@ spec:
             command:
               - sh
               - -c
-              - chown -R 1000:1000 /config /downloads
+              - chown -R 1000:1000 /config
             volumeMounts:
               - name: config
                 mountPath: /config
-              - name: downloads
-                mountPath: /downloads
             securityContext:
               runAsUser: 0
   syncPolicy:
