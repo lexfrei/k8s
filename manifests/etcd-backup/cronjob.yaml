@@ -1,0 +1,82 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: etcd-backup
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: etcd-backup
+    app.kubernetes.io/component: backup
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: etcd-backup
+        spec:
+          restartPolicy: OnFailure
+          nodeSelector:
+            node-role.kubernetes.io/control-plane: "true"
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          containers:
+            - name: backup
+              image: busybox:stable
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  BACKUP_DATE=$(date +%Y-%m-%d-%H%M%S)
+                  SRC_DIR=/snapshots
+                  DEST_DIR=/backup
+
+                  echo "Starting etcd backup at $(date)"
+
+                  mkdir -p "$DEST_DIR/$BACKUP_DATE"
+
+                  cp -r "$SRC_DIR"/* "$DEST_DIR/$BACKUP_DATE/" 2>/dev/null || true
+
+                  if [ -z "$(ls -A "$DEST_DIR/$BACKUP_DATE" 2>/dev/null)" ]; then
+                      echo "ERROR: No snapshot files found in $SRC_DIR"
+                      exit 1
+                  fi
+
+                  echo "Backed up snapshots to $DEST_DIR/$BACKUP_DATE:"
+                  ls -la "$DEST_DIR/$BACKUP_DATE/"
+
+                  echo "Cleaning up backups older than 7 days..."
+                  find "$DEST_DIR" -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \; 2>/dev/null || true
+
+                  echo "Current backups:"
+                  ls -la "$DEST_DIR/"
+
+                  echo "Backup completed successfully at $(date)"
+              volumeMounts:
+                - name: snapshots
+                  mountPath: /snapshots
+                  readOnly: true
+                - name: backup
+                  mountPath: /backup
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+          volumes:
+            - name: snapshots
+              hostPath:
+                path: /var/lib/rancher/k3s/server/db/snapshots
+                type: Directory
+            - name: backup
+              persistentVolumeClaim:
+                claimName: etcd-backup
