@@ -123,7 +123,7 @@ data "talos_machine_configuration_patches" "node" {
               ip = var.cluster_vip
             }
           }]
-          nameservers = ["1.1.1.1", "8.8.8.8"]
+          nameservers = ["172.16.0.1", "1.1.1.1", "8.8.8.8"]  # Primary + fallback from Ansible
         }
 
         time = {
@@ -180,9 +180,11 @@ data "talos_machine_configuration_patches" "node" {
           "vm.dirty_writeback_centisecs"      = "500"
           "vm.overcommit_memory"              = "0"
 
-          # Kernel panic (available in Talos)
+          # Kernel panic (from Ansible sysctl-kernel-panic.yml)
           "kernel.panic"                      = "10"
           "kernel.panic_on_oops"              = "1"
+          "vm.panic_on_oom"                   = "0"
+          "kernel.hung_task_panic"            = "0"
         }
 
         features = {
