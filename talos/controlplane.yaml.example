@@ -1,0 +1,153 @@
+# Talos Control Plane Configuration for RPi5
+# Reference: https://www.talos.dev/v1.9/reference/configuration/v1alpha1/config/
+#
+# Generate base config:
+#   talosctl gen config homelab https://172.16.101.1:6443 --output-dir talos
+# Then patch with this file:
+#   talosctl machineconfig patch controlplane.yaml --patch @controlplane-patch.yaml
+
+machine:
+  type: controlplane
+
+  # Static network (no DHCP)
+  network:
+    hostname: k8s-cp-01
+    interfaces:
+      - interface: eth0
+        addresses:
+          - 172.16.101.1/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 172.16.101.254
+    nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+
+  # Time sync
+  time:
+    servers:
+      - time.cloudflare.com
+
+  # Kubelet configuration
+  kubelet:
+    extraArgs:
+      rotate-server-certificates: "true"
+    # Node labels
+    nodeIP:
+      validSubnets:
+        - 172.16.101.0/24
+
+  # Kernel modules for Cilium
+  kernel:
+    modules:
+      - name: br_netfilter
+      - name: xt_socket
+
+  # Sysctls for networking
+  sysctls:
+    net.core.bpf_jit_enable: "1"
+    net.ipv4.ip_forward: "1"
+    net.ipv6.conf.all.forwarding: "1"
+    net.bridge.bridge-nf-call-iptables: "1"
+    net.bridge.bridge-nf-call-ip6tables: "1"
+    # For Cilium BPF
+    kernel.unprivileged_bpf_disabled: "1"
+    net.core.netdev_max_backlog: "5000"
+    # File descriptors
+    fs.file-max: "2097152"
+    fs.inotify.max_user_watches: "524288"
+    fs.inotify.max_user_instances: "8192"
+
+  # Features
+  features:
+    rbac: true
+    stableHostname: true
+    # Enable KubePrism (local LB for API)
+    kubePrism:
+      enabled: true
+      port: 7445
+
+  # Install configuration for RPi5
+  install:
+    disk: /dev/mmcblk0  # SD card, or /dev/sda for USB
+    image: ghcr.io/siderolabs/installer:v1.9.0
+    # RPi5 specific extensions would go here when available
+    # extensions:
+    #   - image: ghcr.io/siderolabs/rpi5-firmware:v1.9.0
+
+cluster:
+  # Cluster name
+  clusterName: homelab
+
+  # Control plane endpoint (VIP or single node IP)
+  controlPlane:
+    endpoint: https://172.16.101.1:6443
+
+  # Cluster network settings
+  network:
+    # NO CNI - we install Cilium ourselves
+    cni:
+      name: none
+
+    # Pod CIDR (match current K3s)
+    podSubnets:
+      - 10.42.0.0/16
+
+    # Service CIDR (match current K3s)
+    serviceSubnets:
+      - 10.43.0.0/16
+
+    # Cluster domain (match current K3s)
+    dnsDomain: k8s.home.lex.la
+
+  # DISABLE kube-proxy - Cilium replaces it
+  proxy:
+    disabled: true
+
+  # API Server configuration
+  apiServer:
+    certSANs:
+      - 172.16.101.1
+      - k8s-cp-01
+      - k8s-cp-01.home.lex.la
+      - api.k8s.home.lex.la
+    extraArgs:
+      # Audit logging (optional)
+      # audit-log-path: /var/log/audit.log
+      # audit-log-maxage: "30"
+
+  # Controller Manager
+  controllerManager:
+    extraArgs:
+      bind-address: 0.0.0.0  # For metrics scraping
+
+  # Scheduler
+  scheduler:
+    extraArgs:
+      bind-address: 0.0.0.0  # For metrics scraping
+
+  # etcd configuration
+  etcd:
+    extraArgs:
+      listen-metrics-urls: http://0.0.0.0:2381  # For metrics
+      # Match current K3s etcd tuning
+      quota-backend-bytes: "536870912"  # 512 MiB
+      auto-compaction-mode: periodic
+      auto-compaction-retention: "1h"
+      snapshot-count: "5000"
+
+  # CoreDNS - let Talos manage it, or disable and use own
+  # Option 1: Use Talos CoreDNS (simpler)
+  coreDNS:
+    disabled: false
+
+  # Option 2: Disable and deploy own (more control)
+  # coreDNS:
+  #   disabled: true
+
+  # Admission control plugins
+  adminKubeconfig:
+    certLifetime: 8760h  # 1 year
+
+  # Allow scheduling on control plane (single node friendly)
+  allowSchedulingOnControlPlanes: true
