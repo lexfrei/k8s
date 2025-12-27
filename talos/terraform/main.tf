@@ -133,6 +133,10 @@ data "talos_machine_configuration_patches" "node" {
         install = {
           disk  = each.value.disk
           image = "ghcr.io/siderolabs/installer:${var.talos_version}"
+          extensions = [
+            # iSCSI for Longhorn (replaces open-iscsi package)
+            "ghcr.io/siderolabs/iscsi-tools:${var.talos_version}",
+          ]
         }
 
         kubelet = {
@@ -152,15 +156,33 @@ data "talos_machine_configuration_patches" "node" {
         }
 
         sysctls = {
-          "net.core.bpf_jit_enable"           = "1"
-          "net.ipv4.ip_forward"               = "1"
-          "net.ipv6.conf.all.forwarding"      = "1"
+          # Cilium/BPF requirements
+          "net.core.bpf_jit_enable"             = "1"
+          "net.ipv4.ip_forward"                 = "1"
+          "net.ipv6.conf.all.forwarding"        = "1"
           "net.bridge.bridge-nf-call-iptables"  = "1"
           "net.bridge.bridge-nf-call-ip6tables" = "1"
-          "kernel.unprivileged_bpf_disabled"  = "1"
+          "kernel.unprivileged_bpf_disabled"    = "1"
+          "net.core.netdev_max_backlog"         = "5000"
+
+          # Filesystem (from Ansible sysctl-filesystem.yml)
           "fs.file-max"                       = "2097152"
           "fs.inotify.max_user_watches"       = "524288"
-          "fs.inotify.max_user_instances"     = "8192"
+          "fs.inotify.max_user_instances"     = "512"
+          "fs.inotify.max_queued_events"      = "65536"
+          "fs.aio-max-nr"                     = "1048576"
+
+          # Memory management (from Ansible)
+          "vm.swappiness"                     = "1"
+          "vm.dirty_background_ratio"         = "5"
+          "vm.dirty_ratio"                    = "10"
+          "vm.dirty_expire_centisecs"         = "1500"
+          "vm.dirty_writeback_centisecs"      = "500"
+          "vm.overcommit_memory"              = "0"
+
+          # Kernel panic (available in Talos)
+          "kernel.panic"                      = "10"
+          "kernel.panic_on_oops"              = "1"
         }
 
         features = {
