@@ -401,6 +401,7 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - K3s cluster with specific components disabled (local-storage, servicelb, metrics-server, coredns, kube-proxy, flannel, traefik)
 - Custom CoreDNS and Cilium replace default K3s networking
 - Designed for ARM64 architecture (Raspberry Pi)
+- **Node access**: Only network (SSH/Talos API) and UART available — no HDMI/display access to nodes
 - All changes deploy automatically via ArgoCD (selfHeal: true, prune: true)
 - Domain references throughout use `lex.la` - must be updated for different domains
 - Public services use direct IP access without Cloudflare Tunnel due to ISP DPI blocking

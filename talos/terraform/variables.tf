@@ -39,7 +39,7 @@ variable "gateway" {
 variable "nameservers" {
   description = "DNS servers for nodes"
   type        = list(string)
-  default     = ["172.16.0.1", "1.1.1.1", "8.8.8.8"]
+  default     = ["172.16.0.1"]
 }
 
 variable "pod_cidr" {
@@ -58,6 +58,12 @@ variable "node_subnet" {
   description = "Node network subnet for kubelet"
   type        = string
   default     = "172.16.101.0/24"
+}
+
+variable "network_interface" {
+  description = "Network interface name (eth0 for RPi, enp0s1 for VMs)"
+  type        = string
+  default     = "eth0"
 }
 
 # ========================================
@@ -97,13 +103,13 @@ variable "nodes" {
 variable "talos_version" {
   description = "Talos Linux version"
   type        = string
-  default     = "v1.9.0"
+  default     = "v1.12.0"
 }
 
 variable "kubernetes_version" {
   description = "Kubernetes version"
   type        = string
-  default     = "1.32.0"
+  default     = "1.35.0"
 }
 
 # ========================================
@@ -114,4 +120,20 @@ variable "ntp_servers" {
   description = "NTP servers for time sync"
   type        = list(string)
   default     = ["time.cloudflare.com"]
+}
+
+# ========================================
+# Storage Configuration
+# ========================================
+
+variable "etcd_disk" {
+  description = "Separate disk for etcd data (improves performance on slow boot disks)"
+  type        = string
+  default     = ""
+}
+
+variable "data_disk" {
+  description = "Separate disk for ephemeral data (/var). If set, Talos will use this disk for containerd, kubelet, and other runtime data"
+  type        = string
+  default     = ""
 }

@@ -30,24 +30,26 @@ resource "talos_machine_configuration_apply" "node" {
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.controlplane[each.key].machine_configuration
   node                        = each.value.ip
+  endpoint                    = each.value.ip
+  apply_mode                  = "reboot"
 
-  config_patches = [
+  config_patches = concat([
     yamlencode({
       machine = {
         network = {
-          hostname = each.value.hostname
-          interfaces = [{
-            interface = "eth0"
-            addresses = ["${each.value.ip}/24"]
-            routes = [{
-              network = "0.0.0.0/0"
-              gateway = var.gateway
-            }]
-            vip = {
-              ip = var.cluster_vip
-            }
-          }]
-          nameservers = var.nameservers
+          interfaces = [merge(
+            {
+              interface = var.network_interface
+              addresses = ["${each.value.ip}/24"]
+              mtu       = 1400
+              routes = [{
+                network = "0.0.0.0/0"
+                gateway = var.gateway
+              }]
+            },
+            var.cluster_vip != "" ? { vip = { ip = var.cluster_vip } } : {}
+          )]
+          nameservers = ["8.8.8.8", "8.8.4.4"]
         }
 
         time = {
@@ -58,7 +60,7 @@ resource "talos_machine_configuration_apply" "node" {
           disk  = each.value.disk
           image = "ghcr.io/siderolabs/installer:${var.talos_version}"
           extensions = [
-            "ghcr.io/siderolabs/iscsi-tools:${var.talos_version}",
+            { image = "ghcr.io/siderolabs/iscsi-tools:${var.talos_version}" },
           ]
         }
 
@@ -101,18 +103,17 @@ resource "talos_machine_configuration_apply" "node" {
           "vm.dirty_ratio"               = "10"
           "vm.dirty_expire_centisecs"    = "1500"
           "vm.dirty_writeback_centisecs" = "500"
-          "vm.overcommit_memory"         = "0"
+          "vm.overcommit_memory"         = "1"
 
           # Kernel panic behavior
-          "kernel.panic"           = "10"
-          "kernel.panic_on_oops"   = "1"
-          "vm.panic_on_oom"        = "0"
-          "kernel.hung_task_panic" = "0"
+          "kernel.panic"         = "10"
+          "kernel.panic_on_oops" = "1"
+          "vm.panic_on_oom"      = "0"
+          # Note: kernel.hung_task_panic not available in Apple Virtualization VMs
         }
 
         features = {
-          rbac           = true
-          stableHostname = true
+          rbac = true
           kubePrism = {
             enabled = true
             port    = 7445
@@ -171,7 +172,18 @@ resource "talos_machine_configuration_apply" "node" {
         allowSchedulingOnControlPlanes = true
       }
     })
-  ]
+  ],
+  # Add VolumeConfig for EPHEMERAL on separate disk (contains etcd data)
+  var.etcd_disk != "" ? [yamlencode({
+    apiVersion = "v1alpha1"
+    kind       = "VolumeConfig"
+    name       = "EPHEMERAL"
+    provisioning = {
+      diskSelector = {
+        match = "!system_disk"
+      }
+    }
+  })] : [])
 }
 
 # ========================================
@@ -193,7 +205,7 @@ data "talos_client_configuration" "this" {
   cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.this.client_configuration
   nodes                = [for n in var.nodes : n.ip]
-  endpoints            = [var.cluster_vip]
+  endpoints            = var.cluster_vip != "" ? [var.cluster_vip] : [for n in var.nodes : n.ip]
 }
 
 # ========================================
