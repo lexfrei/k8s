@@ -27,7 +27,7 @@ spec:
           # This is not safe for production.
           defaultSettings:
             defaultReplicaCount: 1
-            taintToleration: ":"
+            taintToleration: "minecraft=true:NoExecute"
           longhornUI:
             replicas: 1
           longhornConversionWebhook:
