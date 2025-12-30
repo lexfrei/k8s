@@ -11,10 +11,11 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # renovate: registryUrl=oci://ghcr.io/lexfrei/cloudflare-tunnel-gateway-controller/chart
-    - repoURL: ghcr.io/lexfrei/cloudflare-tunnel-gateway-controller
-      chart: cloudflare-tunnel-gateway-controller
-      targetRevision: 1.0.0
+    # TODO: Switch to OCI after fixing chart packaging in cloudflare-tunnel-gateway-controller repo
+    # renovate: datasource=github-releases depName=lexfrei/cloudflare-tunnel-gateway-controller
+    - repoURL: https://github.com/lexfrei/cloudflare-tunnel-gateway-controller.git
+      path: charts/cloudflare-tunnel-gateway-controller
+      targetRevision: v1.0.0
       helm:
         valuesObject:
           gatewayClassConfig:
