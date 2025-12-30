@@ -65,9 +65,10 @@ spec:
           resources:
             requests:
               memory: "6Gi"
-              cpu: "2000m"
+              cpu: "4000m"
             limits:
               memory: "6Gi"
+              cpu: "4000m"
 
           affinity:
             nodeAffinity:
