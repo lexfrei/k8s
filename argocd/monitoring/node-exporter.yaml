@@ -35,6 +35,10 @@ spec:
           tolerations:
             - key: node-role.kubernetes.io/master
               effect: NoSchedule
+            - key: minecraft
+              operator: Equal
+              value: "true"
+              effect: NoExecute
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
