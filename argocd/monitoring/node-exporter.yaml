@@ -33,12 +33,7 @@ spec:
           nodeSelector:
             kubernetes.io/os: linux
           tolerations:
-            - key: node-role.kubernetes.io/master
-              effect: NoSchedule
-            - key: minecraft
-              operator: Equal
-              value: "true"
-              effect: NoExecute
+            - operator: Exists
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:

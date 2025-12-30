@@ -27,7 +27,7 @@ spec:
           # This is not safe for production.
           defaultSettings:
             defaultReplicaCount: 1
-            taintToleration: "minecraft=true:NoExecute"
+            taintToleration: ":"
           longhornUI:
             replicas: 1
           longhornConversionWebhook:
@@ -43,16 +43,10 @@ spec:
             snapshotterReplicaCount: 1
           longhornManager:
             tolerations:
-              - key: minecraft
-                operator: Equal
-                value: "true"
-                effect: NoExecute
+              - operator: Exists
           longhornDriver:
             tolerations:
-              - key: minecraft
-                operator: Equal
-                value: "true"
-                effect: NoExecute
+              - operator: Exists
           metrics:
             serviceMonitor:
               enabled: true

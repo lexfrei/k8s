@@ -53,3 +53,7 @@ hubble:
 gatewayAPI:
   enabled: true
   enableAlpn: true
+
+# Tolerations for Cilium agent DaemonSet
+tolerations:
+  - operator: Exists
