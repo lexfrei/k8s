@@ -65,10 +65,16 @@ spec:
           resources:
             requests:
               memory: "6Gi"
-              cpu: "2500m"
+              cpu: "4000m"
             limits:
               memory: "6Gi"
               cpu: "4000m"
+
+          tolerations:
+            - key: minecraft
+              operator: Equal
+              value: "true"
+              effect: NoSchedule
 
           affinity:
             nodeAffinity:
