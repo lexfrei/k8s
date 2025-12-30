@@ -5,7 +5,7 @@ metadata:
   namespace: wish-operator
 spec:
   title: "Logitech MX Creative Console"
-  imageURL: "https://resource.logitech.com/w_800,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/mx-creative-console/gallery/mx-creative-console-gallery-graphite-top-view.png"
+  imageURL: "https://www.fotopolis.pl/i/images/3/2/4/dz0xMzc3Jmg9OTE4_src_234324-logitech-mx-creative-console-1.jpg"
   officialURL: "https://www.logitech.com/en-us/products/keyboards/mx-creative-console.html"
   purchaseURLs:
     - "https://www.logitech.com/en-us/shop/p/buy-mx-creative-console"
