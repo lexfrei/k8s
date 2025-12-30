@@ -1,0 +1,21 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: logitech-mx-creative-console
+  namespace: wish-operator
+spec:
+  title: "Logitech MX Creative Console"
+  imageURL: "https://resource.logitech.com/w_800,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/mx-creative-console/gallery/mx-creative-console-gallery-graphite-top-view.png"
+  officialURL: "https://www.logitech.com/en-us/products/keyboards/mx-creative-console.html"
+  purchaseURLs:
+    - "https://www.logitech.com/en-us/shop/p/buy-mx-creative-console"
+    - "https://www.amazon.com/Logitech-Creative-Console-Customizable-Membership/dp/B0D5FRQXWZ"
+  msrp: "$ 199.99"
+  tags:
+    - electronics
+    - productivity
+    - creative-tools
+  contextTags:
+    - any-occasion
+  description: "Customizable dial and keypad for creative workflows. Includes 9 LCD keys, control dial, and 3-month Adobe Creative Cloud membership."
+  priority: 4
