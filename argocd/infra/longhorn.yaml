@@ -40,6 +40,18 @@ spec:
             provisionerReplicaCount: 1
             resizerReplicaCount: 1
             snapshotterReplicaCount: 1
+          longhornManager:
+            tolerations:
+              - key: minecraft
+                operator: Equal
+                value: "true"
+                effect: NoExecute
+          longhornDriver:
+            tolerations:
+              - key: minecraft
+                operator: Equal
+                value: "true"
+                effect: NoExecute
           metrics:
             serviceMonitor:
               enabled: true
