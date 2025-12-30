@@ -74,7 +74,7 @@ spec:
             - key: minecraft
               operator: Equal
               value: "true"
-              effect: NoSchedule
+              effect: NoExecute
 
           affinity:
             nodeAffinity:
