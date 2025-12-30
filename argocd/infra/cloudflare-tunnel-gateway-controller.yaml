@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     # renovate: registryUrl=oci://ghcr.io/lexfrei/cloudflare-tunnel-gateway-controller
-    - repoURL: oci://ghcr.io/lexfrei/cloudflare-tunnel-gateway-controller
+    - repoURL: ghcr.io/lexfrei/cloudflare-tunnel-gateway-controller
       chart: chart
       targetRevision: 1.0.0
       helm:
