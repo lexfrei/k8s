@@ -1,0 +1,21 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: eve-weather
+  namespace: wish-operator
+spec:
+  title: "Eve Weather"
+  imageURL: "https://ispot.pl/img/imagecache/103001-104000/680x680/1/product-media/103001-104000/Eve-Weather-Matter-monitor-temperatury-i-wilgotnosci-55864-680x680.webp"
+  officialURL: "https://www.evehome.com/en/eve-weather"
+  purchaseURLs:
+    - "https://www.evehome.com/en/eve-weather"
+    - "https://www.amazon.com/dp/B0D5YP26LK"
+  msrp: "€ 79.95"
+  tags:
+    - electronics
+    - smarthome
+    - matter
+  contextTags:
+    - any-occasion
+  description: "Connected weather station with Matter/Thread. Monitors outdoor temperature, humidity, and barometric pressure. IPX4 water resistant."
+  priority: 4
