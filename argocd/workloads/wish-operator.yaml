@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wish-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: wish-operator
+    server: "https://kubernetes.default.svc"
+  sources:
+    # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/wish-operator
+    - chart: wish-operator
+      repoURL: ghcr.io/lexfrei/charts
+      targetRevision: 0.0.1
+      helm:
+        valuesObject:
+          httpRoute:
+            enabled: true
+            annotations:
+              external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+            parentRefs:
+              - name: cloudflare-tunnel
+                namespace: cloudflare-tunnel-system
+            hostnames:
+              - wish.lex.la
+          operator:
+            namespace: wish-operator
+    - path: manifests/wish-operator
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+  project: workloads
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
