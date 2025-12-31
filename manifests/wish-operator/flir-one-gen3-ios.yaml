@@ -1,0 +1,21 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: flir-one-gen3-ios
+  namespace: wish-operator
+spec:
+  title: "FLIR ONE Gen 3 (iOS, USB-C)"
+  imageURL: "https://www.flir.com/netx-assets/flir-one-gen-3-consumer/?width=1500&quality=80"
+  officialURL: "https://www.flir.com/products/flir-one-gen-3/?model=435-0010-03"
+  purchaseURLs:
+    - "https://www.flir.com/products/flir-one-gen-3/?model=435-0010-03"
+    - "https://www.amazon.com/FLIR-ONE-Thermal-Imaging-Camera/dp/B0728C7KND"
+  msrp: "$ 214"
+  tags:
+    - electronics
+    - thermal-imaging
+    - diagnostics
+  contextTags:
+    - any-occasion
+  description: "Thermal camera for iOS devices. 80x60 thermal resolution, MSX image enhancement. Useful for electrical diagnostics, HVAC inspection, and home maintenance."
+  priority: 3
