@@ -553,18 +553,17 @@
         {
           "id": "extractFields",
           "options": {
-            "format": "auto",
-            "source": "labels"
+            "format": "regexp",
+            "regexp": "/\\[[\\d:]+\\s+(?\u003clevel\u003e\\w+)\\]:\\s*(?:\\[(?\u003cplugin\u003e[^\\]]+)\\]\\s*)?(?\u003cmessage\u003e.*)/",
+            "replace": true,
+            "source": "Line"
           }
         },
         {
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Line": true,
               "id": true,
-              "kubernetes_namespace_name": true,
-              "kubernetes_pod_name": true,
               "labels": true,
               "tsNs": true
             },
