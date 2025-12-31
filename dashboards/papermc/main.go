@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/grafana/grafana-foundation-sdk/go/common"
 	"github.com/grafana/grafana-foundation-sdk/go/dashboard"
 	"github.com/grafana/grafana-foundation-sdk/go/gauge"
 	"github.com/grafana/grafana-foundation-sdk/go/logs"
@@ -59,6 +60,18 @@ func main() {
 			Datasource(datasourceRef("${datasource}")).
 			Query(stringQuery("label_values(mc_tps, pod)")).
 			Refresh(dashboard.VariableRefreshOnDashboardLoad)).
+		WithVariable(dashboard.NewCustomVariableBuilder("level").
+			Label("Log Level").
+			Values(stringQuery("INFO,WARN,ERROR")).
+			IncludeAll(true).
+			AllValue(".*")).
+		WithVariable(dashboard.NewQueryVariableBuilder("plugin").
+			Label("Plugin").
+			Datasource(datasourceRef("${loki}")).
+			Query(stringQuery(`{kubernetes_namespace_name="paper"} | json | line_format "{{.log}}" | regexp ` + "`" + `^\[[\d:]+\s+\w+\]:\s*\[(?P<plugin>[^\]]+)\]` + "`")).
+			Refresh(dashboard.VariableRefreshOnDashboardLoad).
+			IncludeAll(true).
+			AllValue(".*")).
 		// Row 1: Game Status
 		WithPanel(
 			gauge.NewPanelBuilder().
@@ -199,6 +212,8 @@ func main() {
 						Expr("mc_players_online_total{pod=~\"$pod\"}").
 						LegendFormat("{{world}}"),
 				).
+				Decimals(0).
+				Min(0).
 				GridPos(gridPos(8, 12, 12, 13)),
 		).
 		// Row 4: JVM Memory and GC
@@ -314,9 +329,10 @@ func main() {
 				ShowTime(true).
 				WrapLogMessage(true).
 				EnableLogDetails(true).
+				SortOrder(common.LogsSortOrderDescending).
 				WithTarget(
 					loki.NewDataqueryBuilder().
-						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | regexp ` + "`" + `\[[\d:]+\s+(?P<level>\w+)\]` + "`" + ` | line_format "{{.log}}"`),
+						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}" | regexp ` + "`" + `^\[[\d:]+\s+(?P<level>\w+)\]:\s*(?:\[(?P<plugin>[^\]]+)\]\s*)?(?P<message>.*)` + "`" + ` | level=~"$level" | plugin=~"$plugin" | line_format "{{if .plugin}}[{{.plugin}}] {{end}}{{.message}}"`),
 				).
 				GridPos(gridPos(12, 24, 0, 45)),
 		)
