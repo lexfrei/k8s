@@ -1,8 +1,0 @@
-# Patch for k8s-cp-03 (172.16.101.3)
-machine:
-  network:
-    hostname: k8s-cp-03
-    interfaces:
-      - interface: eth0
-        addresses:
-          - 172.16.101.3/24

@@ -1,8 +1,0 @@
-# Patch for k8s-cp-02 (172.16.101.2)
-machine:
-  network:
-    hostname: k8s-cp-02
-    interfaces:
-      - interface: eth0
-        addresses:
-          - 172.16.101.2/24

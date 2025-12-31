@@ -1,4 +1,0 @@
-# Local testing - don't commit state
-*.tfstate
-*.tfstate.*
-.terraform/
