@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/grafana/grafana-foundation-sdk/go/common"
 	"github.com/grafana/grafana-foundation-sdk/go/dashboard"
 	"github.com/grafana/grafana-foundation-sdk/go/gauge"
-	"github.com/grafana/grafana-foundation-sdk/go/logs"
 	"github.com/grafana/grafana-foundation-sdk/go/loki"
 	"github.com/grafana/grafana-foundation-sdk/go/prometheus"
 	"github.com/grafana/grafana-foundation-sdk/go/stat"
+	"github.com/grafana/grafana-foundation-sdk/go/table"
 	"github.com/grafana/grafana-foundation-sdk/go/timeseries"
 )
 
@@ -60,6 +59,11 @@ func main() {
 			Datasource(datasourceRef("${datasource}")).
 			Query(stringQuery("label_values(mc_tps, pod)")).
 			Refresh(dashboard.VariableRefreshOnDashboardLoad)).
+		WithVariable(dashboard.NewCustomVariableBuilder("level").
+			Label("Level").
+			Values(stringQuery("INFO,WARN,ERROR")).
+			IncludeAll(true).
+			AllValue(".*")).
 		// Row 1: Game Status
 		WithPanel(
 			gauge.NewPanelBuilder().
@@ -311,16 +315,12 @@ func main() {
 		).
 		// Row 7: Logs
 		WithPanel(
-			logs.NewPanelBuilder().
+			table.NewPanelBuilder().
 				Title("Server Logs").
 				Datasource(datasourceRef("${loki}")).
-				ShowTime(true).
-				WrapLogMessage(true).
-				EnableLogDetails(true).
-				SortOrder(common.LogsSortOrderDescending).
 				WithTarget(
 					loki.NewDataqueryBuilder().
-						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}"`),
+						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}" | regexp ` + "`" + `^\[[\d:]+\s+(?P<level>\w+)\]:\s*(?:\[(?P<plugin>[^\]]+)\]\s*)?(?P<message>.*)` + "`" + ` | level=~"${level:regex}"`),
 				).
 				GridPos(gridPos(12, 24, 0, 45)),
 		)

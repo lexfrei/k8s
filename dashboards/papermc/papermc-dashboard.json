@@ -531,10 +531,10 @@
       }
     },
     {
-      "type": "logs",
+      "type": "table",
       "targets": [
         {
-          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"} | json | line_format \"{{.log}}\"",
+          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"} | json | line_format \"{{.log}}\" | regexp `^\\[[\\d:]+\\s+(?P\u003clevel\u003e\\w+)\\]:\\s*(?:\\[(?P\u003cplugin\u003e[^\\]]+)\\]\\s*)?(?P\u003cmessage\u003e.*)` | level=~\"${level:regex}\"",
           "refId": ""
         }
       ],
@@ -550,16 +550,7 @@
         "y": 45
       },
       "transformations": [],
-      "options": {
-        "showLabels": false,
-        "showCommonLabels": false,
-        "showTime": true,
-        "wrapLogMessage": true,
-        "prettifyLogMessage": false,
-        "enableLogDetails": true,
-        "sortOrder": "Descending",
-        "dedupStrategy": ""
-      },
+      "options": null,
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -610,6 +601,21 @@
         "multi": false,
         "refresh": 1,
         "includeAll": false,
+        "auto": false,
+        "auto_min": "10s",
+        "auto_count": 30
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "type": "custom",
+        "name": "level",
+        "label": "Level",
+        "hide": 0,
+        "skipUrlSync": false,
+        "query": "INFO,WARN,ERROR",
+        "multi": false,
+        "includeAll": true,
+        "allValue": ".*",
         "auto": false,
         "auto_min": "10s",
         "auto_count": 30
