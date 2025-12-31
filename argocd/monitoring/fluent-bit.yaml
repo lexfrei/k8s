@@ -80,7 +80,9 @@ spec:
                 remove_keys kubernetes,stream
                 line_format json
                 storage.total_limit_size 500M
-                Retry_Limit 5
+                Retry_Limit 10
+                Workers 2
+                net.buffer_size 128k
 
             [OUTPUT]
                 Name loki
@@ -90,7 +92,9 @@ spec:
                 labels job=systemd-journal
                 line_format json
                 storage.total_limit_size 500M
-                Retry_Limit 5
+                Retry_Limit 10
+                Workers 2
+                net.buffer_size 128k
 
         resources:
           requests:
