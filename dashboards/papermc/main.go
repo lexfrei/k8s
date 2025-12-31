@@ -61,7 +61,7 @@ func main() {
 				Datasource(datasourceRef("${datasource}")).
 				WithTarget(
 					prometheus.NewDataqueryBuilder().
-						Expr("up{pod=~\"$pod\"}").
+						Expr("count(container_last_seen{pod=~\"$pod\", container=\"papermc\"} > (time() - 60))").
 						LegendFormat("Status"),
 				).
 				Mappings([]dashboard.ValueMapping{

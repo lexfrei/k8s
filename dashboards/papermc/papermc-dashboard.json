@@ -19,7 +19,7 @@
       "type": "stat",
       "targets": [
         {
-          "expr": "up{pod=~\"$pod\"}",
+          "expr": "count(container_last_seen{pod=~\"$pod\", container=\"papermc\"} \u003e (time() - 60))",
           "legendFormat": "Status",
           "refId": ""
         }
