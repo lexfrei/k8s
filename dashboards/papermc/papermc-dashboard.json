@@ -531,10 +531,10 @@
       }
     },
     {
-      "type": "table",
+      "type": "logs",
       "targets": [
         {
-          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"} | json | line_format \"{{.log}}\" | regexp `^\\[[\\d:]+\\s+(?P\u003clevel\u003e\\w+)\\]:\\s*(?:\\[(?P\u003cplugin\u003e[^\\]]+)\\]\\s*)?(?P\u003cmessage\u003e.*)` | level=~\"${level:regex}\"",
+          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"} | json | line_format \"{{.log}}\" | level=~\"${level:regex}\"",
           "refId": ""
         }
       ],
@@ -549,45 +549,7 @@
         "x": 0,
         "y": 45
       },
-      "transformations": [
-        {
-          "id": "labelsToFields",
-          "options": {
-            "mode": "columns"
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Line": true,
-              "Time ns": true,
-              "_p": true,
-              "detected_level": true,
-              "id": true,
-              "job": true,
-              "kubernetes_container_name": true,
-              "kubernetes_namespace_name": true,
-              "kubernetes_pod_name": true,
-              "log": true,
-              "service_name": true,
-              "time": true
-            },
-            "indexByName": {
-              "Time": 0,
-              "level": 1,
-              "message": 3,
-              "plugin": 2
-            },
-            "renameByName": {
-              "Time": "When",
-              "level": "Level",
-              "message": "Message",
-              "plugin": "Who"
-            }
-          }
-        }
-      ],
+      "transformations": [],
       "options": null,
       "fieldConfig": {
         "defaults": {},

@@ -9,8 +9,8 @@ import (
 	"github.com/grafana/grafana-foundation-sdk/go/gauge"
 	"github.com/grafana/grafana-foundation-sdk/go/loki"
 	"github.com/grafana/grafana-foundation-sdk/go/prometheus"
+	"github.com/grafana/grafana-foundation-sdk/go/logs"
 	"github.com/grafana/grafana-foundation-sdk/go/stat"
-	"github.com/grafana/grafana-foundation-sdk/go/table"
 	"github.com/grafana/grafana-foundation-sdk/go/timeseries"
 )
 
@@ -315,52 +315,13 @@ func main() {
 		).
 		// Row 7: Logs
 		WithPanel(
-			table.NewPanelBuilder().
+			logs.NewPanelBuilder().
 				Title("Server Logs").
 				Datasource(datasourceRef("${loki}")).
 				WithTarget(
 					loki.NewDataqueryBuilder().
-						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}" | regexp ` + "`" + `^\[[\d:]+\s+(?P<level>\w+)\]:\s*(?:\[(?P<plugin>[^\]]+)\]\s*)?(?P<message>.*)` + "`" + ` | level=~"${level:regex}"`),
+						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}" | level=~"${level:regex}"`),
 				).
-				// Transformation 1: Convert labels to columns
-				WithTransformation(dashboard.DataTransformerConfig{
-					Id: "labelsToFields",
-					Options: map[string]interface{}{
-						"mode": "columns",
-					},
-				}).
-				// Transformation 2: Organize - hide unwanted columns, rename others
-				WithTransformation(dashboard.DataTransformerConfig{
-					Id: "organize",
-					Options: map[string]interface{}{
-						"excludeByName": map[string]interface{}{
-							"Line":                      true,
-							"Time ns":                   true,
-							"id":                        true,
-							"_p":                        true,
-							"detected_level":            true,
-							"job":                       true,
-							"kubernetes_container_name": true,
-							"kubernetes_namespace_name": true,
-							"kubernetes_pod_name":       true,
-							"log":                       true,
-							"service_name":              true,
-							"time":                      true,
-						},
-						"renameByName": map[string]interface{}{
-							"Time":    "When",
-							"level":   "Level",
-							"plugin":  "Who",
-							"message": "Message",
-						},
-						"indexByName": map[string]interface{}{
-							"Time":    0,
-							"level":   1,
-							"plugin":  2,
-							"message": 3,
-						},
-					},
-				}).
 				GridPos(gridPos(12, 24, 0, 45)),
 		)
 
