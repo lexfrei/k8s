@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: papermc-metrics
+  namespace: paper
+  labels:
+    app: papermc-metrics
+spec:
+  selector:
+    app: papermc
+  ports:
+    - name: metrics
+      port: 9940
+      targetPort: 9940
