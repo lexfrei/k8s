@@ -30,10 +30,16 @@ jobs:
           go mod download
           go run main.go ipmi-dashboard.json
 
+      - name: Generate PaperMC dashboard
+        run: |
+          cd dashboards/papermc
+          go mod download
+          go run main.go papermc-dashboard.json
+
       - name: Commit generated dashboards
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add dashboards/**/ipmi-dashboard.json
+          git add dashboards/**/*.json
           git diff --quiet && git diff --staged --quiet || \
             (git commit --message "chore(dashboards): regenerate Grafana dashboards [skip ci]" && git push)

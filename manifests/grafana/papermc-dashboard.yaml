@@ -1,0 +1,12 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: papermc-monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  url: https://raw.githubusercontent.com/lexfrei/k8s/master/dashboards/papermc/papermc-dashboard.json
+  datasources:
+    - inputName: "DS_VICTORIAMETRICS"
+      datasourceName: "VictoriaMetrics"
