@@ -313,9 +313,10 @@ func main() {
 				Datasource(datasourceRef("${loki}")).
 				ShowTime(true).
 				WrapLogMessage(true).
+				EnableLogDetails(true).
 				WithTarget(
 					loki.NewDataqueryBuilder().
-						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"}`),
+						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | regexp ` + "`" + `\[[\d:]+\s+(?P<level>\w+)\]` + "`" + ` | line_format "{{.log}}"`),
 				).
 				GridPos(gridPos(12, 24, 0, 45)),
 		)

@@ -531,7 +531,7 @@
       "type": "logs",
       "targets": [
         {
-          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"}",
+          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"} | json | regexp `\\[[\\d:]+\\s+(?P\u003clevel\u003e\\w+)\\]` | line_format \"{{.log}}\"",
           "refId": ""
         }
       ],
@@ -553,7 +553,7 @@
         "showTime": true,
         "wrapLogMessage": true,
         "prettifyLogMessage": false,
-        "enableLogDetails": false,
+        "enableLogDetails": true,
         "sortOrder": "",
         "dedupStrategy": ""
       },
