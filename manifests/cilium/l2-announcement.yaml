@@ -4,7 +4,11 @@ metadata:
   name: l2-announcement-policy
 spec:
   serviceSelector:
-    matchLabels: {}
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values:
+          - papermc
   nodeSelector:
     matchLabels: {}
   interfaces:
