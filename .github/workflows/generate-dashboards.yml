@@ -42,4 +42,16 @@ jobs:
           git config --global user.email "actions@github.com"
           git add dashboards/**/*.json
           git diff --quiet && git diff --staged --quiet || \
-            (git commit --message "chore(dashboards): regenerate Grafana dashboards [skip ci]" && git push)
+            git commit --message "chore(dashboards): regenerate Grafana dashboards"
+
+      - name: Update manifest URLs with commit hash
+        run: |
+          COMMIT_HASH=$(git rev-parse HEAD)
+          sed -i -E "s|lexfrei/k8s/([a-f0-9]{40}|master|main)/dashboards/|lexfrei/k8s/${COMMIT_HASH}/dashboards/|g" \
+            manifests/grafana/*-dashboard.yaml
+          git add manifests/grafana/*-dashboard.yaml
+          git diff --quiet && git diff --staged --quiet || \
+            git commit --message "chore(grafana): update dashboard URLs to ${COMMIT_HASH:0:7} [skip ci]"
+
+      - name: Push changes
+        run: git push
