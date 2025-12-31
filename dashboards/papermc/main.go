@@ -322,14 +322,11 @@ func main() {
 					loki.NewDataqueryBuilder().
 						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}" | regexp ` + "`" + `^\[[\d:]+\s+(?P<level>\w+)\]:\s*(?:\[(?P<plugin>[^\]]+)\]\s*)?(?P<message>.*)` + "`" + ` | level=~"${level:regex}"`),
 				).
-				// Transformation 1: Extract fields from Line with regexp
+				// Transformation 1: Convert labels to columns
 				WithTransformation(dashboard.DataTransformerConfig{
-					Id: "extractFields",
+					Id: "labelsToFields",
 					Options: map[string]interface{}{
-						"source":  "Line",
-						"format":  "regexp",
-						"regexp":  `/\[[\d:]+\s+(?<level>\w+)\]:\s*(?:\[(?<plugin>[^\]]+)\]\s*)?(?<message>.*)/`,
-						"replace": true,
+						"mode": "columns",
 					},
 				}).
 				// Transformation 2: Organize - hide unwanted columns, rename others
@@ -337,9 +334,18 @@ func main() {
 					Id: "organize",
 					Options: map[string]interface{}{
 						"excludeByName": map[string]interface{}{
-							"labels": true,
-							"tsNs":   true,
-							"id":     true,
+							"Line":                      true,
+							"Time ns":                   true,
+							"id":                        true,
+							"_p":                        true,
+							"detected_level":            true,
+							"job":                       true,
+							"kubernetes_container_name": true,
+							"kubernetes_namespace_name": true,
+							"kubernetes_pod_name":       true,
+							"log":                       true,
+							"service_name":              true,
+							"time":                      true,
 						},
 						"renameByName": map[string]interface{}{
 							"Time":    "When",
