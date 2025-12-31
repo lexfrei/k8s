@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: papermc
+  namespace: paper
+spec:
+  namespaceSelector:
+    matchNames:
+      - paper
+  selector:
+    matchLabels:
+      app: papermc-metrics
+  endpoints:
+    - port: metrics
+      interval: 30s

@@ -103,6 +103,9 @@ spec:
 
           updateStrategy:
             type: RollingUpdate
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/papermc
   syncPolicy:
     automated:
       prune: true
