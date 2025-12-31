@@ -1,0 +1,15 @@
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: l2-minecraft-policy
+spec:
+  loadBalancerIPs: true
+  interfaces:
+    - ^eth[0-9]+
+    - ^en[ospx][0-9]+
+  serviceSelector:
+    matchLabels:
+      app.kubernetes.io/name: papermc
+  nodeSelector:
+    matchLabels:
+      minecraft: "true"
