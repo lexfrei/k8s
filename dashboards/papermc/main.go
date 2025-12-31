@@ -60,18 +60,6 @@ func main() {
 			Datasource(datasourceRef("${datasource}")).
 			Query(stringQuery("label_values(mc_tps, pod)")).
 			Refresh(dashboard.VariableRefreshOnDashboardLoad)).
-		WithVariable(dashboard.NewCustomVariableBuilder("level").
-			Label("Log Level").
-			Values(stringQuery("INFO,WARN,ERROR")).
-			IncludeAll(true).
-			AllValue(".*")).
-		WithVariable(dashboard.NewQueryVariableBuilder("plugin").
-			Label("Plugin").
-			Datasource(datasourceRef("${loki}")).
-			Query(stringQuery(`{kubernetes_namespace_name="paper"} | json | line_format "{{.log}}" | regexp ` + "`" + `^\[[\d:]+\s+\w+\]:\s*\[(?P<plugin>[^\]]+)\]` + "`")).
-			Refresh(dashboard.VariableRefreshOnDashboardLoad).
-			IncludeAll(true).
-			AllValue(".*")).
 		// Row 1: Game Status
 		WithPanel(
 			gauge.NewPanelBuilder().
@@ -332,7 +320,7 @@ func main() {
 				SortOrder(common.LogsSortOrderDescending).
 				WithTarget(
 					loki.NewDataqueryBuilder().
-						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}" | regexp ` + "`" + `^\[[\d:]+\s+(?P<level>\w+)\]:\s*(?:\[(?P<plugin>[^\]]+)\]\s*)?(?P<message>.*)` + "`" + ` | level=~"$level" | plugin=~"$plugin" | line_format "{{if .plugin}}[{{.plugin}}] {{end}}{{.message}}"`),
+						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}"`),
 				).
 				GridPos(gridPos(12, 24, 0, 45)),
 		)

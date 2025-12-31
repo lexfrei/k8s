@@ -534,7 +534,7 @@
       "type": "logs",
       "targets": [
         {
-          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"} | json | line_format \"{{.log}}\" | regexp `^\\[[\\d:]+\\s+(?P\u003clevel\u003e\\w+)\\]:\\s*(?:\\[(?P\u003cplugin\u003e[^\\]]+)\\]\\s*)?(?P\u003cmessage\u003e.*)` | level=~\"$level\" | plugin=~\"$plugin\" | line_format \"{{if .plugin}}[{{.plugin}}] {{end}}{{.message}}\"",
+          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"} | json | line_format \"{{.log}}\"",
           "refId": ""
         }
       ],
@@ -610,40 +610,6 @@
         "multi": false,
         "refresh": 1,
         "includeAll": false,
-        "auto": false,
-        "auto_min": "10s",
-        "auto_count": 30
-      },
-      {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "type": "custom",
-        "name": "level",
-        "label": "Log Level",
-        "hide": 0,
-        "skipUrlSync": false,
-        "query": "INFO,WARN,ERROR",
-        "multi": false,
-        "includeAll": true,
-        "allValue": ".*",
-        "auto": false,
-        "auto_min": "10s",
-        "auto_count": 30
-      },
-      {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "type": "query",
-        "name": "plugin",
-        "label": "Plugin",
-        "hide": 0,
-        "skipUrlSync": false,
-        "query": "{kubernetes_namespace_name=\"paper\"} | json | line_format \"{{.log}}\" | regexp `^\\[[\\d:]+\\s+\\w+\\]:\\s*\\[(?P\u003cplugin\u003e[^\\]]+)\\]`",
-        "datasource": {
-          "uid": "${loki}"
-        },
-        "multi": false,
-        "refresh": 1,
-        "includeAll": true,
-        "allValue": ".*",
         "auto": false,
         "auto_min": "10s",
         "auto_count": 30
