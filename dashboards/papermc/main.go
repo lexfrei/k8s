@@ -7,6 +7,8 @@ import (
 
 	"github.com/grafana/grafana-foundation-sdk/go/dashboard"
 	"github.com/grafana/grafana-foundation-sdk/go/gauge"
+	"github.com/grafana/grafana-foundation-sdk/go/logs"
+	"github.com/grafana/grafana-foundation-sdk/go/loki"
 	"github.com/grafana/grafana-foundation-sdk/go/prometheus"
 	"github.com/grafana/grafana-foundation-sdk/go/stat"
 	"github.com/grafana/grafana-foundation-sdk/go/timeseries"
@@ -42,19 +44,69 @@ func main() {
 	}
 
 	builder := dashboard.NewDashboardBuilder("PaperMC Server Monitoring").
-		Description("Container metrics for PaperMC Minecraft server").
-		Tags([]string{"minecraft", "papermc", "kubernetes", "container"}).
+		Description("Minecraft server metrics and logs").
+		Tags([]string{"minecraft", "papermc", "kubernetes"}).
 		Timezone("browser").
 		Refresh("30s").
 		WithVariable(dashboard.NewDatasourceVariableBuilder("datasource").
-			Label("Datasource").
+			Label("Prometheus").
 			Type("prometheus")).
+		WithVariable(dashboard.NewDatasourceVariableBuilder("loki").
+			Label("Loki").
+			Type("loki")).
 		WithVariable(dashboard.NewQueryVariableBuilder("pod").
 			Label("Pod").
 			Datasource(datasourceRef("${datasource}")).
-			Query(stringQuery("label_values(container_cpu_usage_seconds_total{container=\"papermc\"}, pod)")).
+			Query(stringQuery("label_values(mc_tps, pod)")).
 			Refresh(dashboard.VariableRefreshOnDashboardLoad)).
-		// Row 1: Status panels
+		// Row 1: Game Status
+		WithPanel(
+			gauge.NewPanelBuilder().
+				Title("TPS").
+				Description("Ticks per second (target: 20)").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_tps{pod=~\"$pod\"}").
+						LegendFormat("TPS"),
+				).
+				Min(0).
+				Max(20).
+				GridPos(gridPos(5, 4, 0, 0)),
+		).
+		WithPanel(
+			stat.NewPanelBuilder().
+				Title("Players Online").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("sum(mc_players_online_total{pod=~\"$pod\"})").
+						LegendFormat("Online"),
+				).
+				GridPos(gridPos(5, 4, 4, 0)),
+		).
+		WithPanel(
+			stat.NewPanelBuilder().
+				Title("Total Players").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_players_total{pod=~\"$pod\"}").
+						LegendFormat("Total"),
+				).
+				GridPos(gridPos(5, 4, 8, 0)),
+		).
+		WithPanel(
+			stat.NewPanelBuilder().
+				Title("Loaded Chunks").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("sum(mc_loaded_chunks_total{pod=~\"$pod\"})").
+						LegendFormat("Chunks"),
+				).
+				GridPos(gridPos(5, 4, 12, 0)),
+		).
 		WithPanel(
 			stat.NewPanelBuilder().
 				Title("Status").
@@ -75,31 +127,7 @@ func main() {
 						},
 					},
 				}).
-				GridPos(gridPos(4, 6, 0, 0)),
-		).
-		WithPanel(
-			stat.NewPanelBuilder().
-				Title("CPU Usage").
-				Datasource(datasourceRef("${datasource}")).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("sum(rate(container_cpu_usage_seconds_total{pod=~\"$pod\", container=\"papermc\"}[5m])) / sum(container_spec_cpu_quota{pod=~\"$pod\", container=\"papermc\"} / container_spec_cpu_period{pod=~\"$pod\", container=\"papermc\"}) * 100").
-						LegendFormat("CPU %"),
-				).
-				Unit("percent").
-				GridPos(gridPos(4, 6, 6, 0)),
-		).
-		WithPanel(
-			stat.NewPanelBuilder().
-				Title("Memory Usage").
-				Datasource(datasourceRef("${datasource}")).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("sum(container_memory_working_set_bytes{pod=~\"$pod\", container=\"papermc\"}) / sum(container_spec_memory_limit_bytes{pod=~\"$pod\", container=\"papermc\"}) * 100").
-						LegendFormat("Memory %"),
-				).
-				Unit("percent").
-				GridPos(gridPos(4, 6, 12, 0)),
+				GridPos(gridPos(5, 4, 16, 0)),
 		).
 		WithPanel(
 			stat.NewPanelBuilder().
@@ -111,17 +139,112 @@ func main() {
 						LegendFormat("Uptime"),
 				).
 				Unit("s").
-				GridPos(gridPos(4, 6, 18, 0)),
+				GridPos(gridPos(5, 4, 20, 0)),
 		).
-		// Row 2: CPU panels
+		// Row 2: TPS and Tick Duration
 		WithPanel(
 			timeseries.NewPanelBuilder().
-				Title("CPU Usage").
+				Title("TPS Over Time").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_tps{pod=~\"$pod\"}").
+						LegendFormat("TPS"),
+				).
+				Min(0).
+				Max(20).
+				GridPos(gridPos(8, 12, 0, 5)),
+		).
+		WithPanel(
+			timeseries.NewPanelBuilder().
+				Title("Tick Duration").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_tick_duration_average{pod=~\"$pod\"} / 1000000").
+						LegendFormat("Average"),
+				).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_tick_duration_median{pod=~\"$pod\"} / 1000000").
+						LegendFormat("Median"),
+				).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_tick_duration_max{pod=~\"$pod\"} / 1000000").
+						LegendFormat("Max"),
+				).
+				Unit("ms").
+				GridPos(gridPos(8, 12, 12, 5)),
+		).
+		// Row 3: World Stats
+		WithPanel(
+			timeseries.NewPanelBuilder().
+				Title("World Size").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_world_size{pod=~\"$pod\"}").
+						LegendFormat("{{world}}"),
+				).
+				Unit("bytes").
+				GridPos(gridPos(8, 12, 0, 13)),
+		).
+		WithPanel(
+			timeseries.NewPanelBuilder().
+				Title("Players per World").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_players_online_total{pod=~\"$pod\"}").
+						LegendFormat("{{world}}"),
+				).
+				GridPos(gridPos(8, 12, 12, 13)),
+		).
+		// Row 4: JVM Memory and GC
+		WithPanel(
+			timeseries.NewPanelBuilder().
+				Title("JVM Memory").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_jvm_memory{pod=~\"$pod\", type=\"allocated\"}").
+						LegendFormat("Allocated"),
+				).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_jvm_memory{pod=~\"$pod\", type=\"max\"}").
+						LegendFormat("Max"),
+				).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("mc_jvm_memory{pod=~\"$pod\", type=\"free\"}").
+						LegendFormat("Free"),
+				).
+				Unit("bytes").
+				GridPos(gridPos(8, 12, 0, 21)),
+		).
+		WithPanel(
+			timeseries.NewPanelBuilder().
+				Title("JVM GC").
+				Datasource(datasourceRef("${datasource}")).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr("rate(mc_jvm_gc_collection_seconds_sum{pod=~\"$pod\"}[5m])").
+						LegendFormat("{{gc}}"),
+				).
+				Unit("s").
+				GridPos(gridPos(8, 12, 12, 21)),
+		).
+		// Row 5: Container CPU and Memory
+		WithPanel(
+			timeseries.NewPanelBuilder().
+				Title("Container CPU").
 				Datasource(datasourceRef("${datasource}")).
 				WithTarget(
 					prometheus.NewDataqueryBuilder().
 						Expr("sum(rate(container_cpu_usage_seconds_total{pod=~\"$pod\", container=\"papermc\"}[5m]))").
-						LegendFormat("CPU cores"),
+						LegendFormat("CPU Usage"),
 				).
 				WithTarget(
 					prometheus.NewDataqueryBuilder().
@@ -129,29 +252,11 @@ func main() {
 						LegendFormat("Limit"),
 				).
 				Unit("short").
-				GridPos(gridPos(8, 12, 0, 4)),
+				GridPos(gridPos(8, 12, 0, 29)),
 		).
 		WithPanel(
 			timeseries.NewPanelBuilder().
-				Title("CPU Throttling").
-				Datasource(datasourceRef("${datasource}")).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("rate(container_cpu_cfs_throttled_seconds_total{pod=~\"$pod\", container=\"papermc\"}[5m])").
-						LegendFormat("Throttled seconds/s"),
-				).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("rate(container_cpu_cfs_throttled_periods_total{pod=~\"$pod\", container=\"papermc\"}[5m]) / rate(container_cpu_cfs_periods_total{pod=~\"$pod\", container=\"papermc\"}[5m]) * 100").
-						LegendFormat("Throttled periods %"),
-				).
-				Unit("short").
-				GridPos(gridPos(8, 12, 12, 4)),
-		).
-		// Row 3: Memory panels
-		WithPanel(
-			timeseries.NewPanelBuilder().
-				Title("Memory Usage").
+				Title("Container Memory").
 				Datasource(datasourceRef("${datasource}")).
 				WithTarget(
 					prometheus.NewDataqueryBuilder().
@@ -160,37 +265,13 @@ func main() {
 				).
 				WithTarget(
 					prometheus.NewDataqueryBuilder().
-						Expr("container_memory_rss{pod=~\"$pod\", container=\"papermc\"}").
-						LegendFormat("RSS"),
-				).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("container_memory_cache{pod=~\"$pod\", container=\"papermc\"}").
-						LegendFormat("Cache"),
-				).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
 						Expr("container_spec_memory_limit_bytes{pod=~\"$pod\", container=\"papermc\"}").
 						LegendFormat("Limit"),
 				).
 				Unit("bytes").
-				GridPos(gridPos(8, 12, 0, 12)),
+				GridPos(gridPos(8, 12, 12, 29)),
 		).
-		WithPanel(
-			gauge.NewPanelBuilder().
-				Title("Memory vs Limit").
-				Datasource(datasourceRef("${datasource}")).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("sum(container_memory_working_set_bytes{pod=~\"$pod\", container=\"papermc\"}) / sum(container_spec_memory_limit_bytes{pod=~\"$pod\", container=\"papermc\"}) * 100").
-						LegendFormat("Memory %"),
-				).
-				Unit("percent").
-				Min(0).
-				Max(100).
-				GridPos(gridPos(8, 12, 12, 12)),
-		).
-		// Row 4: Network panels
+		// Row 6: Network and Disk
 		WithPanel(
 			timeseries.NewPanelBuilder().
 				Title("Network Traffic").
@@ -206,26 +287,8 @@ func main() {
 						LegendFormat("Transmit"),
 				).
 				Unit("Bps").
-				GridPos(gridPos(8, 12, 0, 20)),
+				GridPos(gridPos(8, 12, 0, 37)),
 		).
-		WithPanel(
-			timeseries.NewPanelBuilder().
-				Title("Network Packets").
-				Datasource(datasourceRef("${datasource}")).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("sum(rate(container_network_receive_packets_total{pod=~\"$pod\"}[5m]))").
-						LegendFormat("Receive pps"),
-				).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("sum(rate(container_network_transmit_packets_total{pod=~\"$pod\"}[5m]))").
-						LegendFormat("Transmit pps"),
-				).
-				Unit("pps").
-				GridPos(gridPos(8, 12, 12, 20)),
-		).
-		// Row 5: Disk I/O panels
 		WithPanel(
 			timeseries.NewPanelBuilder().
 				Title("Disk I/O").
@@ -241,61 +304,20 @@ func main() {
 						LegendFormat("Write"),
 				).
 				Unit("Bps").
-				GridPos(gridPos(8, 12, 0, 28)),
+				GridPos(gridPos(8, 12, 12, 37)),
 		).
+		// Row 7: Logs
 		WithPanel(
-			timeseries.NewPanelBuilder().
-				Title("Disk IOPS").
-				Datasource(datasourceRef("${datasource}")).
+			logs.NewPanelBuilder().
+				Title("Server Logs").
+				Datasource(datasourceRef("${loki}")).
+				ShowTime(true).
+				WrapLogMessage(true).
 				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("sum(rate(container_fs_reads_total{pod=~\"$pod\", container=\"papermc\"}[5m]))").
-						LegendFormat("Read IOPS"),
+					loki.NewDataqueryBuilder().
+						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"}`),
 				).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("sum(rate(container_fs_writes_total{pod=~\"$pod\", container=\"papermc\"}[5m]))").
-						LegendFormat("Write IOPS"),
-				).
-				Unit("iops").
-				GridPos(gridPos(8, 12, 12, 28)),
-		).
-		// Row 6: System panels
-		WithPanel(
-			timeseries.NewPanelBuilder().
-				Title("Threads").
-				Datasource(datasourceRef("${datasource}")).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("container_threads{pod=~\"$pod\", container=\"papermc\"}").
-						LegendFormat("Threads"),
-				).
-				Unit("short").
-				GridPos(gridPos(6, 8, 0, 36)),
-		).
-		WithPanel(
-			timeseries.NewPanelBuilder().
-				Title("File Descriptors").
-				Datasource(datasourceRef("${datasource}")).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("container_file_descriptors{pod=~\"$pod\", container=\"papermc\"}").
-						LegendFormat("Open FDs"),
-				).
-				Unit("short").
-				GridPos(gridPos(6, 8, 8, 36)),
-		).
-		WithPanel(
-			stat.NewPanelBuilder().
-				Title("OOM Events").
-				Datasource(datasourceRef("${datasource}")).
-				WithTarget(
-					prometheus.NewDataqueryBuilder().
-						Expr("sum(container_oom_events_total{pod=~\"$pod\", container=\"papermc\"})").
-						LegendFormat("OOM Events"),
-				).
-				Unit("short").
-				GridPos(gridPos(6, 8, 16, 36)),
+				GridPos(gridPos(12, 24, 0, 45)),
 		)
 
 	dash, err := builder.Build()
