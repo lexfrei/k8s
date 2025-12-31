@@ -6,7 +6,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: grafana
-  url: https://raw.githubusercontent.com/lexfrei/k8s/c09a33c6fc3b94c00c09fa6b8a2e0cb052f07b9d/dashboards/papermc/papermc-dashboard.json
+  url: https://raw.githubusercontent.com/lexfrei/k8s/4c2676d04c206dc66b51538a2b9648c715423c7e/dashboards/papermc/papermc-dashboard.json
   datasources:
     - inputName: "DS_VICTORIAMETRICS"
       datasourceName: "VictoriaMetrics"
