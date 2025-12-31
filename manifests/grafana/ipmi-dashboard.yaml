@@ -6,7 +6,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: grafana
-  url: https://raw.githubusercontent.com/lexfrei/k8s/a86f21fb4366683fd2e880e2f162df9a13cea899/dashboards/ipmi/ipmi-dashboard.json
+  url: https://raw.githubusercontent.com/lexfrei/k8s/c134883156d1a94b5ba1c59af95f2837c9c70456/dashboards/ipmi/ipmi-dashboard.json
   datasources:
     - inputName: "DS_VICTORIAMETRICS"
       datasourceName: "VictoriaMetrics"
