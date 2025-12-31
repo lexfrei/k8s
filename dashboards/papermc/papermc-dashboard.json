@@ -549,7 +549,40 @@
         "x": 0,
         "y": 45
       },
-      "transformations": [],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "format": "auto",
+            "source": "labels"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Line": true,
+              "id": true,
+              "kubernetes_namespace_name": true,
+              "kubernetes_pod_name": true,
+              "labels": true,
+              "tsNs": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "level": 1,
+              "message": 3,
+              "plugin": 2
+            },
+            "renameByName": {
+              "Time": "When",
+              "level": "Level",
+              "message": "Message",
+              "plugin": "Who"
+            }
+          }
+        }
+      ],
       "options": null,
       "fieldConfig": {
         "defaults": {},

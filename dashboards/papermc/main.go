@@ -322,6 +322,40 @@ func main() {
 					loki.NewDataqueryBuilder().
 						Expr(`{kubernetes_namespace_name="paper", kubernetes_pod_name=~"$pod"} | json | line_format "{{.log}}" | regexp ` + "`" + `^\[[\d:]+\s+(?P<level>\w+)\]:\s*(?:\[(?P<plugin>[^\]]+)\]\s*)?(?P<message>.*)` + "`" + ` | level=~"${level:regex}"`),
 				).
+				// Transformation 1: Extract fields from labels
+				WithTransformation(dashboard.DataTransformerConfig{
+					Id: "extractFields",
+					Options: map[string]interface{}{
+						"source": "labels",
+						"format": "auto",
+					},
+				}).
+				// Transformation 2: Organize - hide unwanted columns, rename others
+				WithTransformation(dashboard.DataTransformerConfig{
+					Id: "organize",
+					Options: map[string]interface{}{
+						"excludeByName": map[string]interface{}{
+							"labels":                    true,
+							"Line":                      true,
+							"tsNs":                      true,
+							"id":                        true,
+							"kubernetes_namespace_name": true,
+							"kubernetes_pod_name":       true,
+						},
+						"renameByName": map[string]interface{}{
+							"Time":    "When",
+							"level":   "Level",
+							"plugin":  "Who",
+							"message": "Message",
+						},
+						"indexByName": map[string]interface{}{
+							"Time":    0,
+							"level":   1,
+							"plugin":  2,
+							"message": 3,
+						},
+					},
+				}).
 				GridPos(gridPos(12, 24, 0, 45)),
 		)
 
