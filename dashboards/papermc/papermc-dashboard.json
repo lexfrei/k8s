@@ -1,11 +1,10 @@
 {
   "title": "PaperMC Server Monitoring",
-  "description": "Container metrics for PaperMC Minecraft server",
+  "description": "Minecraft server metrics and logs",
   "tags": [
     "minecraft",
     "papermc",
-    "kubernetes",
-    "container"
+    "kubernetes"
   ],
   "style": "",
   "timezone": "browser",
@@ -15,6 +14,118 @@
   "refresh": "30s",
   "schemaVersion": 36,
   "panels": [
+    {
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "mc_tps{pod=~\"$pod\"}",
+          "legendFormat": "TPS",
+          "refId": ""
+        }
+      ],
+      "title": "TPS",
+      "description": "Ticks per second (target: 20)",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 20
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(mc_players_online_total{pod=~\"$pod\"})",
+          "legendFormat": "Online",
+          "refId": ""
+        }
+      ],
+      "title": "Players Online",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "mc_players_total{pod=~\"$pod\"}",
+          "legendFormat": "Total",
+          "refId": ""
+        }
+      ],
+      "title": "Total Players",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 8,
+        "y": 0
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(mc_loaded_chunks_total{pod=~\"$pod\"})",
+          "legendFormat": "Chunks",
+          "refId": ""
+        }
+      ],
+      "title": "Loaded Chunks",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
     {
       "type": "stat",
       "targets": [
@@ -30,9 +141,9 @@
         "uid": "${datasource}"
       },
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
+        "h": 5,
+        "w": 4,
+        "x": 16,
         "y": 0
       },
       "transformations": [],
@@ -62,64 +173,6 @@
       "type": "stat",
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{pod=~\"$pod\", container=\"papermc\"}[5m])) / sum(container_spec_cpu_quota{pod=~\"$pod\", container=\"papermc\"} / container_spec_cpu_period{pod=~\"$pod\", container=\"papermc\"}) * 100",
-          "legendFormat": "CPU %",
-          "refId": ""
-        }
-      ],
-      "title": "CPU Usage",
-      "transparent": false,
-      "datasource": {
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 0
-      },
-      "transformations": [],
-      "options": null,
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent"
-        },
-        "overrides": []
-      }
-    },
-    {
-      "type": "stat",
-      "targets": [
-        {
-          "expr": "sum(container_memory_working_set_bytes{pod=~\"$pod\", container=\"papermc\"}) / sum(container_spec_memory_limit_bytes{pod=~\"$pod\", container=\"papermc\"}) * 100",
-          "legendFormat": "Memory %",
-          "refId": ""
-        }
-      ],
-      "title": "Memory Usage",
-      "transparent": false,
-      "datasource": {
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 0
-      },
-      "transformations": [],
-      "options": null,
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent"
-        },
-        "overrides": []
-      }
-    },
-    {
-      "type": "stat",
-      "targets": [
-        {
           "expr": "time() - container_start_time_seconds{pod=~\"$pod\", container=\"papermc\"}",
           "legendFormat": "Uptime",
           "refId": ""
@@ -131,9 +184,9 @@
         "uid": "${datasource}"
       },
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
+        "h": 5,
+        "w": 4,
+        "x": 20,
         "y": 0
       },
       "transformations": [],
@@ -149,17 +202,12 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{pod=~\"$pod\", container=\"papermc\"}[5m]))",
-          "legendFormat": "CPU cores",
-          "refId": ""
-        },
-        {
-          "expr": "sum(container_spec_cpu_quota{pod=~\"$pod\", container=\"papermc\"} / container_spec_cpu_period{pod=~\"$pod\", container=\"papermc\"})",
-          "legendFormat": "Limit",
+          "expr": "mc_tps{pod=~\"$pod\"}",
+          "legendFormat": "TPS",
           "refId": ""
         }
       ],
-      "title": "CPU Usage",
+      "title": "TPS Over Time",
       "transparent": false,
       "datasource": {
         "uid": "${datasource}"
@@ -168,13 +216,14 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 4
+        "y": 5
       },
       "transformations": [],
       "options": null,
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "min": 0,
+          "max": 20
         },
         "overrides": []
       }
@@ -183,17 +232,22 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "rate(container_cpu_cfs_throttled_seconds_total{pod=~\"$pod\", container=\"papermc\"}[5m])",
-          "legendFormat": "Throttled seconds/s",
+          "expr": "mc_tick_duration_average{pod=~\"$pod\"} / 1000000",
+          "legendFormat": "Average",
           "refId": ""
         },
         {
-          "expr": "rate(container_cpu_cfs_throttled_periods_total{pod=~\"$pod\", container=\"papermc\"}[5m]) / rate(container_cpu_cfs_periods_total{pod=~\"$pod\", container=\"papermc\"}[5m]) * 100",
-          "legendFormat": "Throttled periods %",
+          "expr": "mc_tick_duration_median{pod=~\"$pod\"} / 1000000",
+          "legendFormat": "Median",
+          "refId": ""
+        },
+        {
+          "expr": "mc_tick_duration_max{pod=~\"$pod\"} / 1000000",
+          "legendFormat": "Max",
           "refId": ""
         }
       ],
-      "title": "CPU Throttling",
+      "title": "Tick Duration",
       "transparent": false,
       "datasource": {
         "uid": "${datasource}"
@@ -202,7 +256,165 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 4
+        "y": 5
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "mc_world_size{pod=~\"$pod\"}",
+          "legendFormat": "{{world}}",
+          "refId": ""
+        }
+      ],
+      "title": "World Size",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "mc_players_online_total{pod=~\"$pod\"}",
+          "legendFormat": "{{world}}",
+          "refId": ""
+        }
+      ],
+      "title": "Players per World",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "mc_jvm_memory{pod=~\"$pod\", type=\"allocated\"}",
+          "legendFormat": "Allocated",
+          "refId": ""
+        },
+        {
+          "expr": "mc_jvm_memory{pod=~\"$pod\", type=\"max\"}",
+          "legendFormat": "Max",
+          "refId": ""
+        },
+        {
+          "expr": "mc_jvm_memory{pod=~\"$pod\", type=\"free\"}",
+          "legendFormat": "Free",
+          "refId": ""
+        }
+      ],
+      "title": "JVM Memory",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(mc_jvm_gc_collection_seconds_sum{pod=~\"$pod\"}[5m])",
+          "legendFormat": "{{gc}}",
+          "refId": ""
+        }
+      ],
+      "title": "JVM GC",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "transformations": [],
+      "options": null,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{pod=~\"$pod\", container=\"papermc\"}[5m]))",
+          "legendFormat": "CPU Usage",
+          "refId": ""
+        },
+        {
+          "expr": "sum(container_spec_cpu_quota{pod=~\"$pod\", container=\"papermc\"} / container_spec_cpu_period{pod=~\"$pod\", container=\"papermc\"})",
+          "legendFormat": "Limit",
+          "refId": ""
+        }
+      ],
+      "title": "Container CPU",
+      "transparent": false,
+      "datasource": {
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
       },
       "transformations": [],
       "options": null,
@@ -222,51 +434,12 @@
           "refId": ""
         },
         {
-          "expr": "container_memory_rss{pod=~\"$pod\", container=\"papermc\"}",
-          "legendFormat": "RSS",
-          "refId": ""
-        },
-        {
-          "expr": "container_memory_cache{pod=~\"$pod\", container=\"papermc\"}",
-          "legendFormat": "Cache",
-          "refId": ""
-        },
-        {
           "expr": "container_spec_memory_limit_bytes{pod=~\"$pod\", container=\"papermc\"}",
           "legendFormat": "Limit",
           "refId": ""
         }
       ],
-      "title": "Memory Usage",
-      "transparent": false,
-      "datasource": {
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 12
-      },
-      "transformations": [],
-      "options": null,
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes"
-        },
-        "overrides": []
-      }
-    },
-    {
-      "type": "gauge",
-      "targets": [
-        {
-          "expr": "sum(container_memory_working_set_bytes{pod=~\"$pod\", container=\"papermc\"}) / sum(container_spec_memory_limit_bytes{pod=~\"$pod\", container=\"papermc\"}) * 100",
-          "legendFormat": "Memory %",
-          "refId": ""
-        }
-      ],
-      "title": "Memory vs Limit",
+      "title": "Container Memory",
       "transparent": false,
       "datasource": {
         "uid": "${datasource}"
@@ -275,15 +448,13 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 12
+        "y": 29
       },
       "transformations": [],
       "options": null,
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100
+          "unit": "bytes"
         },
         "overrides": []
       }
@@ -311,47 +482,13 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 37
       },
       "transformations": [],
       "options": null,
       "fieldConfig": {
         "defaults": {
           "unit": "Bps"
-        },
-        "overrides": []
-      }
-    },
-    {
-      "type": "timeseries",
-      "targets": [
-        {
-          "expr": "sum(rate(container_network_receive_packets_total{pod=~\"$pod\"}[5m]))",
-          "legendFormat": "Receive pps",
-          "refId": ""
-        },
-        {
-          "expr": "sum(rate(container_network_transmit_packets_total{pod=~\"$pod\"}[5m]))",
-          "legendFormat": "Transmit pps",
-          "refId": ""
-        }
-      ],
-      "title": "Network Packets",
-      "transparent": false,
-      "datasource": {
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 20
-      },
-      "transformations": [],
-      "options": null,
-      "fieldConfig": {
-        "defaults": {
-          "unit": "pps"
         },
         "overrides": []
       }
@@ -378,8 +515,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 28
+        "x": 12,
+        "y": 37
       },
       "transformations": [],
       "options": null,
@@ -391,123 +528,37 @@
       }
     },
     {
-      "type": "timeseries",
+      "type": "logs",
       "targets": [
         {
-          "expr": "sum(rate(container_fs_reads_total{pod=~\"$pod\", container=\"papermc\"}[5m]))",
-          "legendFormat": "Read IOPS",
-          "refId": ""
-        },
-        {
-          "expr": "sum(rate(container_fs_writes_total{pod=~\"$pod\", container=\"papermc\"}[5m]))",
-          "legendFormat": "Write IOPS",
+          "expr": "{kubernetes_namespace_name=\"paper\", kubernetes_pod_name=~\"$pod\"}",
           "refId": ""
         }
       ],
-      "title": "Disk IOPS",
+      "title": "Server Logs",
       "transparent": false,
       "datasource": {
-        "uid": "${datasource}"
+        "uid": "${loki}"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 28
-      },
-      "transformations": [],
-      "options": null,
-      "fieldConfig": {
-        "defaults": {
-          "unit": "iops"
-        },
-        "overrides": []
-      }
-    },
-    {
-      "type": "timeseries",
-      "targets": [
-        {
-          "expr": "container_threads{pod=~\"$pod\", container=\"papermc\"}",
-          "legendFormat": "Threads",
-          "refId": ""
-        }
-      ],
-      "title": "Threads",
-      "transparent": false,
-      "datasource": {
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
+        "h": 12,
+        "w": 24,
         "x": 0,
-        "y": 36
+        "y": 45
       },
       "transformations": [],
-      "options": null,
+      "options": {
+        "showLabels": false,
+        "showCommonLabels": false,
+        "showTime": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": false,
+        "sortOrder": "",
+        "dedupStrategy": ""
+      },
       "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      }
-    },
-    {
-      "type": "timeseries",
-      "targets": [
-        {
-          "expr": "container_file_descriptors{pod=~\"$pod\", container=\"papermc\"}",
-          "legendFormat": "Open FDs",
-          "refId": ""
-        }
-      ],
-      "title": "File Descriptors",
-      "transparent": false,
-      "datasource": {
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 36
-      },
-      "transformations": [],
-      "options": null,
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      }
-    },
-    {
-      "type": "stat",
-      "targets": [
-        {
-          "expr": "sum(container_oom_events_total{pod=~\"$pod\", container=\"papermc\"})",
-          "legendFormat": "OOM Events",
-          "refId": ""
-        }
-      ],
-      "title": "OOM Events",
-      "transparent": false,
-      "datasource": {
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 36
-      },
-      "transformations": [],
-      "options": null,
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
+        "defaults": {},
         "overrides": []
       }
     }
@@ -518,10 +569,24 @@
         "id": "00000000-0000-0000-0000-000000000000",
         "type": "datasource",
         "name": "datasource",
-        "label": "Datasource",
+        "label": "Prometheus",
         "hide": 0,
         "skipUrlSync": false,
         "query": "prometheus",
+        "multi": false,
+        "includeAll": false,
+        "auto": false,
+        "auto_min": "10s",
+        "auto_count": 30
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "type": "datasource",
+        "name": "loki",
+        "label": "Loki",
+        "hide": 0,
+        "skipUrlSync": false,
+        "query": "loki",
         "multi": false,
         "includeAll": false,
         "auto": false,
@@ -535,7 +600,7 @@
         "label": "Pod",
         "hide": 0,
         "skipUrlSync": false,
-        "query": "label_values(container_cpu_usage_seconds_total{container=\"papermc\"}, pod)",
+        "query": "label_values(mc_tps, pod)",
         "datasource": {
           "uid": "${datasource}"
         },
