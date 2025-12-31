@@ -551,21 +551,27 @@
       },
       "transformations": [
         {
-          "id": "extractFields",
+          "id": "labelsToFields",
           "options": {
-            "format": "regexp",
-            "regexp": "/\\[[\\d:]+\\s+(?\u003clevel\u003e\\w+)\\]:\\s*(?:\\[(?\u003cplugin\u003e[^\\]]+)\\]\\s*)?(?\u003cmessage\u003e.*)/",
-            "replace": true,
-            "source": "Line"
+            "mode": "columns"
           }
         },
         {
           "id": "organize",
           "options": {
             "excludeByName": {
+              "Line": true,
+              "Time ns": true,
+              "_p": true,
+              "detected_level": true,
               "id": true,
-              "labels": true,
-              "tsNs": true
+              "job": true,
+              "kubernetes_container_name": true,
+              "kubernetes_namespace_name": true,
+              "kubernetes_pod_name": true,
+              "log": true,
+              "service_name": true,
+              "time": true
             },
             "indexByName": {
               "Time": 0,
