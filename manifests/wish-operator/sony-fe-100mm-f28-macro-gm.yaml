@@ -1,0 +1,22 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: sony-fe-100mm-f28-macro-gm
+  namespace: wish-operator
+spec:
+  title: "Sony FE 100mm F2.8 Macro GM OSS"
+  imageURL: "https://image.ceneostatic.pl/data/products/188897963/i-sony-fe-macro-g-oss-f-2-8-100mm-sel100m28gm.jpg"
+  officialURL: "https://electronics.sony.com/imaging/lenses/full-frame-e-mount/p/sel100m28gm"
+  purchaseURLs:
+    - "https://electronics.sony.com/imaging/lenses/full-frame-e-mount/p/sel100m28gm"
+    - "https://www.bhphotovideo.com/c/product/1924425-REG/sony_fe_100mm_f_2_8_macro.html"
+  msrp: "$ 1499.99"
+  tags:
+    - photography
+    - lens
+    - macro
+    - sony
+  contextTags:
+    - any-occasion
+  description: "G Master macro lens for Sony E-mount. 1.4x native magnification, 4 XD linear motors, teleconverter compatible (up to 2.8x with 2x TC). First macro in G Master series."
+  priority: 4
