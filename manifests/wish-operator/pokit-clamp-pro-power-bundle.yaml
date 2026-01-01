@@ -5,7 +5,7 @@ metadata:
   namespace: wish-operator
 spec:
   title: "Pokit Clamp & Pro Power Bundle"
-  imageURL: "https://shop.pokitmeter.com/cdn/shop/files/power_bundle_logo.png"
+  imageURL: "https://shop.pokitmeter.com/cdn/shop/files/Pro_ClampComboKit_1.png?v=1746598762&width=1000"
   officialURL: "https://shop.pokitmeter.com/products/clamp-pro-power-bundle"
   purchaseURLs:
     - "https://shop.pokitmeter.com/products/clamp-pro-power-bundle"
