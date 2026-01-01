@@ -1,0 +1,21 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: pokit-clamp-pro-power-bundle
+  namespace: wish-operator
+spec:
+  title: "Pokit Clamp & Pro Power Bundle"
+  imageURL: "https://shop.pokitmeter.com/cdn/shop/files/power_bundle_logo.png"
+  officialURL: "https://shop.pokitmeter.com/products/clamp-pro-power-bundle"
+  purchaseURLs:
+    - "https://shop.pokitmeter.com/products/clamp-pro-power-bundle"
+  msrp: "$ 415.80"
+  tags:
+    - electronics
+    - multimeter
+    - oscilloscope
+    - diagnostics
+  contextTags:
+    - any-occasion
+  description: "Bundle with Pokit Clamp (600A AC/DC wireless clamp meter) and Pokit Pro (compact high-voltage multimeter/oscilloscope/logger). Bluetooth-enabled for app-based measurements."
+  priority: 3
