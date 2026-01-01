@@ -1,0 +1,22 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: flipper-video-game-module
+  namespace: wish-operator
+spec:
+  title: "Video Game Module for Flipper Zero"
+  imageURL: "https://cdn.shopify.com/s/files/1/0560/0252/7099/files/video-game-module.png"
+  officialURL: "https://shop.flipperzero.one/products/video-game-module-for-flipper-zero"
+  purchaseURLs:
+    - "https://shop.flipperzero.one/products/video-game-module-for-flipper-zero"
+    - "https://lab401.com/products/flipper-zero-video-game-module"
+  msrp: "€ 49"
+  tags:
+    - electronics
+    - flipper-zero
+    - gaming
+    - raspberry-pi
+  contextTags:
+    - any-occasion
+  description: "Expansion module for Flipper Zero with RP2040 microcontroller, HDMI video output (640x480), gyroscope/accelerometer, and 14-pin GPIO. Can operate standalone."
+  priority: 3
