@@ -1,0 +1,20 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: flipper-zero-video-game-module
+  namespace: wish-operator
+spec:
+  title: "Video Game Module for Flipper Zero"
+  imageURL: "https://flipper.net/cdn/shop/files/product_video-game-module-for-flipper-zero_1.png"
+  officialURL: "https://flipper.net/products/video-game-module-for-flipper-zero"
+  purchaseURLs:
+    - "https://shop.flipperzero.one/products/video-game-module-for-flipper-zero"
+  msrp: "$ 49"
+  tags:
+    - electronics
+    - flipper-zero
+    - gaming
+  contextTags:
+    - any-occasion
+  description: "RP2040-based module for Flipper Zero. Features video output for TV display, motion sensor with open API, 14-pin GPIO port, USB-C, and standalone mode. Open-source firmware and schematics."
+  priority: 3

@@ -1,0 +1,21 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: logitech-mx-master-4
+  namespace: wish-operator
+spec:
+  title: "Logitech MX Master 4 (Graphite)"
+  imageURL: "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/mx-master-4/gallery/mx-master-4-graphite-top-angle-gallery-1.png"
+  officialURL: "https://www.logitech.com/en-us/shop/p/mx-master-4"
+  purchaseURLs:
+    - "https://www.logitech.com/en-us/shop/p/mx-master-4"
+    - "https://www.amazon.com/Logitech-Ergonomic-Performance-Ultra-Fast-Scrolling/dp/B0FC5SJNQX"
+  msrp: "$ 119.99"
+  tags:
+    - electronics
+    - productivity
+    - peripherals
+  contextTags:
+    - any-occasion
+  description: "Ergonomic wireless mouse with haptic feedback, ultra-fast scrolling, USB-C charging, Bluetooth. Includes 1-month Adobe Creative Cloud."
+  priority: 4

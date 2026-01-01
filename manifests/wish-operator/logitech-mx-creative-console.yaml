@@ -4,8 +4,8 @@ metadata:
   name: logitech-mx-creative-console
   namespace: wish-operator
 spec:
-  title: "Logitech MX Creative Console"
-  imageURL: "https://www.fotopolis.pl/i/images/3/2/4/dz0xMzc3Jmg9OTE4_src_234324-logitech-mx-creative-console-1.jpg"
+  title: "Logitech MX Creative Console (Pale Grey)"
+  imageURL: "https://postperspective.com/wp-content/uploads/2024/12/High_Resolution_PNG-MX-Creative-Console-Graphite-3QTR-FRNT-L.png"
   officialURL: "https://www.logitech.com/en-us/products/keyboards/mx-creative-console.html"
   purchaseURLs:
     - "https://www.logitech.com/en-us/shop/p/buy-mx-creative-console"
