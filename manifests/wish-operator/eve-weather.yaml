@@ -5,7 +5,7 @@ metadata:
   namespace: wish-operator
 spec:
   title: "Eve Weather"
-  imageURL: "https://ispot.pl/img/imagecache/103001-104000/680x680/1/product-media/103001-104000/Eve-Weather-Matter-monitor-temperatury-i-wilgotnosci-55864-680x680.webp"
+  imageURL: "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/HRVP2?wid=1144&hei=1144&fmt=jpeg&qlt=90&.v=VzJnbk5RcytyREpldjFmbG84M3JtUWtuVHYzMERCZURia3c5SzJFOTlPalFTRk96RCtNanIzMVV6ZlpYUDlXeDN1NGhqUms1c2NQOVh5QkJ2dkhZa3c"
   officialURL: "https://www.evehome.com/en/eve-weather"
   purchaseURLs:
     - "https://www.evehome.com/en/eve-weather"
