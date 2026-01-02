@@ -33,6 +33,15 @@ l2announcements:
 loadBalancer:
   algorithm: random
 
+# Socket-level load balancing - bypasses iptables for lower latency
+socketLB:
+  enabled: true
+
+# BPF optimizations
+bpf:
+  masquerade: true
+  hostLegacyRouting: false
+
 # Enable L2 neighbor discovery
 l2NeighDiscovery:
   enabled: true
