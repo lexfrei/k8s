@@ -25,7 +25,7 @@ spec:
               - --prometheus-address=http://vmsingle-vmsingle.monitoring.svc:8429
               - --prometheus-cadvisor-job-name=monitoring/kubelet-cadvisor
               - --history-length=8d
-              - --history-resolution=1h
+              - --history-resolution=15m
               - --container-pod-name-label=pod
               - --container-name-label=container
               - --container-namespace-label=namespace
