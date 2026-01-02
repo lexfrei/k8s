@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-index
+  namespace: test-nginx
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Cloudflare Tunnel Gateway API</title>
+      <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        a { color: #0066cc; }
+      </style>
+    </head>
+    <body>
+      <h1>It works!</h1>
+      <p>This page is served via Cloudflare Gateway API through AWG tunnel.</p>
+      <p>More info: <a href="https://github.com/lexfrei/cloudflare-tunnel-gateway-controller">github.com/lexfrei/cloudflare-tunnel-gateway-controller</a></p>
+    </body>
+    </html>
