@@ -23,7 +23,8 @@ spec:
             type: paper
 
           image:
-            repository: lexfrei/papermc
+            repository: ttl.sh/lexfrei-papermc
+            tag: "1h"
             pullPolicy: Always
 
           ports:
