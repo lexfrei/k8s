@@ -24,7 +24,7 @@ spec:
             webhook:
               image:
                 repository: ghcr.io/lexfrei/external-dns-unifios-webhook
-                tag: pr-19
+                tag: "0.2.0"
               env:
                 - name: WEBHOOK_UNIFI_API_KEY
                   valueFrom:
