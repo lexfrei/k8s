@@ -22,3 +22,8 @@ spec:
       memory: 1Gi
   extraArgs:
     dedup.minScrapeInterval: "15s"
+    search.cacheTimestampOffset: "15m"
+    cacheExpireDuration: "1h"
+    memory.allowedPercent: "70"
+    maxConcurrentInserts: "4"
+    inmemoryDataFlushInterval: "30s"
