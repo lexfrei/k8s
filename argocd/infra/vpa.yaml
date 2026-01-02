@@ -20,12 +20,18 @@ spec:
           serviceMonitor:
             enabled: true
           recommender:
+            extraArgs:
+              - --storage=prometheus
+              - --prometheus-address=http://vmsingle-vmsingle.monitoring.svc:8429
+              - --prometheus-cadvisor-job-name=monitoring/kubelet-cadvisor
+              - --history-length=8d
+              - --history-resolution=1h
             resources:
               requests:
                 cpu: 50m
-                memory: 128Mi
-              limits:
                 memory: 256Mi
+              limits:
+                memory: 512Mi
   syncPolicy:
     automated:
       prune: true
