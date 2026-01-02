@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: goldilocks
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: vpa-system
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://charts.fairwinds.com/stable"
+      targetRevision: "10.2.0"
+      chart: goldilocks
+      helm:
+        valuesObject:
+          controller:
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 256Mi
+          dashboard:
+            replicaCount: 1
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 256Mi
+            httpRoute:
+              enabled: true
+              parentRefs:
+                - name: cilium-gateway-internal
+                  namespace: kube-system
+                  sectionName: https-home-lex-la
+              hostnames:
+                - goldilocks.home.lex.la
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
