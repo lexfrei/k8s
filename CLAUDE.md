@@ -502,6 +502,14 @@ Renovate bot is configured with:
    - ArgoCD Applications MUST use inline `valuesObject` in Application manifest
    - This ensures GitOps single source of truth in ArgoCD Application definitions
 
+10. **App-of-Apps sync order (CRITICAL)**
+    - When changing Application definitions (`argocd/**/*.yaml`), ALWAYS sync `meta` app FIRST
+    - **Wrong**: `git push` → `argocd app sync TARGET_APP` (Application CRD not updated yet)
+    - **Correct**: `git push` → `argocd app sync argocd/meta` → target app syncs automatically
+    - Meta app manages all Application CRDs — it must update them before target app knows about new values
+    - Direct sync of target app will show "Synced" but use OLD configuration until meta updates the CRD
+    - For manifests/values changes (NOT Application definitions): can sync target app directly
+
 ### Pre-Commit Checklist
 
 Before every commit, verify:
