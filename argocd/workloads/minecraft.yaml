@@ -23,7 +23,7 @@ spec:
             type: paper
 
           image:
-            repository: ttl.sh/lexfrei-papermc
+            repository: ttl.sh/lexfrei-papermc-ubi
             tag: "1h"
             pullPolicy: Always
 
