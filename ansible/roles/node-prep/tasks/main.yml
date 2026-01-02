@@ -35,6 +35,12 @@
         - sysctl
         - filesystem
 
+    - name: Configure sysctl - network optimization
+      ansible.builtin.include_tasks: sysctl-network.yml
+      tags:
+        - sysctl
+        - network
+
     - name: Configure DNS fallback servers
       ansible.builtin.include_tasks: dns-fallback.yml
       tags:
@@ -76,6 +82,7 @@
           - {{ node_prep_system_packages | length }} system utility packages installed
           - Kernel panic settings configured
           - Filesystem optimization applied
+          - Network optimization applied (BBR, TCP buffers, security)
           - DNS fallback and caching configured
           - Timezone set to {{ node_prep_timezone }}
           - Watchdog configured and running
