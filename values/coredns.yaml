@@ -34,9 +34,11 @@ servers:
           health_check 5s
       # Cache configuration - balance between freshness and performance
       - name: cache
+        parameters: 9000
         configBlock: |-
-          success 300
-          denial 60
+          success 9000 300
+          denial 9000 60
+          prefetch 10 1h 10%
       - name: loop
       - name: reload
       - name: loadbalance
