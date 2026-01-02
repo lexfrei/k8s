@@ -48,6 +48,25 @@ spec:
             retention_delete_delay: 1h
             delete_request_cancel_period: 10m
             delete_request_store: filesystem
+          structuredConfig:
+            ingester:
+              chunk_idle_period: 2h
+              chunk_retain_period: 1m
+              chunk_block_size: 262144
+              flush_check_period: 30s
+            query_range:
+              align_queries_with_step: true
+              cache_results: true
+              results_cache:
+                cache:
+                  embedded_cache:
+                    enabled: true
+                    max_size_mb: 50
+            chunk_store_config:
+              chunk_cache_config:
+                embedded_cache:
+                  enabled: true
+                  max_size_mb: 100
         singleBinary:
           replicas: 1
           persistence:
@@ -63,10 +82,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 384Mi
             limits:
               cpu: 500m
-              memory: 512Mi
+              memory: 768Mi
         # Disable components not needed in SingleBinary mode
         read:
           replicas: 0
