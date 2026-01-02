@@ -16,7 +16,7 @@ spec:
       chart: external-dns
       helm:
         valuesObject:
-          logLevel: debug
+          logLevel: info
           provider:
             name: cloudflare
           policy: sync

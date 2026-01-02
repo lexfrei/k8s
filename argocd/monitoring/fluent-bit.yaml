@@ -31,7 +31,7 @@ spec:
                 storage.path /var/lib/fluent-bit/
                 storage.sync normal
                 storage.checksum off
-                storage.max_chunks_up 128
+                storage.max_chunks_up 64
                 storage.backlog.mem_limit 5M
 
           inputs: |
