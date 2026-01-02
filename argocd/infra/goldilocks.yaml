@@ -27,6 +27,8 @@ spec:
                 memory: 256Mi
           dashboard:
             replicaCount: 1
+            flags:
+              on-by-default: "true"
             resources:
               requests:
                 cpu: 25m
