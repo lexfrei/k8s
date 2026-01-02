@@ -17,6 +17,8 @@ spec:
       helm:
         valuesObject:
           controller:
+            flags:
+              on-by-default: "true"
             resources:
               requests:
                 cpu: 25m
