@@ -1,0 +1,347 @@
+---
+# Configure network stack optimization for Kubernetes
+# Optimizes TCP buffers, connection queues, congestion control, and security
+
+# TCP buffer sizes for high throughput
+- name: Configure maximum receive buffer size
+  ansible.posix.sysctl:
+    name: net.core.rmem_max
+    value: "{{ node_prep_net_core_rmem_max }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure maximum send buffer size
+  ansible.posix.sysctl:
+    name: net.core.wmem_max
+    value: "{{ node_prep_net_core_wmem_max }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure default receive buffer size
+  ansible.posix.sysctl:
+    name: net.core.rmem_default
+    value: "{{ node_prep_net_core_rmem_default }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure default send buffer size
+  ansible.posix.sysctl:
+    name: net.core.wmem_default
+    value: "{{ node_prep_net_core_wmem_default }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure TCP receive buffer (min, default, max)
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_rmem
+    value: "{{ node_prep_net_ipv4_tcp_rmem }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure TCP send buffer (min, default, max)
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_wmem
+    value: "{{ node_prep_net_ipv4_tcp_wmem }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+# Connection queue limits
+- name: Configure listen backlog queue size
+  ansible.posix.sysctl:
+    name: net.core.somaxconn
+    value: "{{ node_prep_net_core_somaxconn }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure TCP SYN backlog queue size
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_max_syn_backlog
+    value: "{{ node_prep_net_ipv4_tcp_max_syn_backlog }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure network device backlog queue size
+  ansible.posix.sysctl:
+    name: net.core.netdev_max_backlog
+    value: "{{ node_prep_net_core_netdev_max_backlog }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure NAPI poll budget
+  ansible.posix.sysctl:
+    name: net.core.netdev_budget
+    value: "{{ node_prep_net_core_netdev_budget }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure NAPI poll time budget
+  ansible.posix.sysctl:
+    name: net.core.netdev_budget_usecs
+    value: "{{ node_prep_net_core_netdev_budget_usecs }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+# TCP performance tuning
+- name: Configure TCP Fast Open
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_fastopen
+    value: "{{ node_prep_net_ipv4_tcp_fastopen }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure TIME_WAIT socket reuse
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_tw_reuse
+    value: "{{ node_prep_net_ipv4_tcp_tw_reuse }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure FIN_WAIT2 timeout
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_fin_timeout
+    value: "{{ node_prep_net_ipv4_tcp_fin_timeout }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure TCP keepalive time
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: "{{ node_prep_net_ipv4_tcp_keepalive_time }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure TCP keepalive probes
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_probes
+    value: "{{ node_prep_net_ipv4_tcp_keepalive_probes }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure TCP keepalive interval
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_intvl
+    value: "{{ node_prep_net_ipv4_tcp_keepalive_intvl }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure ephemeral port range
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_local_port_range
+    value: "{{ node_prep_net_ipv4_ip_local_port_range }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+# Congestion control (complements Cilium BBR for host traffic)
+- name: Configure default queueing discipline
+  ansible.posix.sysctl:
+    name: net.core.default_qdisc
+    value: "{{ node_prep_net_core_default_qdisc }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Configure TCP congestion control algorithm
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_congestion_control
+    value: "{{ node_prep_net_ipv4_tcp_congestion_control }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+# Network security hardening
+- name: Enable SYN cookies (SYN flood protection)
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_syncookies
+    value: "{{ node_prep_net_ipv4_tcp_syncookies }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+    - security
+
+- name: Enable reverse path filtering (all interfaces)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.rp_filter
+    value: "{{ node_prep_net_ipv4_conf_all_rp_filter }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+    - security
+
+- name: Enable reverse path filtering (default)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.rp_filter
+    value: "{{ node_prep_net_ipv4_conf_default_rp_filter }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+    - security
+
+- name: Ignore broadcast ICMP echo requests
+  ansible.posix.sysctl:
+    name: net.ipv4.icmp_echo_ignore_broadcasts
+    value: "{{ node_prep_net_ipv4_icmp_echo_ignore_broadcasts }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+    - security
+
+- name: Disable ICMP redirect acceptance (all interfaces)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.accept_redirects
+    value: "{{ node_prep_net_ipv4_conf_all_accept_redirects }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+    - security
+
+- name: Disable ICMP redirect acceptance (default)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.accept_redirects
+    value: "{{ node_prep_net_ipv4_conf_default_accept_redirects }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+    - security
+
+- name: Disable ICMP redirect sending (all interfaces)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.send_redirects
+    value: "{{ node_prep_net_ipv4_conf_all_send_redirects }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+    - security
+
+- name: Disable ICMP redirect sending (default)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.send_redirects
+    value: "{{ node_prep_net_ipv4_conf_default_send_redirects }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+    - security
+
+# IP forwarding (required for Kubernetes networking)
+- name: Enable IP forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "{{ node_prep_net_ipv4_ip_forward }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
+
+- name: Enable IP forwarding (all interfaces)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: "{{ node_prep_net_ipv4_conf_all_forwarding }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+    reload: true
+  tags:
+    - sysctl
+    - network
