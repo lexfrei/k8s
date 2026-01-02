@@ -37,10 +37,22 @@ loadBalancer:
 socketLB:
   enabled: true
 
+# Bandwidth Manager with BBR for improved throughput and latency
+bandwidthManager:
+  enabled: true
+  bbr: true
+
 # BPF optimizations
 bpf:
   masquerade: true
   hostLegacyRouting: false
+  # Netkit device mode for lower pod networking overhead (requires kernel 6.8+)
+  datapathMode: netkit
+  # Distributed LRU for reduced spinlock contention under high connection load
+  distributedLRU:
+    enabled: true
+  # Dynamic map sizing (8% of node memory for CT/NAT maps)
+  mapDynamicSizeRatio: 0.08
 
 # Enable L2 neighbor discovery
 l2NeighDiscovery:
