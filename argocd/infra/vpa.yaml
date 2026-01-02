@@ -26,6 +26,9 @@ spec:
               - --prometheus-cadvisor-job-name=monitoring/kubelet-cadvisor
               - --history-length=8d
               - --history-resolution=1h
+              - --container-pod-name-label=pod
+              - --container-name-label=container
+              - --container-namespace-label=namespace
             resources:
               requests:
                 cpu: 50m
