@@ -24,7 +24,7 @@ spec:
 
           image:
             repository: ttl.sh/lexfrei-papermc-ubi
-            tag: "b006d8e4-70a6-4fed-86cb-43293294606a"
+            tag: "51824629-8ec0-4274-bcab-5d252ff505cd"
             pullPolicy: Always
 
           ports:
