@@ -23,8 +23,8 @@ spec:
             type: paper
 
           image:
-            repository: ttl.sh/lexfrei-papermc-ubi
-            tag: "51824629-8ec0-4274-bcab-5d252ff505cd"
+            repository: lexfrei/papermc
+            tag: "1.21.11-74"
             pullPolicy: Always
 
           ports:
