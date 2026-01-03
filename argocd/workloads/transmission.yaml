@@ -19,6 +19,9 @@ spec:
         podSecurityContext:
           fsGroup: 1000
           fsGroupChangePolicy: OnRootMismatch
+        terminationGracePeriodSeconds: 120
+        env:
+          S6_KILL_FINISH_MAXTIME: "90000"
         livenessProbe:
           tcpSocket:
             port: 9091
