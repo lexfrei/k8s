@@ -161,7 +161,16 @@ configs:
           end
 
           return health_status
+repoServer:
+  replicas: 2
+  pdb:
+    enabled: true
+    minAvailable: 1
 server:
+  replicas: 2
+  pdb:
+    enabled: true
+    minAvailable: 1
   service:
     type: LoadBalancer
     annotations:

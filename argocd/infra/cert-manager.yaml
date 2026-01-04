@@ -27,6 +27,11 @@ spec:
             apiVersion: controller.config.cert-manager.io/v1alpha1
             kind: ControllerConfiguration
             enableGatewayAPI: true
+          webhook:
+            replicaCount: 2
+            podDisruptionBudget:
+              enabled: true
+              minAvailable: 1
     - path: manifests/cert-manager
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
