@@ -68,7 +68,7 @@ envoy:
 
 # Hubble network observability
 hubble:
-  enabled: false
+  enabled: true
 
 # Gateway API support
 gatewayAPI:
