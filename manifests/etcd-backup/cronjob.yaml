@@ -14,6 +14,7 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 3
+      ttlSecondsAfterFinished: 300
       template:
         metadata:
           labels:
