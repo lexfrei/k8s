@@ -69,6 +69,8 @@ envoy:
 # Hubble network observability
 hubble:
   enabled: true
+  peerService:
+    clusterDomain: k8s.home.lex.la
   relay:
     enabled: true
     resources:
