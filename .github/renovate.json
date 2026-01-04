@@ -4,6 +4,9 @@
         ":pinDependencies",
         ":semanticCommits"
     ],
+    "ignoreDeps": [
+        "https://github.com/k3s-io/k3s-ansible.git"
+    ],
     "major": {
         "minimumReleaseAge": "5 days",
         "labels": [
