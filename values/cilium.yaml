@@ -69,6 +69,15 @@ envoy:
 # Hubble network observability
 hubble:
   enabled: true
+  relay:
+    enabled: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
 
 # Gateway API support
 gatewayAPI:
