@@ -73,6 +73,8 @@ hubble:
     clusterDomain: k8s.home.lex.la
   relay:
     enabled: true
+    service:
+      type: LoadBalancer
     resources:
       requests:
         cpu: 50m
