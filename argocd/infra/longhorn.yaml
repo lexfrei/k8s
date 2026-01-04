@@ -19,6 +19,7 @@ spec:
           persistence:
             defaultClassReplicaCount: 1
             defaultClass: false
+            defaultDataLocality: strict-local
           ingress:
             enabled: false
           preUpgradeChecker:
