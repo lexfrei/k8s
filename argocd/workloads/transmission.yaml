@@ -22,21 +22,8 @@ spec:
         terminationGracePeriodSeconds: 120
         env:
           S6_KILL_FINISH_MAXTIME: "90000"
-        livenessProbe:
-          tcpSocket:
-            port: 9091
-          initialDelaySeconds: 60
-          periodSeconds: 30
-          timeoutSeconds: 5
-          failureThreshold: 6
-        readinessProbe:
-          httpGet:
-            path: /transmission/web/
-            port: 9091
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 6
+        livenessProbe: null
+        readinessProbe: null
         resources:
           requests:
             cpu: 200m
