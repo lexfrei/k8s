@@ -9,7 +9,6 @@ collections:
 
   # k3s-ansible - Official K3s Ansible collection
   # Provides roles and playbooks for K3s cluster management
-  # renovate:ignore - git-based collection, manual updates
   - name: https://github.com/k3s-io/k3s-ansible.git
     type: git
     version: 49b810c948a6b1435374169a8ad650aa2828e86e
