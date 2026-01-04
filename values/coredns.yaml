@@ -1,3 +1,6 @@
+replicaCount: 2
+podDisruptionBudget:
+  minAvailable: 1
 rbac:
   create: true
 service:
