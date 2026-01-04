@@ -12,13 +12,10 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://kubernetes-sigs.github.io/external-dns/"
-      targetRevision: "1.19.0"
+      targetRevision: "1.20.0"
       chart: external-dns
       helm:
         valuesObject:
-          image:
-            repository: registry.k8s.io/external-dns/external-dns
-            tag: v0.20.0
           provider:
             name: webhook
             webhook:
