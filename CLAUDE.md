@@ -63,7 +63,7 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
 - **`values/`** - Helm chart values files for infrastructure components
   - `argocd.yaml` - ArgoCD configuration including Crossplane health checks, server.insecure for Gateway TLS termination, and HTTPRoute configuration
   - `coredns.yaml` - CoreDNS configuration with custom cluster domain k8s.home.lex.la
-  - `cilium.yaml` - Cilium CNI configuration (tunnel mode VXLAN, kube-proxy replacement, L2 announcements, Gateway API, Hubble disabled)
+  - `cilium.yaml` - Cilium CNI configuration (native routing, kube-proxy replacement, L2 announcements, Gateway API, Hubble enabled)
 
 - **`secrets/`** - Encrypted secrets (likely using SOPS or similar)
   - Contains CloudFlare credentials, Grafana config
@@ -118,7 +118,11 @@ The cluster runs on K3s with these core components (in deployment order):
   - Public Gateway: external-dns.alpha.kubernetes.io/target: "217.78.182.161" (proxied)
   - Internal Gateway: external-dns.alpha.kubernetes.io/target: "172.16.100.250" (DNS-only)
 - **Cluster domain**: `k8s.home.lex.la` (configured in K3s and CoreDNS)
-- **Hubble**: Disabled to reduce resource consumption
+- **Hubble**: Enabled for network observability
+  - Web UI: https://hubble.home.lex.la (internal Gateway)
+  - CLI: `hubble --server 172.16.100.101:4245 observe`
+  - Relay LoadBalancer: 172.16.100.101 (pinned via annotation)
+  - **CRITICAL**: `peerService.clusterDomain: k8s.home.lex.la` required due to custom cluster domain
 
 ## Key Commands
 
@@ -437,6 +441,9 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
   - **CRITICAL**: Uses soft mount (not hard) to prevent kernel freeze on NFS unavailability
   - Timeout: timeo=100 (10 seconds) for fast failure detection
   - Hard mount can cause D state hangs and complete node freeze (see Error 14)
+- **Hubble configuration constraints**:
+  - `hubble.peerService.clusterDomain` MUST match cluster domain (k8s.home.lex.la) - Relay DNS resolution fails otherwise
+  - Hubble Relay IP pinning: Helm chart doesn't support service annotations, use `kubectl annotate svc hubble-relay --namespace kube-system io.cilium/lb-ipam-ips=IP` (ArgoCD won't overwrite since Helm doesn't set annotations)
 
 ## Renovate Configuration
 
