@@ -39,6 +39,12 @@
             "\\.yaml$"
         ]
     },
+    "packageRules": [
+        {
+            "matchPackageNames": ["https://github.com/k3s-io/k3s-ansible.git"],
+            "enabled": false
+        }
+    ],
     "automerge": true,
     "prHourlyLimit": 5,
     "prConcurrentLimit": 10
