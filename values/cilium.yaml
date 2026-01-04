@@ -75,6 +75,8 @@ hubble:
     enabled: true
     service:
       type: LoadBalancer
+      annotations:
+        io.cilium/lb-ipam-ips: "172.16.100.101"
     resources:
       requests:
         cpu: 50m
