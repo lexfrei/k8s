@@ -80,6 +80,24 @@ hubble:
       limits:
         cpu: 200m
         memory: 256Mi
+  ui:
+    enabled: true
+    backend:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+    frontend:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
 
 # Gateway API support
 gatewayAPI:
