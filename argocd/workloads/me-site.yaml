@@ -15,6 +15,8 @@ spec:
     targetRevision: 0.5.1
     helm:
       valuesObject:
+        image:
+          pullPolicy: IfNotPresent
         onionService:
           enabled: false
         httpRoute:

@@ -25,7 +25,7 @@ spec:
           image:
             repository: lexfrei/papermc
             tag: "1.21.11-74"
-            pullPolicy: Always
+            pullPolicy: IfNotPresent
 
           ports:
             minecraft:

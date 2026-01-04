@@ -16,6 +16,8 @@ spec:
       chart: goldilocks
       helm:
         valuesObject:
+          image:
+            pullPolicy: IfNotPresent
           controller:
             flags:
               on-by-default: "true"

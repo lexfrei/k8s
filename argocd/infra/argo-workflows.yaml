@@ -16,6 +16,8 @@ spec:
       chart: argo-workflows
       helm:
         valuesObject:
+          images:
+            pullPolicy: IfNotPresent
           server:
             extraArgs:
               - --auth-mode=server
