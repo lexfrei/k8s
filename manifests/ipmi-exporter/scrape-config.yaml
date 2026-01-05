@@ -25,4 +25,4 @@ spec:
   scrapeTimeout: 30s
   staticConfigs:
     - targets:
-        - "ilo2.home.lex.la"
+        - "172.16.10.121"
