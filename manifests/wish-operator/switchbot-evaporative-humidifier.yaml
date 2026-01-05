@@ -1,0 +1,22 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: switchbot-evaporative-humidifier
+  namespace: wish-operator
+spec:
+  quantity: 2
+  title: "SwitchBot Evaporative Humidifier (Auto-refill)"
+  imageURL: "https://eu.switch-bot.com/cdn/shop/files/switchbot-evaporative-humidifier-auto-refill-283343_grande.jpg?v=1724189201"
+  officialURL: "https://www.switch-bot.com/pages/switchbot-evaporative-humidifier-auto-refill"
+  purchaseURLs:
+    - "https://us.switch-bot.com/products/switchbot-evaporative-humidifier-auto-refill"
+    - "https://www.amazon.com/dp/B0CPYFTYPG"
+  msrp: "$ 240"
+  tags:
+    - electronics
+    - smarthome
+    - matter
+  contextTags:
+    - any-occasion
+  description: "Smart evaporative humidifier with 4.5L tank, 750ml/h output. Auto-refill with S10 robot vacuum. Matter support via Hub 2, native Matter 1.4 coming soon."
+  priority: 4
