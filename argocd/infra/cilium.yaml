@@ -6,6 +6,25 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      namespace: kube-system
+      name: cilium-ca
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: Secret
+      namespace: kube-system
+      name: hubble-server-certs
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: Secret
+      namespace: kube-system
+      name: hubble-relay-client-certs
+      jsonPointers:
+        - /data
   project: infra
   destination:
     namespace: kube-system
