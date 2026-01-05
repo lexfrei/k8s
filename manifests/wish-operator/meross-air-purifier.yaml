@@ -4,6 +4,7 @@ metadata:
   name: meross-air-purifier
   namespace: wish-operator
 spec:
+  quantity: 2
   title: "Meross Smart Air Purifier MAP100"
   imageURL: "https://static-file.meross.com/uploads/1628134416347_4bc5cd22.jpg"
   officialURL: "https://www.meross.com/en-gc/smart-air-purifier/homekit-air-purifier/112"

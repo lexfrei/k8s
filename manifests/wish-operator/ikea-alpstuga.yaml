@@ -1,0 +1,22 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: ikea-alpstuga
+  namespace: wish-operator
+spec:
+  title: "IKEA ALPSTUGA Air Quality Sensor"
+  imageURL: "https://www.ikea.com/pl/pl/images/products/alpstuga-czujnik-jakosci-powietrza-smart__1515884_pe1011656_s5.jpg"
+  officialURL: "https://www.ikea.com/us/en/p/alpstuga-air-quality-sensor-smart-70609396/"
+  purchaseURLs:
+    - "https://www.ikea.com/us/en/p/alpstuga-air-quality-sensor-smart-70609396/"
+    - "https://www.ikea.com/gb/en/p/alpstuga-air-quality-sensor-smart-50604187/"
+  msrp: "$ 29"
+  tags:
+    - electronics
+    - smarthome
+    - matter
+    - thread
+  contextTags:
+    - any-occasion
+  description: "Smart indoor air quality sensor with Matter/Thread. Monitors CO2, PM2.5, temperature, and humidity. Built-in clock display."
+  priority: 4
