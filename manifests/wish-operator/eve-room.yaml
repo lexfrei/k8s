@@ -1,0 +1,23 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: eve-room
+  namespace: wish-operator
+spec:
+  title: "Eve Room"
+  imageURL: "https://m.media-amazon.com/images/I/51HKXlNjHBL._AC_UF1000,1000_QL80_.jpg"
+  officialURL: "https://www.evehome.com/en/eve-room"
+  purchaseURLs:
+    - "https://www.evehome.com/en/eve-room"
+    - "https://www.amazon.com/dp/B09L58NQG2"
+    - "https://www.apple.com/shop/product/hpy12zm/a/eve-room-indoor-air-quality-monitor"
+  msrp: "$ 100"
+  tags:
+    - electronics
+    - smarthome
+    - homekit
+    - thread
+  contextTags:
+    - any-occasion
+  description: "Indoor air quality monitor with Thread/Bluetooth. Measures VOC, temperature, and humidity. Rechargeable battery lasts 6+ weeks. 100% privacy - no cloud, no registration."
+  priority: 4
