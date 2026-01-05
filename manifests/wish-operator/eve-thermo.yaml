@@ -1,0 +1,24 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: eve-thermo
+  namespace: wish-operator
+spec:
+  quantity: 2
+  title: "Eve Thermo (5th Gen, 2025, 20ECD1701)"
+  imageURL: "https://www.evehome.com/sites/default/files/2025-12/eve-thermo-2025-pdp-device-hero-mit-badge-en_0.png"
+  officialURL: "https://www.evehome.com/en/eve-thermo"
+  purchaseURLs:
+    - "https://www.evehome.com/en/eve-thermo"
+    - "https://www.amazon.de/dp/B0DRB1PSHX"
+  msrp: "€ 80"
+  tags:
+    - electronics
+    - smarthome
+    - matter
+    - thread
+    - heating
+  contextTags:
+    - any-occasion
+  description: "Smart radiator valve, 5th generation (2025). Matter 1.4.1 + Thread. Presence-based heating, schedules, open window detection. Works with Apple Home, Google Home, Alexa, SmartThings, Home Assistant. 100% privacy - no cloud."
+  priority: 4
