@@ -1,0 +1,18 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: papermc-deny-ingress
+  namespace: paper
+spec:
+  endpointSelector:
+    matchLabels:
+      app: papermc
+  ingressDeny:
+    - fromEntities:
+        - world
+    - toPorts:
+        - ports:
+            - port: "25565"
+              protocol: TCP
+            - port: "25565"
+              protocol: UDP
