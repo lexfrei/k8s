@@ -1,0 +1,24 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: ubiquiti-usw-flex-2-5g-8-poe
+  namespace: wish-operator
+spec:
+  quantity: 1
+  title: "Ubiquiti USW-Flex-2.5G-8-PoE"
+  imageURL: "https://images.svc.ui.com/?u=https%3A%2F%2Fcdn.ecomm.ui.com%2Fproducts%2Fe9d97121-f363-4261-83db-5f74e093a304%2Fdd55113e-93b2-40da-b10b-945ab4d609d0.png&q=75&w=640"
+  officialURL: "https://store.ui.com/us/en/products/usw-flex-2-5g-8-poe"
+  purchaseURLs:
+    - "https://store.ui.com/us/en/products/usw-flex-2-5g-8-poe"
+  msrp: "$329"
+  tags:
+    - electronics
+    - networking
+    - ubiquiti
+    - unifi
+    - switch
+    - poe
+  contextTags:
+    - any-occasion
+  description: "8-port 2.5GbE PoE++ (802.3bt) managed switch with 180W PoE budget. 1x 10G RJ45/SFP+ combo uplink. Can be powered via PoE+++ or AC adapter. Compact form factor."
+  priority: 4
