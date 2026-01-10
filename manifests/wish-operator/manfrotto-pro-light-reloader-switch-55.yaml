@@ -1,0 +1,23 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: manfrotto-pro-light-reloader-switch-55
+  namespace: wish-operator
+spec:
+  title: "Manfrotto Pro Light Reloader Switch-55"
+  imageURL: "https://cdn.manfrotto.com/media/catalog/product/c/a/camera-roller-manfrotto-pro-light-reloader-switch-55-mb-pl-rl-h55-45degrees.jpg"
+  officialURL: "https://www.manfrotto.com/global-en/pro-light-reloader-switch-55-carry-on-camera-roller-bag-mb-pl-rl-h55/"
+  purchaseURLs:
+    - "https://www.manfrotto.com/global-en/pro-light-reloader-switch-55-carry-on-camera-roller-bag-mb-pl-rl-h55/"
+    - "https://www.bhphotovideo.com/c/product/1436565-REG/manfrotto_mb_pl_rl_h55_pro_light_reloader_switch_55.html"
+    - "https://www.adorama.com/mbplrlh55.html"
+  msrp: "$675"
+  tags:
+    - photography
+    - bag
+    - roller
+    - manfrotto
+  contextTags:
+    - any-occasion
+  description: "Carry-on camera roller bag convertible to backpack. Fits pro DSLR with 400mm lens, second body, 3-4 lenses. 17\" laptop pocket, TSA lock, rain cover. Model: MB PL-RL-H55."
+  priority: 4
