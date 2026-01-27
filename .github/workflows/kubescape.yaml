@@ -14,6 +14,10 @@ jobs:
         with:
           format: sarif
           outputFile: results
+      - name: Fix SARIF artifact locations
+        run: |
+          jq 'walk(if type == "object" and has("results") then .results |= map(select(.locations[0].physicalLocation.artifactLocation.uri != null and .locations[0].physicalLocation.artifactLocation.uri != "")) else . end)' results.sarif > results-fixed.sarif
+          mv results-fixed.sarif results.sarif
       - name: Upload Kubescape scan results to Github Code Scanning
         uses: github/codeql-action/upload-sarif@v4
         with:

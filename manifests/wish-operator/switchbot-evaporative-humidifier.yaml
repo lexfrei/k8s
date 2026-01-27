@@ -19,4 +19,4 @@ spec:
   contextTags:
     - any-occasion
   description: "Smart evaporative humidifier with 4.5L tank, 750ml/h output, 18dB quiet mode. UV sterilization, washable filter (4yr lifespan). Matter/HomeKit support via Hub 2."
-  priority: 4
+  priority: 5
