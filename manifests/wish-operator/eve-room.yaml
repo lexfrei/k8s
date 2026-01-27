@@ -20,4 +20,4 @@ spec:
   contextTags:
     - any-occasion
   description: "Indoor air quality monitor with Thread/Bluetooth. Measures VOC, temperature, and humidity. Rechargeable battery lasts 6+ weeks. 100% privacy - no cloud, no registration."
-  priority: 4
+  priority: 2
