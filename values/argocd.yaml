@@ -22,6 +22,9 @@ configs:
               - email
               - groups
             userNameKey: preferred_username
+            # Allow Dex to read and propagate groups claim from ID token
+            # "insecure" refers to groups not updating on token refresh, not a security issue
+            insecureEnableGroups: true
             insecureSkipEmailVerified: true
     application.resourceTrackingMethod: annotation
   rbac:
