@@ -6,29 +6,32 @@ configs:
   cm:
     accounts.admin: apiKey, login
     url: https://argocd.home.lex.la
-    oidc.config: |
-      name: Authelia
-      issuer: https://authelia.home.lex.la
-      clientID: argocd
-      clientSecret: $oidc.authelia.clientSecret
-      requestedScopes:
-        - openid
-        - profile
-        - email
-        - groups
-      # Authelia returns groups only via userinfo endpoint by default
-      requestedIDTokenClaims:
-        groups:
-          essential: true
-      # Use preferred_username for human-readable display name
-      userNameClaim: preferred_username
+    # Using Dex for OIDC - it can fetch claims from userinfo endpoint
+    dex.config: |
+      connectors:
+        - type: oidc
+          id: authelia
+          name: Authelia
+          config:
+            issuer: https://authelia.home.lex.la
+            clientID: argocd
+            clientSecret: $dex.authelia.clientSecret
+            scopes:
+              - openid
+              - profile
+              - email
+              - groups
+            # Fetch claims from userinfo endpoint (groups, preferred_username)
+            getUserInfo: true
+            userNameKey: preferred_username
+            insecureSkipEmailVerified: true
     application.resourceTrackingMethod: annotation
   rbac:
     policy.csv: |
       g, admins, role:admin
   secret:
     extra:
-      oidc.authelia.clientSecret: c6d255b2b92e2fec47c1b56dea8ab2bff77a7a7c7f46ef3c99859779c7932afd
+      dex.authelia.clientSecret: c6d255b2b92e2fec47c1b56dea8ab2bff77a7a7c7f46ef3c99859779c7932afd
     resource.compareoptions: |
       ignoreAggregatedRoles: true
     resource.exclusions: |

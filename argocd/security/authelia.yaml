@@ -152,15 +152,12 @@ spec:
                       path: /secrets/authelia-secrets/ARGOCD_CLIENT_SECRET
                     authorization_policy: two_factor
                     redirect_uris:
-                      - https://argocd.home.lex.la/auth/callback
+                      - https://argocd.home.lex.la/api/dex/callback
                     scopes:
                       - openid
                       - profile
                       - email
                       - groups
-                    # Include groups claim in ID token (not just userinfo)
-                    id_token_signed_response_alg: RS256
-                    userinfo_signed_response_alg: none
                   - client_id: openbao
                     client_name: OpenBao
                     client_secret:
