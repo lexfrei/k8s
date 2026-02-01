@@ -52,7 +52,7 @@ spec:
             default_2fa_method: webauthn
 
             log:
-              level: debug
+              level: info
 
             totp:
               disable: true
@@ -133,12 +133,21 @@ spec:
                 jwks:
                   - key:
                       path: /secrets/authelia-secrets/OIDC_PRIVATE_KEY
+                # Include groups and username claims directly in ID token
+                claims_policies:
+                  full_claims:
+                    id_token:
+                      - groups
+                      - preferred_username
+                      - email
+                      - name
                 clients:
                   - client_id: grafana
                     client_name: Grafana
                     client_secret:
                       path: /secrets/authelia-secrets/GRAFANA_CLIENT_SECRET
                     authorization_policy: two_factor
+                    claims_policy: full_claims
                     redirect_uris:
                       - https://grafana.home.lex.la/login/generic_oauth
                     scopes:
@@ -151,8 +160,7 @@ spec:
                     client_secret:
                       path: /secrets/authelia-secrets/ARGOCD_CLIENT_SECRET
                     authorization_policy: two_factor
-                    # Force explicit consent to ensure groups scope is granted
-                    consent_mode: explicit
+                    claims_policy: full_claims
                     redirect_uris:
                       - https://argocd.home.lex.la/api/dex/callback
                     scopes:
@@ -165,6 +173,7 @@ spec:
                     client_secret:
                       path: /secrets/authelia-secrets/OPENBAO_CLIENT_SECRET
                     authorization_policy: two_factor
+                    claims_policy: full_claims
                     redirect_uris:
                       - https://openbao.home.lex.la/ui/vault/auth/oidc/oidc/callback
                       - http://localhost:8250/oidc/callback

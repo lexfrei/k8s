@@ -6,10 +6,8 @@ configs:
   cm:
     accounts.admin: apiKey, login
     url: https://argocd.home.lex.la
-    # Using Dex for OIDC - it can fetch claims from userinfo endpoint
+    # Using Dex for OIDC - Authelia includes all claims in ID token via claims_policy
     dex.config: |
-      logger:
-        level: debug
       connectors:
         - type: oidc
           id: authelia
@@ -23,11 +21,7 @@ configs:
               - profile
               - email
               - groups
-            # Fetch claims from userinfo endpoint (groups, preferred_username)
-            getUserInfo: true
             userNameKey: preferred_username
-            # Explicitly specify claim keys for groups
-            groupsKey: groups
             insecureSkipEmailVerified: true
     application.resourceTrackingMethod: annotation
   rbac:
