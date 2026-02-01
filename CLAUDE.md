@@ -486,13 +486,14 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
   - Configured clients: Grafana, ArgoCD, OpenBao
   - OIDC secrets stored in OpenBao, referenced via path in authelia config
   - Uses `claims_policies` to include groups in ID token (Authelia 4.38+ feature)
+  - **Dex OIDC connector requires `insecureEnableGroups: true`** to read groups from ID token (name refers to stale data on refresh, not a security issue)
 
 ## Authentication Policy
 
 **CRITICAL: All services MUST use OIDC authentication via Authelia. Local/password authentication is FORBIDDEN.**
 
 - **ArgoCD**: Local admin login disabled (`admin.enabled: false`), OIDC via Dex → Authelia
-- **Grafana**: OIDC via Authelia
+- **Grafana**: Login form disabled (`disable_login_form: true`), OIDC via Authelia
 - **OpenBao**: OIDC via Authelia
 - When adding new services that support authentication, ALWAYS configure OIDC with Authelia
 - NEVER enable local password authentication for any service
