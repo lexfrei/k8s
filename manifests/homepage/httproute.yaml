@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+spec:
+  parentRefs:
+    - name: cilium-gateway-internal
+      namespace: kube-system
+      sectionName: https-start-lex-la
+  hostnames:
+    - start.lex.la
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: homepage
+          port: 3000

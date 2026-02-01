@@ -50,6 +50,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: vpa-system
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: homepage
   to:
     - group: ""
       kind: Service

@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  settings.yaml: |
+    title: Home Lab
+    theme: dark
+    color: slate
+    headerStyle: clean
+    layout:
+      Infrastructure:
+        style: row
+        columns: 3
+      Monitoring:
+        style: row
+        columns: 2
+      Security:
+        style: row
+        columns: 2
+      Workloads:
+        style: row
+        columns: 3
+
+  services.yaml: |
+    - Infrastructure:
+        - ArgoCD:
+            icon: argocd.svg
+            href: https://argocd.home.lex.la
+            description: GitOps continuous delivery
+            siteMonitor: https://argocd.home.lex.la
+        - Longhorn:
+            icon: longhorn.svg
+            href: https://longhorn.home.lex.la
+            description: Distributed block storage
+            siteMonitor: https://longhorn.home.lex.la
+        - Hubble:
+            icon: cilium.svg
+            href: https://hubble.home.lex.la
+            description: Network observability
+            siteMonitor: https://hubble.home.lex.la
+
+    - Monitoring:
+        - Grafana:
+            icon: grafana.svg
+            href: https://grafana.home.lex.la
+            description: Metrics visualization
+            siteMonitor: https://grafana.home.lex.la
+
+    - Security:
+        - Authelia:
+            icon: authelia.svg
+            href: https://authelia.home.lex.la
+            description: SSO and 2FA
+            siteMonitor: https://authelia.home.lex.la
+        - OpenBao:
+            icon: vault.svg
+            href: https://openbao.home.lex.la
+            description: Secrets management
+            siteMonitor: https://openbao.home.lex.la
+
+    - Workloads:
+        - Audiobookshelf:
+            icon: audiobookshelf.svg
+            href: https://audiobookshelf.home.lex.la
+            description: Audiobook server
+            siteMonitor: https://audiobookshelf.home.lex.la
+        - Transmission:
+            icon: transmission.svg
+            href: https://transmission.home.lex.la
+            description: BitTorrent client
+            siteMonitor: https://transmission.home.lex.la
+
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "homelab"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+
+    - datetime:
+        text_size: xl
+        format:
+          dateStyle: long
+          timeStyle: short
+          hour12: false
+
+  kubernetes.yaml: |
+    mode: cluster
+
+  bookmarks.yaml: |
+    []
+
+  docker.yaml: |
+    []
