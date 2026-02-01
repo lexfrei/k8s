@@ -58,7 +58,7 @@ spec:
             dataStorage:
               enabled: true
               size: 5Gi
-              storageClass: longhorn
+              storageClass: longhorn-remote
               accessMode: ReadWriteOnce
 
             volumes:
