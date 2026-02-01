@@ -151,6 +151,8 @@ spec:
                     client_secret:
                       path: /secrets/authelia-secrets/ARGOCD_CLIENT_SECRET
                     authorization_policy: two_factor
+                    # Force explicit consent to ensure groups scope is granted
+                    consent_mode: explicit
                     redirect_uris:
                       - https://argocd.home.lex.la/api/dex/callback
                     scopes:
