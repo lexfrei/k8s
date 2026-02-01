@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jellyfin-media-nfs
+spec:
+  capacity:
+    storage: 10Ti
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 172.16.10.19
+    path: /mnt/pool/Transmission
+  mountOptions:
+    - nfsvers=4.1
+    - rsize=1048576
+    - wsize=1048576
+    - soft
+    - timeo=100
+    - retrans=2
+    - noresvport
+    - noatime
+    - tcp
+    - ro
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-media-nfs
+  namespace: jellyfin
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 10Ti
+  volumeName: jellyfin-media-nfs
