@@ -3,13 +3,15 @@ kind: HTTPRoute
 metadata:
   name: jellyfin
   namespace: jellyfin
+  annotations:
+    internal-dns/target: "172.16.100.250"
 spec:
   parentRefs:
     - name: cilium-gateway-internal
       namespace: kube-system
-      sectionName: https-home-lex-la
+      sectionName: https-lex-la
   hostnames:
-    - jellyfin.home.lex.la
+    - jellyfin.lex.la
   rules:
     - matches:
         - path:
