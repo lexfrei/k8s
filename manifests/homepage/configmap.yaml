@@ -73,9 +73,9 @@ data:
     - Security:
         - Authelia:
             icon: authelia.svg
-            href: https://authelia.home.lex.la
+            href: https://authelia.lex.la
             description: SSO and 2FA
-            siteMonitor: https://authelia.home.lex.la
+            siteMonitor: https://authelia.lex.la
         - OpenBao:
             icon: vault.svg
             href: https://openbao.home.lex.la
@@ -85,9 +85,9 @@ data:
     - Workloads:
         - Jellyfin:
             icon: jellyfin.svg
-            href: https://jellyfin.home.lex.la
+            href: https://jellyfin.lex.la
             description: Media server
-            siteMonitor: https://jellyfin.home.lex.la
+            siteMonitor: https://jellyfin.lex.la
         - Audiobookshelf:
             icon: audiobookshelf.svg
             href: https://abs.lex.la
