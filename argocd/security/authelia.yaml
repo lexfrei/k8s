@@ -86,7 +86,7 @@ spec:
                 path: SESSION_SECRET
               cookies:
                 - domain: home.lex.la
-                  authelia_url: https://authelia.lex.la
+                  authelia_url: https://authelia.home.lex.la
                   default_redirection_url: https://grafana.home.lex.la
                 - domain: lex.la
                   authelia_url: https://authelia.lex.la
@@ -119,12 +119,6 @@ spec:
                   resources:
                     - "^/api([/?].*)?$"
                 - domain: "*.home.lex.la"
-                  policy: two_factor
-                - domain: "*.lex.la"
-                  policy: one_factor
-                  resources:
-                    - "^/api([/?].*)?$"
-                - domain: "*.lex.la"
                   policy: two_factor
 
             identity_validation:
@@ -198,6 +192,7 @@ spec:
                     authorization_policy: two_factor
                     claims_policy: full_claims
                     redirect_uris:
+                      - https://jellyfin.home.lex.la/sso/OID/redirect/authelia
                       - https://jellyfin.lex.la/sso/OID/redirect/authelia
                     scopes:
                       - openid
