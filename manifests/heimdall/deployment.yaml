@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: heimdall
-          image: lscr.io/linuxserver/heimdall:latest
+          image: ghcr.io/linuxserver/heimdall:latest
           ports:
             - name: http
               containerPort: 80
