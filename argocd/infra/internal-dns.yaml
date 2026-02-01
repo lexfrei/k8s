@@ -53,6 +53,9 @@ spec:
             - --annotation-prefix=internal-dns/
           logLevel: info
           logFormat: json
+    - path: manifests/internal-dns
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
   syncPolicy:
     automated:
       prune: true
