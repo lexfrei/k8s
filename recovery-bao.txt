@@ -1,0 +1,42 @@
+================================================================================
+                         OpenBao Recovery Information
+                              homelab cluster
+                            2026-02-01 15:02 MSK
+================================================================================
+
+INITIAL ROOT TOKEN
+------------------
+s.jiNqZnz0G3QuiplFg4eazQPV
+
+
+RECOVERY KEYS (threshold: 3 of 5)
+---------------------------------
+Key 1: uRg5t1+E1V5uJ7KjGC0HbG9cfG5XSlGjjght2zDnetlY
+Key 2: TgsWBQKw/yT/Ig4UaU9rfl4tWer2SIuXOhGo3B91nwD1
+Key 3: CQMQowLnA2wTiNXWU/95z/SYlHgcZgNZUUWceHJZ1dbx
+Key 4: yUTaAeMr4W97lnHsBNh+HnffnGFPDlJCSdnXEnKeL5iJ
+Key 5: QOvJoAeI+ObHtQiN34ot2OX0tFyplEgQQ8o6HyvD3qnz
+
+
+SEAL CONFIGURATION
+------------------
+Seal Type:           static
+Storage:             file (/openbao/data)
+Unseal Key Secret:   openbao-seal-key (namespace: security)
+Unseal Key ID:       openbao-homelab-v1
+
+
+ACCESS
+------
+UI:        https://openbao.home.lex.la
+Namespace: security
+Pod:       openbao-0
+
+
+NOTES
+-----
+- Recovery keys are needed for: rekey, seal migration, generating root token
+- Root token should be revoked after creating admin policies
+- Keep this document secure - treat as highly confidential
+
+================================================================================

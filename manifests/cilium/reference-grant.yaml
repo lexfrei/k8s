@@ -53,9 +53,6 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: homepage
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: heimdall
   to:
     - group: ""
       kind: Service
