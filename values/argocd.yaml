@@ -24,6 +24,8 @@ configs:
             # Fetch claims from userinfo endpoint (groups, preferred_username)
             getUserInfo: true
             userNameKey: preferred_username
+            # Explicitly specify claim keys for groups
+            groupsKey: groups
             insecureSkipEmailVerified: true
     application.resourceTrackingMethod: annotation
   rbac:
