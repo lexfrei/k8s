@@ -9,25 +9,28 @@ spec:
   destination:
     namespace: me-site
     server: "https://kubernetes.default.svc"
-  source:
-    chart: me-site
-    repoURL: ghcr.io/lexfrei/charts
-    targetRevision: 0.5.1
-    helm:
-      valuesObject:
-        image:
-          pullPolicy: IfNotPresent
-        onionService:
-          enabled: false
-        httpRoute:
-          enabled: true
-          annotations:
-            external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          parentRefs:
-            - name: cloudflare-tunnel
-              namespace: cloudflare-tunnel-system
-          hostnames:
-            - aleksei.sviridk.in
+  sources:
+    - chart: me-site
+      repoURL: ghcr.io/lexfrei/charts
+      targetRevision: 0.5.1
+      helm:
+        valuesObject:
+          image:
+            pullPolicy: IfNotPresent
+          onionService:
+            enabled: false
+          httpRoute:
+            enabled: true
+            annotations:
+              external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+            parentRefs:
+              - name: cloudflare-tunnel
+                namespace: cloudflare-tunnel-system
+            hostnames:
+              - aleksei.sviridk.in
+    - path: manifests/me-site
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
   project: workloads
   syncPolicy:
     automated:
