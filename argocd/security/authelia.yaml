@@ -52,7 +52,7 @@ spec:
             default_2fa_method: webauthn
 
             log:
-              level: info
+              level: debug
 
             totp:
               disable: true
