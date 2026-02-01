@@ -137,7 +137,7 @@ spec:
                   - client_id: grafana
                     client_name: Grafana
                     client_secret:
-                      value: "$plaintext$a7faa0e83cf7c4354a9429204bdc1114439b48edf016dbf82def055791df6cda"
+                      path: /secrets/authelia-secrets/GRAFANA_CLIENT_SECRET
                     authorization_policy: two_factor
                     redirect_uris:
                       - https://grafana.home.lex.la/login/generic_oauth
@@ -149,10 +149,23 @@ spec:
                   - client_id: argocd
                     client_name: ArgoCD
                     client_secret:
-                      value: "$plaintext$c6d255b2b92e2fec47c1b56dea8ab2bff77a7a7c7f46ef3c99859779c7932afd"
+                      path: /secrets/authelia-secrets/ARGOCD_CLIENT_SECRET
                     authorization_policy: two_factor
                     redirect_uris:
                       - https://argocd.home.lex.la/auth/callback
+                    scopes:
+                      - openid
+                      - profile
+                      - email
+                      - groups
+                  - client_id: openbao
+                    client_name: OpenBao
+                    client_secret:
+                      path: /secrets/authelia-secrets/OPENBAO_CLIENT_SECRET
+                    authorization_policy: two_factor
+                    redirect_uris:
+                      - https://openbao.home.lex.la/ui/vault/auth/oidc/oidc/callback
+                      - http://localhost:8250/oidc/callback
                     scopes:
                       - openid
                       - profile
