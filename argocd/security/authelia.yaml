@@ -158,6 +158,9 @@ spec:
                       - profile
                       - email
                       - groups
+                    # Include groups claim in ID token (not just userinfo)
+                    id_token_signed_response_alg: RS256
+                    userinfo_signed_response_alg: none
                   - client_id: openbao
                     client_name: OpenBao
                     client_secret:

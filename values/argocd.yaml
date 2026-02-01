@@ -16,6 +16,12 @@ configs:
         - profile
         - email
         - groups
+      # Authelia returns groups only via userinfo endpoint by default
+      requestedIDTokenClaims:
+        groups:
+          essential: true
+      # Use preferred_username for human-readable display name
+      userNameClaim: preferred_username
     application.resourceTrackingMethod: annotation
   rbac:
     policy.csv: |
