@@ -46,7 +46,7 @@ data:
             description: Network storage
             widget:
               type: truenas
-              url: https://truenas.home.lex.la
+              url: https://172.16.10.19
               key: "{{HOMEPAGE_VAR_TRUENAS_KEY}}"
               enablePools: true
         - Router:
