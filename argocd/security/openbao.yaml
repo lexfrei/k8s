@@ -1,0 +1,95 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openbao
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: security
+  destination:
+    namespace: security
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://openbao.github.io/openbao-helm"
+      targetRevision: "0.23.5"
+      chart: openbao
+      helm:
+        valuesObject:
+          global:
+            enabled: true
+
+          injector:
+            enabled: false
+
+          server:
+            image:
+              repository: "quay.io/openbao/openbao"
+              tag: "2.4.4"
+
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+
+            standalone:
+              enabled: true
+              config: |
+                ui = true
+
+                listener "tcp" {
+                  tls_disable = 1
+                  address = "[::]:8200"
+                  cluster_address = "[::]:8201"
+                }
+
+                storage "file" {
+                  path = "/openbao/data"
+                }
+
+                seal "static" {
+                  current_key_id = "openbao-homelab-v1"
+                  current_key    = "file:///openbao/seal/unseal-key"
+                }
+
+            dataStorage:
+              enabled: true
+              size: 5Gi
+              storageClass: longhorn
+              accessMode: ReadWriteOnce
+
+            volumes:
+              - name: seal-key
+                secret:
+                  secretName: openbao-seal-key
+
+            volumeMounts:
+              - name: seal-key
+                mountPath: /openbao/seal
+                readOnly: true
+
+            service:
+              enabled: true
+              type: ClusterIP
+              port: 8200
+
+            ha:
+              enabled: false
+
+          ui:
+            enabled: true
+            serviceType: ClusterIP
+
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/openbao
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
