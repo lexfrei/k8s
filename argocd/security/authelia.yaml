@@ -182,6 +182,19 @@ spec:
                       - profile
                       - email
                       - groups
+                  - client_id: jellyfin
+                    client_name: Jellyfin
+                    client_secret:
+                      path: /secrets/authelia-secrets/JELLYFIN_CLIENT_SECRET
+                    authorization_policy: two_factor
+                    claims_policy: full_claims
+                    redirect_uris:
+                      - https://jellyfin.home.lex.la/sso/OID/redirect/authelia
+                    scopes:
+                      - openid
+                      - profile
+                      - email
+                      - groups
 
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
