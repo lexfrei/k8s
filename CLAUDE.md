@@ -65,8 +65,10 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
   - `coredns.yaml` - CoreDNS configuration with custom cluster domain k8s.home.lex.la
   - `cilium.yaml` - Cilium CNI configuration (native routing, kube-proxy replacement, L2 announcements, Gateway API, Hubble enabled)
 
-- **`secrets/`** - Encrypted secrets (likely using SOPS or similar)
-  - Contains CloudFlare credentials, Grafana config
+- **`secrets/`** - Bootstrap secrets (GPG encrypted)
+  - `openbao-seal-key.yaml.asc` - OpenBao auto-unseal key (required before OpenBao starts)
+  - `authelia.yaml.asc` - Authelia OIDC secrets (references OpenBao paths)
+  - All other secrets migrated to OpenBao and managed via External Secrets Operator
 
 ### Core Infrastructure Stack
 
@@ -82,8 +84,11 @@ The cluster runs on K3s with these core components (in deployment order):
 8. **Certificate Management**: cert-manager with automatic Gateway API integration
 9. **External DNS**: external-dns with Gateway API HTTPRoute support
 10. **Monitoring**: Grafana operator, node-exporter, metrics-server
-11. **Workflow Automation**: Argo Workflows for Kubernetes-native workflow orchestration
-12. **Event-Driven Automation**: Argo Events for event-driven workflow triggers
+11. **Secrets Management**: OpenBao (Vault fork) with auto-unseal
+12. **Secrets Sync**: External Secrets Operator (ESO) for OpenBao → K8s sync
+13. **Authentication**: Authelia for SSO/OIDC (integrated with OpenBao)
+14. **Workflow Automation**: Argo Workflows for Kubernetes-native workflow orchestration
+15. **Event-Driven Automation**: Argo Events for event-driven workflow triggers
 
 ### Network Configuration
 
@@ -250,7 +255,33 @@ kubectl get eventbus --namespace argo-events
 
 ### Secrets Management
 
-Secrets in `secrets/` directory are encrypted. Pattern indicates SOPS or similar tool is used.
+Secrets are managed via **OpenBao** (Vault fork) and **External Secrets Operator (ESO)**:
+
+- **OpenBao**: Central secrets store deployed in `security` namespace
+  - UI: https://openbao.home.lex.la
+  - Auto-unseal via static seal with key from `secrets/openbao-seal-key.yaml.asc`
+  - KV v2 secrets engine at `secret/`
+  - Kubernetes auth method for ESO
+
+- **External Secrets Operator**: Syncs secrets from OpenBao to Kubernetes
+  - `ClusterSecretStore` named `openbao` connects to OpenBao
+  - `ExternalSecret` resources in each namespace define what to sync
+  - Secrets refresh every 1 hour
+
+- **Bootstrap secrets** in `secrets/` (GPG encrypted):
+  - `openbao-seal-key.yaml.asc` - Required BEFORE OpenBao starts
+  - `authelia.yaml.asc` - Uses path references to OpenBao secrets
+
+```bash
+# Check ExternalSecrets status
+kubectl get externalsecrets --all-namespaces
+
+# Check ClusterSecretStore
+kubectl get clustersecretstore openbao
+
+# View secret in OpenBao (requires root token or appropriate policy)
+kubectl exec -it openbao-0 -n security -- bao kv get secret/PATH
+```
 
 ### Ansible Node Management
 
@@ -444,6 +475,16 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - **Hubble configuration constraints**:
   - `hubble.peerService.clusterDomain` MUST match cluster domain (k8s.home.lex.la) - Relay DNS resolution fails otherwise
   - Hubble Relay IP pinning: Helm chart doesn't support service annotations, use `kubectl annotate svc hubble-relay --namespace kube-system io.cilium/lb-ipam-ips=IP` (ArgoCD won't overwrite since Helm doesn't set annotations)
+- **OpenBao**: Deployed in `security` namespace with static auto-unseal
+  - Seal key stored in `secrets/openbao-seal-key.yaml.asc` (must exist before OpenBao starts)
+  - Uses `longhorn-remote` StorageClass (dataLocality: disabled) due to worker-02 disk issues
+  - nodeAffinity excludes k8s-worker-02
+- **External Secrets Operator**: Deployed in `external-secrets` namespace
+  - ClusterSecretStore `openbao` authenticates via Kubernetes auth method
+  - All application secrets synced from OpenBao KV v2 (`secret/` path)
+- **Authelia**: OIDC provider in `security` namespace
+  - Configured clients: Grafana, ArgoCD, OpenBao
+  - OIDC secrets stored in OpenBao, referenced via path in authelia config
 
 ## Renovate Configuration
 
