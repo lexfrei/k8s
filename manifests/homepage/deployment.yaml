@@ -24,6 +24,9 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
+          envFrom:
+            - secretRef:
+                name: homepage-secrets
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: "start.lex.la"
