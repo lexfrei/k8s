@@ -30,6 +30,9 @@ spec:
                 secretKeyRef:
                   name: cloudflare-api-token
                   key: api-token
+    - path: manifests/external-dns
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
   syncPolicy:
     automated:
       prune: true
