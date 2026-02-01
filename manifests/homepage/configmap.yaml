@@ -23,7 +23,7 @@ data:
         columns: 2
       Workloads:
         style: row
-        columns: 3
+        columns: 4
 
   services.yaml: |
     - Infrastructure:
@@ -83,6 +83,11 @@ data:
             siteMonitor: https://openbao.home.lex.la
 
     - Workloads:
+        - Jellyfin:
+            icon: jellyfin.svg
+            href: https://jellyfin.home.lex.la
+            description: Media server
+            siteMonitor: https://jellyfin.home.lex.la
         - Audiobookshelf:
             icon: audiobookshelf.svg
             href: https://abs.lex.la
