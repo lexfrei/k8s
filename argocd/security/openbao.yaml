@@ -24,7 +24,7 @@ spec:
 
           server:
             image:
-              repository: "quay.io/openbao/openbao"
+              repository: "openbao/openbao"
               tag: "2.4.4"
 
             resources:
