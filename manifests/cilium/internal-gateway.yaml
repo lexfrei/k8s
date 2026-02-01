@@ -44,3 +44,16 @@ spec:
         certificateRefs:
           - name: start-lex-la-tls
             kind: Secret
+
+    - name: https-lex-la
+      hostname: "*.lex.la"
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: lex-la-tls
+            kind: Secret
