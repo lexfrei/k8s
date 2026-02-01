@@ -13,7 +13,7 @@ spec:
   sources:
     - repoURL: https://jellyfin.github.io/jellyfin-helm
       chart: jellyfin
-      targetRevision: 3.0.0
+      targetRevision: 2.7.0
       helm:
         valuesObject:
           podSecurityContext:
@@ -38,23 +38,19 @@ spec:
           service:
             type: ClusterIP
             port: 8096
-          httpRoute:
-            enabled: true
-            parentRefs:
-              - name: cilium-gateway-internal
-                namespace: kube-system
-                sectionName: https-home-lex-la
-            hostnames:
-              - jellyfin.home.lex.la
           persistence:
             config:
               existingClaim: jellyfin-config
             media:
               type: pvc
               existingClaim: jellyfin-media-nfs
-            cache:
-              enabled: true
-              existingClaim: jellyfin-cache
+          volumes:
+            - name: cache
+              persistentVolumeClaim:
+                claimName: jellyfin-cache
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/jellyfin
