@@ -14,10 +14,10 @@ data:
     layout:
       Infrastructure:
         style: row
-        columns: 3
+        columns: 5
       Monitoring:
         style: row
-        columns: 2
+        columns: 1
       Security:
         style: row
         columns: 2
@@ -37,6 +37,16 @@ data:
             href: https://longhorn.home.lex.la
             description: Distributed block storage
             siteMonitor: https://longhorn.home.lex.la
+        - TrueNAS:
+            icon: truenas.svg
+            href: https://truenas.home.lex.la
+            description: Network storage
+            siteMonitor: https://truenas.home.lex.la
+        - Router:
+            icon: router.svg
+            href: http://172.16.0.1
+            description: Network router
+            siteMonitor: http://172.16.0.1
         - Hubble:
             icon: cilium.svg
             href: https://hubble.home.lex.la
@@ -65,14 +75,19 @@ data:
     - Workloads:
         - Audiobookshelf:
             icon: audiobookshelf.svg
-            href: https://audiobookshelf.home.lex.la
+            href: https://abs.lex.la
             description: Audiobook server
-            siteMonitor: https://audiobookshelf.home.lex.la
+            siteMonitor: https://abs.lex.la
         - Transmission:
             icon: transmission.svg
             href: https://transmission.home.lex.la
             description: BitTorrent client
             siteMonitor: https://transmission.home.lex.la
+        - Minecraft Map:
+            icon: minecraft.svg
+            href: https://map.lex.la
+            description: BlueMap world viewer
+            siteMonitor: https://map.lex.la
 
   widgets.yaml: |
     - kubernetes:
