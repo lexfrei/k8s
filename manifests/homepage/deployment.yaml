@@ -17,16 +17,12 @@ spec:
     spec:
       serviceAccountName: homepage
       automountServiceAccountToken: true
-      dnsPolicy: "None"
       dnsConfig:
-        nameservers:
-          - 10.43.0.10
-        searches:
-          - homepage.svc.k8s.home.lex.la
-          - svc.k8s.home.lex.la
         options:
           - name: ndots
-            value: "1"
+            value: "2"
+        searches:
+          - home.lex.la
       containers:
         - name: homepage
           image: ghcr.io/gethomepage/homepage:v1.9.0
