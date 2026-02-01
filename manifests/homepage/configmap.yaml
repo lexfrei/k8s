@@ -28,7 +28,7 @@ data:
   services.yaml: |
     - Infrastructure:
         - ArgoCD:
-            icon: argocd.svg
+            icon: argo-cd.svg
             href: https://argocd.home.lex.la
             description: GitOps continuous delivery
             siteMonitor: https://argocd.home.lex.la
@@ -83,11 +83,17 @@ data:
             href: https://transmission.home.lex.la
             description: BitTorrent client
             siteMonitor: https://transmission.home.lex.la
+            widget:
+              type: transmission
+              url: http://transmission.transmission-system.svc:9091
         - Minecraft Map:
             icon: minecraft.svg
             href: https://map.lex.la
             description: BlueMap world viewer
-            siteMonitor: https://map.lex.la
+            widget:
+              type: gamedig
+              serverType: minecraft
+              url: udp://172.16.100.253:25565
 
   widgets.yaml: |
     - kubernetes:
