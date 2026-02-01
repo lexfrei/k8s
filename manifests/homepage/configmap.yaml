@@ -31,7 +31,10 @@ data:
             icon: argo-cd.svg
             href: https://argocd.home.lex.la
             description: GitOps continuous delivery
-            siteMonitor: https://argocd.home.lex.la
+            widget:
+              type: argocd
+              url: http://argocd-server.argocd.svc
+              key: "{{HOMEPAGE_VAR_ARGOCD_KEY}}"
         - Longhorn:
             icon: longhorn.svg
             href: https://longhorn.home.lex.la
@@ -41,12 +44,19 @@ data:
             icon: truenas.svg
             href: https://truenas.home.lex.la
             description: Network storage
-            siteMonitor: https://truenas.home.lex.la
+            widget:
+              type: truenas
+              url: https://truenas.home.lex.la
+              key: "{{HOMEPAGE_VAR_TRUENAS_KEY}}"
+              enablePools: true
         - Router:
             icon: router.svg
             href: http://172.16.0.1
             description: Network router
-            siteMonitor: http://172.16.0.1
+            widget:
+              type: unifi
+              url: https://172.16.0.1
+              key: "{{HOMEPAGE_VAR_UNIFI_KEY}}"
         - Hubble:
             icon: cilium.svg
             href: https://hubble.home.lex.la
