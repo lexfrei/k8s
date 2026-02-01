@@ -8,6 +8,8 @@ configs:
     url: https://argocd.home.lex.la
     # Using Dex for OIDC - it can fetch claims from userinfo endpoint
     dex.config: |
+      logger:
+        level: debug
       connectors:
         - type: oidc
           id: authelia
