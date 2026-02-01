@@ -4,7 +4,7 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 
 ## Features
 
-- **Control Plane HA**: kube-vip for control plane high availability with VIP
+- **Control Plane HA**: vipalived (keepalived) for control plane high availability with VIP
 - **Networking**: Cilium CNI with native routing and kube-proxy replacement
 - **Load Balancing**: Cilium L2 Announcements (LB IPAM) for bare metal load balancing
 - **Gateway API**: Cilium Gateway API v1.3.0 for HTTP/HTTPS routing with automatic TLS and HTTP→HTTPS redirect
@@ -12,6 +12,8 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 - **GitOps**: ArgoCD for declarative, Git-based application deployment
 - **Monitoring**: Node exporter and Grafana for monitoring
 - **Observability**: Hubble for network visibility and troubleshooting
+- **Secrets Management**: OpenBao (Vault fork) with External Secrets Operator
+- **Authentication**: Authelia for SSO/OIDC
 - **Applications**: Various workloads including PaperMC, Transmission, etc.
 
 ## Prerequisites
@@ -89,23 +91,22 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL='https://172.1
 helm repo add coredns https://coredns.github.io/helm
 helm repo add cilium https://helm.cilium.io/
 helm repo add argo https://argoproj.github.io/argo-helm
-helm repo add kube-vip https://kube-vip.github.io/helm-charts
 helm repo update
 
 # Install components in order
 helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
 helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
-helm install kube-vip kube-vip/kube-vip --namespace kube-system --values values/kube-vip.yaml
+helm install vipalived oci://ghcr.io/lexfrei/charts/vipalived --namespace kube-system
 helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
 
 # Apply Cilium LB IP pools and L2 announcement policy
 kubectl apply --filename manifests/cilium/
 
-# Wait for kube-vip to be ready and VIP to be assigned
-kubectl wait --namespace kube-system --for=condition=ready pod --selector app.kubernetes.io/name=kube-vip --timeout=60s
+# Wait for vipalived to be ready and VIP to be assigned
+kubectl wait --namespace kube-system --for=condition=ready pod --selector app.kubernetes.io/name=vipalived --timeout=60s
 
 # Verify VIP is assigned (should show 172.16.101.101)
-kubectl get pods --namespace kube-system --selector app.kubernetes.io/name=kube-vip
+kubectl get pods --namespace kube-system --selector app.kubernetes.io/name=vipalived
 
 # Now you can join worker nodes using the VIP address (https://172.16.101.101:6443)
 
@@ -140,7 +141,7 @@ Access via port-forward or HTTPRoute for network observability and troubleshooti
 ## Network Architecture
 
 This cluster uses:
-- **kube-vip** for control plane HA with virtual IP (172.16.101.101) using ARP mode
+- **vipalived** (keepalived) for control plane HA with virtual IP (172.16.101.101) using VRRP
 - **Cilium CNI** for pod networking with native routing (10.42.0.0/16)
 - **Cilium kube-proxy replacement** for service load balancing and NodePort
 - **Cilium L2 Announcements** for LoadBalancer IP allocation with dedicated pools:
