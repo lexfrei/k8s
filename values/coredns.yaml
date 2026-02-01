@@ -31,7 +31,7 @@ servers:
         parameters: 0.0.0.0:9153
       # Forward to router for split-horizon DNS, fallback to Cloudflare
       - name: forward
-        parameters: . 172.16.101.1 1.1.1.1 1.0.0.1
+        parameters: . 172.16.0.1 1.1.1.1 1.0.0.1
         configBlock: |-
           max_concurrent 1000
           health_check 5s
