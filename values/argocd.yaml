@@ -4,7 +4,9 @@ configs:
   params:
     server.insecure: true
   cm:
-    accounts.admin: apiKey, login
+    # Disable local admin login - OIDC only
+    admin.enabled: "false"
+    accounts.admin: apiKey
     url: https://argocd.home.lex.la
     # Using Dex for OIDC - Authelia includes all claims in ID token via claims_policy
     dex.config: |

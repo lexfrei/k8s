@@ -9,7 +9,8 @@ spec:
     log:
       mode: "console"
     auth:
-      disable_login_form: "false"
+      # OIDC only - local login disabled
+      disable_login_form: "true"
     auth.generic_oauth:
       enabled: "true"
       name: "Authelia"
