@@ -83,11 +83,11 @@ data:
             siteMonitor: https://openbao.home.lex.la
 
     - Workloads:
-        - Jellyfin:
-            icon: jellyfin.svg
-            href: https://jellyfin.lex.la
+        - Plex:
+            icon: plex.svg
+            href: https://plex.lex.la
             description: Media server
-            siteMonitor: https://jellyfin.lex.la
+            siteMonitor: https://plex.lex.la
         - Audiobookshelf:
             icon: audiobookshelf.svg
             href: https://abs.lex.la

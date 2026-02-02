@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: plex
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  destination:
+    namespace: plex
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages"
+      targetRevision: "1.4.0"
+      chart: plex-media-server
+      helm:
+        valuesObject:
+          image:
+            tag: "1.42.2.10156-f737b826c"
+
+          pms:
+            storageClassName: longhorn-remote
+            configStorage: 10Gi
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                cpu: 2000m
+                memory: 4Gi
+
+          extraVolumes:
+            - name: media
+              persistentVolumeClaim:
+                claimName: plex-media-nfs
+
+          extraVolumeMounts:
+            - name: media
+              mountPath: /data
+              readOnly: true
+
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/plex
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

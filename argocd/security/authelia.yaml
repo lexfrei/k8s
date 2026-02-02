@@ -88,9 +88,6 @@ spec:
                 - domain: home.lex.la
                   authelia_url: https://authelia.home.lex.la
                   default_redirection_url: https://grafana.home.lex.la
-                - domain: lex.la
-                  authelia_url: https://authelia.lex.la
-                  default_redirection_url: https://jellyfin.lex.la
 
             regulation:
               max_retries: 3
@@ -180,20 +177,6 @@ spec:
                     redirect_uris:
                       - https://openbao.home.lex.la/ui/vault/auth/oidc/oidc/callback
                       - http://localhost:8250/oidc/callback
-                    scopes:
-                      - openid
-                      - profile
-                      - email
-                      - groups
-                  - client_id: jellyfin
-                    client_name: Jellyfin
-                    client_secret:
-                      path: /secrets/authelia-secrets/JELLYFIN_CLIENT_SECRET
-                    authorization_policy: two_factor
-                    claims_policy: full_claims
-                    redirect_uris:
-                      - https://jellyfin.home.lex.la/sso/OID/redirect/authelia
-                      - https://jellyfin.lex.la/sso/OID/redirect/authelia
                     scopes:
                       - openid
                       - profile
