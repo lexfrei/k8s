@@ -43,7 +43,7 @@ spec:
       namespace: minecraft-operator-system
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: jellyfin
+      namespace: plex
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: monitoring
