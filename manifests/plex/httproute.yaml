@@ -13,6 +13,13 @@ spec:
   hostnames:
     - plex.lex.la
   rules:
-    - backendRefs:
+    - filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - X-Forwarded-For
+              - X-Real-IP
+              - X-Envoy-External-Address
+      backendRefs:
         - name: plex-plex-media-server
           port: 32400
