@@ -53,6 +53,12 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: homepage
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: homebridge
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: homeassistant
   to:
     - group: ""
       kind: Service

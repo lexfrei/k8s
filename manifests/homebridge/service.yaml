@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: homebridge
+  namespace: homebridge
+spec:
+  selector:
+    app: homebridge
+  ports:
+    - port: 8581
+      targetPort: http
+      name: http
