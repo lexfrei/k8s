@@ -15,7 +15,7 @@ configs:
           id: authelia
           name: Authelia
           config:
-            issuer: https://authelia.home.lex.la
+            issuer: https://authelia.lex.la
             clientID: argocd
             clientSecret: $dex.authelia.clientSecret
             scopes:
