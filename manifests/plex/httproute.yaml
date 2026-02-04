@@ -7,13 +7,19 @@ metadata:
     internal-dns/target: "172.16.100.250"
 spec:
   parentRefs:
-    - name: cilium-gateway-internal
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: cilium-gateway-internal
       namespace: kube-system
       sectionName: https-lex-la
   hostnames:
     - plex.lex.la
   rules:
-    - filters:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
         - type: RequestHeaderModifier
           requestHeaderModifier:
             remove:
@@ -21,5 +27,8 @@ spec:
               - X-Real-IP
               - X-Envoy-External-Address
       backendRefs:
-        - name: plex-plex-media-server
+        - group: ""
+          kind: Service
+          name: plex-plex-media-server
           port: 32400
+          weight: 1
