@@ -18,9 +18,9 @@ spec:
       client_id: "grafana"
       client_secret: "a7faa0e83cf7c4354a9429204bdc1114439b48edf016dbf82def055791df6cda"
       scopes: "openid profile email groups"
-      auth_url: "https://authelia.home.lex.la/api/oidc/authorization"
-      token_url: "https://authelia.home.lex.la/api/oidc/token"
-      api_url: "https://authelia.home.lex.la/api/oidc/userinfo"
+      auth_url: "https://authelia.lex.la/api/oidc/authorization"
+      token_url: "https://authelia.lex.la/api/oidc/token"
+      api_url: "https://authelia.lex.la/api/oidc/userinfo"
       role_attribute_path: "contains(groups[*], 'admins') && 'Admin' || 'Viewer'"
     server:
       root_url: "https://grafana.home.lex.la"
