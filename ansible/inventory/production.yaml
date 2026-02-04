@@ -25,4 +25,4 @@ all:
       vars:
         # K3s version for upgrades
         # Note: k3s-ansible requires explicit version, cannot use "stable" or "latest"
-        k3s_version: v1.35.0+k3s1
+        k3s_version: v1.35.0+k3s3
