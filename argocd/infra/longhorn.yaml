@@ -22,6 +22,14 @@ spec:
             defaultDataLocality: strict-local
           ingress:
             enabled: false
+          httproute:
+            enabled: true
+            parentRefs:
+              - name: cilium-gateway-internal
+                namespace: kube-system
+                sectionName: https-home-lex-la
+            hostnames:
+              - longhorn.home.lex.la
           preUpgradeChecker:
             jobEnabled: false
           # Minimize the number of replicas to reduce the resource usage.
