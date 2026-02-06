@@ -15,8 +15,8 @@ ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
 # Or encrypt with: ansible-vault encrypt_string 'TOKEN_VALUE' --name 'token'
 token: "K10142c98439253958f48327589a1ea4b32e04f44d619bd47d2ba9593b4acd12d14::server:715647ac6872b2ebe0c3198651b6dcdb"
 
-# API endpoint (first server node)
-api_endpoint: "172.16.101.1"
+# API endpoint (vipalived VIP for HA)
+api_endpoint: "172.16.101.101"
 api_port: 6443
 
 # Custom K3s server arguments

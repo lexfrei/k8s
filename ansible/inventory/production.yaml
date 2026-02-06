@@ -10,17 +10,14 @@ all:
           hosts:
             k8s-cp-01:
               ansible_host: 172.16.101.1
-
-        # K3s agent nodes (workers)
-        agent:
-          hosts:
             k8s-worker-01:
               ansible_host: 172.16.101.2
-              extra_agent_args: >-
-                --node-label=minecraft=true
-                --node-taint=minecraft=true:NoExecute
             k8s-worker-02:
               ansible_host: 172.16.101.3
+
+        # Agent group kept empty (required by collection defaults)
+        agent:
+          hosts: {}
 
       vars:
         # K3s version for upgrades
