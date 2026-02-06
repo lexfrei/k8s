@@ -10,9 +10,9 @@ all:
           hosts:
             k8s-cp-01:
               ansible_host: 172.16.101.1
-            k8s-worker-01:
+            k8s-cp-02:
               ansible_host: 172.16.101.2
-            k8s-worker-02:
+            k8s-cp-03:
               ansible_host: 172.16.101.3
 
         # Agent group kept empty (required by collection defaults)
