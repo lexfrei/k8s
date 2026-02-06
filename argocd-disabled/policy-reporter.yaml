@@ -29,6 +29,19 @@ spec:
               memory: 64Mi
           ui:
             enabled: true
+            httproute:
+              enabled: true
+              parentRefs:
+                - name: cilium-gateway-internal
+                  namespace: kube-system
+                  sectionName: https-home-lex-la
+              hostnames:
+                - policy-reporter.home.lex.la
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: /
             resources:
               limits:
                 cpu: 200m
@@ -38,9 +51,6 @@ spec:
                 memory: 64Mi
       repoURL: https://kyverno.github.io/policy-reporter
       targetRevision: 3.5.0
-    - path: manifests/policy-reporter
-      repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
   syncPolicy:
     automated:
       prune: true

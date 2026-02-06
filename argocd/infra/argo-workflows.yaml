@@ -21,6 +21,19 @@ spec:
           server:
             extraArgs:
               - --auth-mode=server
+            httproute:
+              enabled: true
+              parentRefs:
+                - name: cilium-gateway-internal
+                  namespace: kube-system
+                  sectionName: https-home-lex-la
+              hostnames:
+                - argo-workflows.home.lex.la
+              rules:
+                - matches:
+                    - path:
+                        type: PathPrefix
+                        value: /
           controller:
             workflowDefaults:
               spec:
