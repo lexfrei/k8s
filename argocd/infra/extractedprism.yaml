@@ -13,11 +13,11 @@ spec:
   source:
     chart: extractedprism
     repoURL: ghcr.io/lexfrei/charts
-    targetRevision: 0.1.1
+    targetRevision: 0.1.2
     helm:
       valuesObject:
         image:
-          tag: "0.1.0"
+          tag: "v0.2.0"
         endpoints: "172.16.101.1:6443,172.16.101.2:6443,172.16.101.3:6443"
   syncPolicy:
     automated:
