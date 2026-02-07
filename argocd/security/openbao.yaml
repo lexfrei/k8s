@@ -87,7 +87,7 @@ spec:
                         - key: kubernetes.io/hostname
                           operator: NotIn
                           values:
-                            - k8s-worker-02
+                            - k8s-cp-03
 
           ui:
             enabled: true
