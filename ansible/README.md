@@ -96,7 +96,7 @@ All custom K3s flags are defined in `group_vars/k3s_cluster.yaml`:
 - **Custom domain**: k8s.home.lex.la
 - **CNI**: Cilium (flannel-backend=none)
 - **kube-proxy**: Disabled (Cilium replacement)
-- **TLS SANs**: vipalived VIP (172.16.101.101) + server IP
+- **TLS SANs**: first control plane node IP (172.16.101.1)
 
 ### Run Full Site Playbook
 

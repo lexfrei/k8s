@@ -24,13 +24,13 @@ architecture_overview:
     - "GitOps First: ArgoCD manages all application deployments automatically"
     - "Declarative Configuration: Kubernetes manifests and Helm values define desired state"
     - "ARM64 Optimized: Designed for resource-constrained ARM64 systems"
-    - "Production Ready: High availability control plane with kube-vip VIP"
+    - "Production Ready: High availability control plane with extractedprism per-node LB"
     - "Security Hardened: GPG-signed commits, encrypted secrets, explicit hostname-only Gateway routing"
     - "Self-Healing: ArgoCD automated sync with selfHeal and prune enabled"
     - "Minimal Dependencies: Lean component selection for resource efficiency"
 
   key_characteristics:
-    - "Control Plane HA: kube-vip provides VIP failover for API server"
+    - "Control Plane HA: extractedprism provides per-node TCP load balancing for API server"
     - "Custom Networking: Cilium CNI replaces default Flannel with advanced features"
     - "Modern Ingress: Gateway API v1.3.0 with dual gateway security model"
     - "Automatic TLS: cert-manager + Gateway API integration for certificate lifecycle"
@@ -68,32 +68,26 @@ technical_stack:
       - Custom CoreDNS configuration for cluster DNS
 
   control_plane_ha:
-    tool: "kube-vip"
-    version: "latest"
-    chart: "kube-vip/kube-vip"
-    vip_address: "172.16.101.101"
-    mode: "ARP"
+    tool: "extractedprism"
+    version: "v0.2.0"
+    chart: "ghcr.io/lexfrei/charts/extractedprism"
+    mode: "per-node TCP load balancer"
 
     configuration:
-      interface: "eth0"
-      arp_enabled: true
-      load_balancer: false
-      leader_election: false
-      control_plane: true
-      service_lb: false
+      bind_address: "127.0.0.1"
+      bind_port: 7445
+      health_port: 7446
+      static_endpoints: "172.16.101.1:6443,172.16.101.2:6443,172.16.101.3:6443"
+      enable_discovery: true
 
     reasoning: |
-      kube-vip chosen for control plane HA:
-      - Virtual IP Failover: Single stable IP (172.16.101.101) for API server access
-      - ARP Mode: Layer 2 announcement for bare metal environments without BGP
-      - Simple Architecture: No external load balancer required
-      - Worker Node Join: Workers use stable VIP instead of individual master IPs
-      - Production Proven: Battle-tested for bare metal Kubernetes HA
-
-      Critical deployment requirement:
-      - MUST be deployed before worker nodes join cluster
-      - Workers cannot join without stable VIP for API access
-      - Cilium k8sServiceHost must reference VIP (cannot use kubernetes.default.svc)
+      extractedprism chosen for control plane HA:
+      - Per-Node LB: Each node runs its own TCP load balancer to all API servers
+      - No SPOF: Unlike VIP, no single point of failure for API access
+      - macb Resilient: Independent path per node survives silent NIC death
+      - No CNI Dependency: Static bootstrap endpoints work before Cilium starts
+      - Dynamic Discovery: Kubernetes EndpointSlice discovery for runtime updates
+      - Cilium k8sServiceHost points to 127.0.0.1:7445 (cannot use kubernetes.default.svc)
 
   networking:
     cni: "Cilium"
@@ -114,9 +108,9 @@ technical_stack:
       mode: "kubernetes"
 
     api_server:
-      host: "172.16.101.101"
-      port: "6443"
-      reasoning: "Must use kube-vip VIP because kube-proxy is replaced by Cilium"
+      host: "127.0.0.1"
+      port: "7445"
+      reasoning: "Uses extractedprism local LB because kube-proxy is replaced by Cilium"
 
     reasoning: |
       Cilium CNI chosen for:
@@ -380,7 +374,7 @@ technical_stack:
         - Configuration Control: K3s default CoreDNS lacks customization
         - Custom Zones: Support for custom cluster domain (k8s.home.lex.la)
         - Performance Tuning: Custom cache TTL and forwarding
-        - Integration: Works with kube-vip and Cilium networking
+        - Integration: Works with Cilium networking and extractedprism
 
     external_dns:
       solution: "external-dns"
@@ -486,7 +480,7 @@ technical_stack:
 
       - name: "infra"
         purpose: "Infrastructure components"
-        applications: ["argocd", "cilium", "kube-vip", "coredns", "longhorn", "cert-manager", "external-dns", "gateway-api-crds", "csi-driver-nfs", "tor-controller"]
+        applications: ["argocd", "cilium", "extractedprism", "coredns", "longhorn", "cert-manager", "external-dns", "gateway-api-crds", "csi-driver-nfs", "tor-controller"]
 
       - name: "monitoring"
         purpose: "Monitoring and observability"
@@ -507,7 +501,7 @@ technical_stack:
     workflow:
       bootstrap: |
         1. Install K3s on master nodes with control plane HA
-        2. Install core components via Helm: CoreDNS, Cilium, kube-vip, ArgoCD
+        2. Install core components via Helm: CoreDNS, Cilium, ArgoCD
         3. Apply Cilium manifests: IP pools, L2 announcements, Gateways
         4. Deploy meta application: kubectl apply -f argocd/meta/meta.yaml
         5. ArgoCD automatically deploys all other applications from Git
@@ -658,7 +652,6 @@ directory_structure:
       - "argocd.yaml - ArgoCD configuration"
       - "cilium.yaml - Cilium CNI configuration"
       - "coredns.yaml - CoreDNS configuration"
-      - "kube-vip.yaml - kube-vip HA configuration"
 
   secrets:
     purpose: "Encrypted secrets"
@@ -726,7 +719,6 @@ deployment_procedures:
           sudo mkdir -p /etc/rancher/k3s
           cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml
           tls-san:
-            - 172.16.101.101
             - <MASTER_NODE_IP>
           EOF
 
@@ -734,7 +726,7 @@ deployment_procedures:
             INSTALL_K3S_EXEC="--disable traefik,local-storage,servicelb,metrics-server,coredns,kube-proxy \
             --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none --cluster-init" sh -
 
-          cat /etc/rancher/k3s/k3s.yaml  # Copy to ~/.kube/config, update server to 172.16.101.101
+          cat /etc/rancher/k3s/k3s.yaml  # Copy to ~/.kube/config, update server to first master IP
           cat /var/lib/rancher/k3s/server/node-token  # Save for other nodes
 
       step_2_k3s_additional_masters:
@@ -742,13 +734,12 @@ deployment_procedures:
           sudo mkdir -p /etc/rancher/k3s
           cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml
           tls-san:
-            - 172.16.101.101
             - <THIS_MASTER_IP>
           EOF
 
           curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest \
             K3S_TOKEN=<TOKEN_FROM_FIRST_MASTER> \
-            INSTALL_K3S_EXEC="server --server https://172.16.101.101:6443 \
+            INSTALL_K3S_EXEC="server --server https://<FIRST_MASTER_IP>:6443 \
             --disable traefik,local-storage,servicelb,metrics-server,kube-proxy \
             --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none" sh -
 
@@ -757,24 +748,20 @@ deployment_procedures:
           helm repo add coredns https://coredns.github.io/helm
           helm repo add cilium https://helm.cilium.io/
           helm repo add argo https://argoproj.github.io/argo-helm
-          helm repo add kube-vip https://kube-vip.github.io/helm-charts
           helm repo update
 
           helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
           helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
-          helm install kube-vip kube-vip/kube-vip --namespace kube-system --values values/kube-vip.yaml
           helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
 
       step_4_cilium_config:
         commands: |
           kubectl apply --filename manifests/cilium/
-          kubectl wait --namespace kube-system --for=condition=ready pod \
-            --selector app.kubernetes.io/name=kube-vip --timeout=60s
 
       step_5_workers:
         commands: |
           curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest \
-            K3S_URL='https://172.16.101.101:6443' \
+            K3S_URL='https://<FIRST_MASTER_IP>:6443' \
             K3S_TOKEN=<TOKEN_FROM_MASTER> \
             INSTALL_K3S_EXEC="--disable kube-proxy" sh -
 
@@ -934,26 +921,22 @@ decisions:
       - Users must implement external backups for important data
 
   - id: ADR-007
-    date: 2025-10-05
-    status: accepted
-    decision: "kube-vip MUST be deployed before worker nodes join cluster"
+    date: 2026-02-08
+    status: superseded
+    decision: "extractedprism replaces kube-vip/vipalived for control plane HA"
     reasoning: |
-      Cilium replaces kube-proxy, so kubernetes.default.svc doesn't work for API access.
-      Worker nodes need stable VIP (172.16.101.101) to join cluster. kube-vip must
-      provide this VIP before workers attempt to join.
+      Per-node TCP load balancer (extractedprism) replaces VIP-based HA.
+      Each node independently load-balances API requests across all control plane endpoints.
+      Eliminates single point of failure (VIP) and survives macb silent NIC death.
     alternatives:
-      - "Direct master IP: Rejected - loses HA benefit, workers tied to specific master"
-      - "External load balancer: Rejected - not available in bare metal home environment"
+      - "kube-vip/vipalived VIP: Superseded - single VIP is SPOF, vulnerable to NIC death"
+      - "External load balancer: Not available in bare metal home environment"
     impact: |
-      Deployment sequence:
-      - Install K3s on master nodes
-      - Install CoreDNS, Cilium, kube-vip via Helm
-      - Wait for kube-vip VIP to be assigned (kubectl wait)
-      - THEN join worker nodes using VIP URL
-
-      If violated:
-      - Worker nodes fail to join (connection refused)
-      - Must manually reconfigure worker nodes after kube-vip deployment
+      - No VIP needed for runtime API access
+      - Cilium k8sServiceHost: 127.0.0.1:7445 (extractedprism)
+      - kubelet: 127.0.0.1:6443 (direct to local API server)
+      - kubectl admin: points to first control plane node IP
+      - Worker join: uses first control plane node IP
 
 known_limitations:
   cloudflare_proxied_annotation:
@@ -980,10 +963,10 @@ known_limitations:
     status: "Components disabled in argocd-disabled/"
     impact: "Minimal observability - only metrics-server active"
 
-  kube_vip_deployment_order:
-    issue: "Worker nodes cannot join before kube-vip deploys VIP"
-    affected_components: ["kube-vip", "K3s worker join"]
-    workaround: "Always deploy kube-vip and wait for VIP before joining workers"
+  extractedprism_bootstrap:
+    issue: "extractedprism needs static endpoints for initial boot before Kubernetes discovery works"
+    affected_components: ["extractedprism", "Cilium"]
+    workaround: "Static endpoints configured in ArgoCD Application values, dynamic discovery supplements after boot"
     tracking: "See ADR-007"
 
 security_practices:
