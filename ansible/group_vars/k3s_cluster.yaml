@@ -15,8 +15,8 @@ ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
 # Or encrypt with: ansible-vault encrypt_string 'TOKEN_VALUE' --name 'token'
 token: "K10142c98439253958f48327589a1ea4b32e04f44d619bd47d2ba9593b4acd12d14::server:715647ac6872b2ebe0c3198651b6dcdb"
 
-# API endpoint (vipalived VIP for HA)
-api_endpoint: "172.16.101.101"
+# API endpoint (first control plane node, used for k3s join)
+api_endpoint: "172.16.101.1"
 api_port: 6443
 
 # Custom K3s server arguments
@@ -31,7 +31,6 @@ extra_server_args: >-
   --disable-network-policy
   --disable-kube-proxy
   --flannel-backend=none
-  --tls-san=172.16.101.101
   --tls-san=172.16.101.1
   --etcd-arg=quota-backend-bytes=536870912
   --etcd-arg=auto-compaction-mode=periodic
@@ -52,7 +51,7 @@ k3s_server_location: "/var/lib/rancher/k3s"
 systemd_dir: "/etc/systemd/system"
 # Cluster configuration
 # Note: --cluster-init is automatically added for HA when server count > 1
-# Note: vipalived manages VIP 172.16.101.101 outside of k3s-ansible
+# Note: extractedprism handles per-node API LB (127.0.0.1:7445), VIP no longer used at runtime
 
 # Important: Cilium CNI is deployed via ArgoCD, not during K3s installation
 # flannel-backend=none disables default Flannel CNI
