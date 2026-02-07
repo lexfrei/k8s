@@ -23,24 +23,9 @@ spec:
             trackInterface:
               - eth0
         startupProbe:
-          enabled: true
-          exec:
-            command:
-              - sh
-              - -c
-              - ip addr show eth0 | grep -q "172.16.101.101"
-          periodSeconds: 5
-          failureThreshold: 12
+          enabled: false
         livenessProbe:
-          enabled: true
-          exec:
-            command:
-              - sh
-              - -c
-              - ip addr show eth0 | grep -q "172.16.101.101"
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          failureThreshold: 3
+          enabled: false
   syncPolicy:
     automated:
       prune: true
