@@ -31,6 +31,59 @@
     - watchdog
     - config
 
+- name: Disable wd_keepalive (must not feed hw watchdog when daemon crashes)
+  ansible.builtin.copy:
+    dest: /etc/default/watchdog
+    content: |
+      # Ansible managed
+      # CRITICAL: wd_keepalive must be disabled
+      # When watchdog daemon crashes, hw watchdog must trigger reboot
+      # wd_keepalive prevents this by continuing heartbeats
+      run_wd_keepalive=0
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart watchdog
+  tags:
+    - watchdog
+
+- name: Stop and disable wd_keepalive service
+  ansible.builtin.systemd:
+    name: wd_keepalive
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  tags:
+    - watchdog
+
+- name: Create watchdog.service override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/watchdog.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags:
+    - watchdog
+
+- name: Configure watchdog service restart policy
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/watchdog.service.d/restart.conf
+    content: |
+      # Ansible managed
+      # Ensure watchdog daemon restarts on failure
+      [Service]
+      Restart=on-failure
+      RestartSec=5
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - reload systemd
+    - restart watchdog
+  tags:
+    - watchdog
+
 - name: Enable watchdog service
   ansible.builtin.systemd:
     name: watchdog
