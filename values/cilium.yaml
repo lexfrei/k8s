@@ -1,6 +1,8 @@
 # Kubernetes API Server configuration
-k8sServiceHost: "172.16.101.101"
-k8sServicePort: "6443"
+# Uses extractedprism local LB instead of vipalived VIP for resilience
+# against macb silent network death (LP #2133877)
+k8sServiceHost: "127.0.0.1"
+k8sServicePort: "7445"
 
 # Enable kube-proxy replacement
 kubeProxyReplacement: "true"

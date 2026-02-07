@@ -76,7 +76,7 @@ The cluster runs on K3s with these core components (in deployment order):
 
 1. **DNS**: CoreDNS with custom cluster domain k8s.home.lex.la
 2. **Networking**: Cilium CNI with native routing on 10.42.0.0/16
-3. **Control Plane HA**: vipalived DaemonSet for control plane high availability via VRRP/keepalived (VIP: 172.16.101.101)
+3. **Control Plane HA**: vipalived DaemonSet for VIP (172.16.101.101) + extractedprism per-node TCP LB (127.0.0.1:7445)
 4. **GitOps**: ArgoCD (self-managed via the meta application)
 5. **Storage**: Longhorn for distributed block storage
 6. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
@@ -95,8 +95,13 @@ The cluster runs on K3s with these core components (in deployment order):
 - **Control Plane VIP**: 172.16.101.101 (vipalived DaemonSet using keepalived/VRRP for control plane HA)
   - vipalived runs as DaemonSet on control-plane nodes with hostNetwork
   - Uses VRRP protocol (keepalived) for automatic failover
-  - Cilium requires explicit k8sServiceHost configuration (cannot use kubernetes.default.svc due to kube-proxy replacement)
-  - All nodes and worker join operations use this VIP for API access
+  - VIP used for: k3s cluster join (`--server` flag), kubectl admin access, kubeconfig
+  - VIP NOT used by runtime components (Cilium uses extractedprism instead)
+- **extractedprism**: Per-node TCP load balancer on 127.0.0.1:7445 for API server HA
+  - DaemonSet with hostNetwork, static bootstrap endpoints + dynamic EndpointSlice discovery
+  - Cilium k8sServiceHost points to extractedprism (127.0.0.1:7445) instead of VIP
+  - Resilient to macb silent NIC death — each node has independent API server path
+  - No CNI dependency at boot (hostNetwork + static endpoints)
 - **Pod network**: 10.42.0.0/16 (Cilium tunnel mode with VXLAN)
 - **Cilium kube-proxy replacement** for service load balancing and NodePort
 - **Cilium L2 Announcements** for LoadBalancer IP allocation:
@@ -451,7 +456,7 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
   - MUST be deployed before worker nodes join (they need VIP 172.16.101.101 for API access)
   - Uses VRRP for automatic failover between control plane nodes
   - Runs with hostNetwork and requires NET_ADMIN/NET_RAW/NET_BROADCAST capabilities
-- Cilium k8sServiceHost MUST point to vipalived VIP 172.16.101.101 (cannot be empty due to kube-proxy replacement)
+- Cilium k8sServiceHost points to extractedprism 127.0.0.1:7445 (cannot be empty due to kube-proxy replacement, cannot use kubernetes.default.svc)
 - ArgoCD server.insecure MUST be true when behind Gateway with TLS termination
 - ArgoCD HTTPRoute is managed via Helm chart values (server.httproute section), not manual manifests
 - **ArgoCD dual-access architecture**:
