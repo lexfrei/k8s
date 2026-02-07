@@ -4,7 +4,7 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 
 ## Features
 
-- **Control Plane HA**: vipalived (keepalived) for control plane high availability with VIP
+- **Control Plane HA**: extractedprism per-node TCP load balancer for API server access
 - **Networking**: Cilium CNI with native routing and kube-proxy replacement
 - **Load Balancing**: Cilium L2 Announcements (LB IPAM) for bare metal load balancing
 - **Gateway API**: Cilium Gateway API v1.3.0 for HTTP/HTTPS routing with automatic TLS and HTTP→HTTPS redirect
@@ -50,14 +50,13 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 sudo mkdir -p /etc/rancher/k3s
 cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml
 tls-san:
-  - 172.16.101.101
   - 172.16.113.46
 EOF
 
 # Install K3s
 curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest INSTALL_K3S_EXEC="--disable traefik,local-storage,servicelb,metrics-server,coredns,kube-proxy --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none --cluster-init" sh -
 
-# Copy content to ~/.kube/config on your management machine (update server address to kube-vip VIP: 172.16.101.101)
+# Copy content to ~/.kube/config on your management machine (update server address to first master node IP)
 cat /etc/rancher/k3s/k3s.yaml
 
 # Copy token for other nodes
@@ -71,17 +70,16 @@ cat /var/lib/rancher/k3s/server/node-token
 sudo mkdir -p /etc/rancher/k3s
 cat <<EOF | sudo tee /etc/rancher/k3s/config.yaml
 tls-san:
-  - 172.16.101.101
   - 172.16.113.46
 EOF
 
-curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_TOKEN=TOKEN-FROM-MASTER INSTALL_K3S_EXEC="server --server https://172.16.101.101:6443 --disable traefik,local-storage,servicelb,metrics-server,kube-proxy --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_TOKEN=TOKEN-FROM-MASTER INSTALL_K3S_EXEC="server --server https://FIRST-MASTER-IP:6443 --disable traefik,local-storage,servicelb,metrics-server,kube-proxy --cluster-domain k8s.home.example.com --disable-network-policy --flannel-backend=none" sh -
 ```
 
 #### On Worker Nodes
 
 ```shell
-curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL='https://172.16.101.101:6443' K3S_TOKEN=TOKEN-FROM-MASTER INSTALL_K3S_EXEC="--disable kube-proxy" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=latest K3S_URL='https://FIRST-MASTER-IP:6443' K3S_TOKEN=TOKEN-FROM-MASTER INSTALL_K3S_EXEC="--disable kube-proxy" sh -
 ```
 
 ### Deploy Core Components
@@ -96,21 +94,13 @@ helm repo update
 # Install components in order
 helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
 helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
-helm install vipalived oci://ghcr.io/lexfrei/charts/vipalived --namespace kube-system
 helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
 
 # Apply Cilium LB IP pools and L2 announcement policy
 kubectl apply --filename manifests/cilium/
 
-# Wait for vipalived to be ready and VIP to be assigned
-kubectl wait --namespace kube-system --for=condition=ready pod --selector app.kubernetes.io/name=vipalived --timeout=60s
-
-# Verify VIP is assigned (should show 172.16.101.101)
-kubectl get pods --namespace kube-system --selector app.kubernetes.io/name=vipalived
-
-# Now you can join worker nodes using the VIP address (https://172.16.101.101:6443)
-
 # Deploy meta application (deploys all other applications via GitOps)
+# This will deploy extractedprism (per-node API LB) and all other apps
 kubectl apply --filename argocd/meta/meta.yaml
 ```
 
@@ -141,7 +131,7 @@ Access via port-forward or HTTPRoute for network observability and troubleshooti
 ## Network Architecture
 
 This cluster uses:
-- **vipalived** (keepalived) for control plane HA with virtual IP (172.16.101.101) using VRRP
+- **extractedprism** per-node TCP load balancer for API server HA (127.0.0.1:7445 → all control plane nodes)
 - **Cilium CNI** for pod networking with native routing (10.42.0.0/16)
 - **Cilium kube-proxy replacement** for service load balancing and NodePort
 - **Cilium L2 Announcements** for LoadBalancer IP allocation with dedicated pools:

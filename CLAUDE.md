@@ -24,7 +24,7 @@ kubectl config use-context homelab
 ```
 
 - Context name: `homelab`
-- API server: https://172.16.101.101:6443 (VIP)
+- API server: https://172.16.101.1:6443 (k8s-cp-01)
 - Credentials: admin via client certificate
 
 **Never run kubectl commands without specifying context** — this prevents accidental operations on wrong clusters.
@@ -76,7 +76,7 @@ The cluster runs on K3s with these core components (in deployment order):
 
 1. **DNS**: CoreDNS with custom cluster domain k8s.home.lex.la
 2. **Networking**: Cilium CNI with native routing on 10.42.0.0/16
-3. **Control Plane HA**: vipalived DaemonSet for VIP (172.16.101.101) + extractedprism per-node TCP LB (127.0.0.1:7445)
+3. **Control Plane HA**: extractedprism per-node TCP LB (127.0.0.1:7445 → all control plane endpoints)
 4. **GitOps**: ArgoCD (self-managed via the meta application)
 5. **Storage**: Longhorn for distributed block storage
 6. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
@@ -92,11 +92,6 @@ The cluster runs on K3s with these core components (in deployment order):
 
 ### Network Configuration
 
-- **Control Plane VIP**: 172.16.101.101 (vipalived DaemonSet using keepalived/VRRP for control plane HA)
-  - vipalived runs as DaemonSet on control-plane nodes with hostNetwork
-  - Uses VRRP protocol (keepalived) for automatic failover
-  - VIP used for: k3s cluster join (`--server` flag), kubectl admin access, kubeconfig
-  - VIP NOT used by runtime components (Cilium uses extractedprism instead)
 - **extractedprism**: Per-node TCP load balancer on 127.0.0.1:7445 for API server HA
   - DaemonSet with hostNetwork, static bootstrap endpoints + dynamic EndpointSlice discovery
   - Cilium k8sServiceHost points to extractedprism (127.0.0.1:7445) instead of VIP
@@ -150,17 +145,14 @@ helm repo update
 # Install core components in order
 helm install coredns coredns/coredns --namespace kube-system --values values/coredns.yaml
 helm install cilium cilium/cilium --namespace kube-system --values values/cilium.yaml
-helm install vipalived oci://ghcr.io/lexfrei/charts/vipalived --version 0.3.0 --namespace kube-system
 helm install argocd argo/argo-cd --namespace argocd --values values/argocd.yaml --create-namespace
 
 # Apply Cilium LB IP pools, L2 announcement policy, and Gateway
 kubectl apply --filename manifests/cilium/
 
 # Deploy meta application (deploys all other applications via GitOps)
+# This will deploy extractedprism (per-node API LB) and all other apps
 kubectl apply --filename argocd/meta/meta.yaml
-
-# Note: vipalived DaemonSet manages control plane VIP (172.16.101.101) via VRRP/keepalived
-# Worker nodes can join using VIP: https://172.16.101.101:6443
 ```
 
 ### Working with ArgoCD Applications
@@ -452,11 +444,10 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - **SECURITY**: Internal Gateway uses wildcard (*.home.lex.la) since it's not exposed to internet
 - **SECURITY**: Internal Gateway (172.16.100.250) MUST NOT be port-forwarded - local network access only
 - **Cluster domain**: k8s.home.lex.la is configured in both K3s and CoreDNS, must be consistent across all components
-- **vipalived**: DaemonSet running keepalived on control-plane nodes for VIP management
-  - MUST be deployed before worker nodes join (they need VIP 172.16.101.101 for API access)
-  - Uses VRRP for automatic failover between control plane nodes
-  - Runs with hostNetwork and requires NET_ADMIN/NET_RAW/NET_BROADCAST capabilities
-- Cilium k8sServiceHost points to extractedprism 127.0.0.1:7445 (cannot be empty due to kube-proxy replacement, cannot use kubernetes.default.svc)
+- **extractedprism**: Per-node TCP LB DaemonSet (127.0.0.1:7445 → all control plane endpoints)
+  - Cilium k8sServiceHost points to extractedprism (cannot be empty due to kube-proxy replacement)
+  - Static bootstrap endpoints + dynamic Kubernetes EndpointSlice discovery
+  - No CNI dependency at boot (hostNetwork + static endpoints)
 - ArgoCD server.insecure MUST be true when behind Gateway with TLS termination
 - ArgoCD HTTPRoute is managed via Helm chart values (server.httproute section), not manual manifests
 - **ArgoCD dual-access architecture**:
