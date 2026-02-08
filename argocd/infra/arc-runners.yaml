@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runners
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: arc-runners
+    server: "https://kubernetes.default.svc"
+  sources:
+    - chart: gha-runner-scale-set
+      repoURL: ghcr.io/actions/actions-runner-controller-charts
+      targetRevision: 0.13.1
+      helm:
+        valuesObject:
+          githubConfigUrl: "https://github.com/lexfrei/k8s"
+          githubConfigSecret: arc-runner-pat
+          minRunners: 0
+          maxRunners: 3
+          runnerScaleSetName: "homelab"
+          template:
+            spec:
+              serviceAccountName: arc-runner
+              containers:
+                - name: runner
+                  image: ghcr.io/actions/actions-runner:latest
+                  resources:
+                    requests:
+                      cpu: 200m
+                      memory: 256Mi
+                    limits:
+                      cpu: "1"
+                      memory: 512Mi
+    - path: manifests/arc-runners
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
