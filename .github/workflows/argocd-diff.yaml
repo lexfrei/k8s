@@ -109,6 +109,7 @@ jobs:
 
             DIFF_RESULT=$(argocd app diff "argocd/${app}" \
               --core \
+              --port-forward-namespace argocd \
               --hard-refresh 2>&1) || EXIT_CODE=$?
             EXIT_CODE=${EXIT_CODE:-0}
 
