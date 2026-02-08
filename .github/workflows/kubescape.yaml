@@ -13,11 +13,11 @@ jobs:
 
       - name: Install kubescape
         run: |
-          gh release download --repo kubescape/kubescape --pattern "kubescape_*_linux_arm64" --output kubescape
+          LATEST=$(curl --silent "https://api.github.com/repos/kubescape/kubescape/releases/latest" | grep '"tag_name"' | sed 's/.*"v\(.*\)".*/\1/')
+          curl --silent --location --fail --output kubescape \
+            "https://github.com/kubescape/kubescape/releases/download/v${LATEST}/kubescape_${LATEST}_linux_arm64"
           chmod +x kubescape
           sudo mv kubescape /usr/local/bin/
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Run kubescape scan
         run: |
