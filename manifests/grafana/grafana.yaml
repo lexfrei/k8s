@@ -4,6 +4,7 @@ metadata:
   name: grafana
   labels:
     dashboards: "grafana"
+    app.kubernetes.io/managed-by: "argocd"
 spec:
   config:
     log:
