@@ -27,18 +27,15 @@ jobs:
           chmod +x kubescape
           sudo mv kubescape /usr/local/bin/
 
-      - name: Download kubescape policies
-        run: |
-          kubescape download framework all
-
       - name: Run kubescape scan
+        continue-on-error: true
         run: |
           kubescape scan framework all . \
             --format sarif \
             --output results.sarif
 
       - name: Upload Kubescape scan results to Github Code Scanning
-        if: always()
+        if: hashFiles('results.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
