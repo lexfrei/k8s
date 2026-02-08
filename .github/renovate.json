@@ -39,10 +39,18 @@
             "\\.yaml$"
         ]
     },
-    "packageRules": [
+    "customManagers": [
         {
-            "matchPackageNames": ["https://github.com/k3s-io/k3s-ansible.git"],
-            "enabled": false
+            "customType": "regex",
+            "fileMatch": [
+                "ansible/requirements\\.yaml$"
+            ],
+            "matchStrings": [
+                "name:\\s*(?<depName>https://github\\.com/[^\\s]+?\\.git)\\s*type:\\s*git\\s*version:\\s*(?<currentDigest>[a-f0-9]+)"
+            ],
+            "datasourceTemplate": "git-refs",
+            "versioningTemplate": "git",
+            "currentValueTemplate": "main"
         }
     ],
     "automerge": true,
