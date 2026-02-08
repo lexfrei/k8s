@@ -15,31 +15,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get ArgoCD token
-        id: token
-        run: |
-          if ! kubectl get secret argocd-ci-token --namespace arc-runners > /dev/null 2>&1; then
-            echo "ArgoCD CI token secret not found. Manual setup required."
-            echo "available=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
-
-          ARGOCD_AUTH_TOKEN=$(kubectl get secret argocd-ci-token \
-            --namespace arc-runners \
-            --output jsonpath='{.data.token}' | base64 --decode)
-
-          if [ -z "${ARGOCD_AUTH_TOKEN}" ]; then
-            echo "ArgoCD CI token is empty. Manual setup required."
-            echo "available=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
-
-          echo "::add-mask::${ARGOCD_AUTH_TOKEN}"
-          echo "ARGOCD_AUTH_TOKEN=${ARGOCD_AUTH_TOKEN}" >> "${GITHUB_ENV}"
-          echo "available=true" >> "${GITHUB_OUTPUT}"
-
       - name: Install ArgoCD CLI
-        if: steps.token.outputs.available == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -115,24 +91,18 @@ jobs:
           echo "Affected apps: ${AFFECTED_APPS}"
 
       - name: Run ArgoCD diff
-        if: steps.token.outputs.available == 'true' && steps.affected.outputs.apps != ''
+        if: steps.affected.outputs.apps != ''
         id: diff
         run: |
-          argocd login api.argocd.home.lex.la:443 \
-            --auth-token "${ARGOCD_AUTH_TOKEN}" \
-            --plaintext
-
-          PR_SHA="${{ github.event.pull_request.head.sha }}"
           DIFF_OUTPUT=""
           HAS_DIFF="false"
 
           for app in ${{ steps.affected.outputs.apps }}; do
             echo "--- Diffing app: ${app} ---"
-            DIFF_RESULT=""
 
-            # Try diff with revision (works for git-sourced apps)
+            # Use --core to bypass ArgoCD API server (direct Kubernetes API access)
             if DIFF_RESULT=$(argocd app diff "argocd/${app}" \
-              --revision "${PR_SHA}" \
+              --core \
               --hard-refresh 2>&1); then
               DIFF_OUTPUT="${DIFF_OUTPUT}
 ### ${app}
@@ -149,29 +119,10 @@ ${DIFF_RESULT}
 \`\`\`
 "
               else
-                # Error with --revision, try without
-                if DIFF_RESULT=$(argocd app diff "argocd/${app}" 2>&1); then
-                  DIFF_OUTPUT="${DIFF_OUTPUT}
+                DIFF_OUTPUT="${DIFF_OUTPUT}
 ### ${app}
-No changes detected (current state).
+> Could not generate diff (exit code ${EXIT_CODE}): ${DIFF_RESULT}
 "
-                else
-                  FALLBACK_CODE=$?
-                  if [ ${FALLBACK_CODE} -eq 1 ]; then
-                    HAS_DIFF="true"
-                    DIFF_OUTPUT="${DIFF_OUTPUT}
-### ${app}
-\`\`\`diff
-${DIFF_RESULT}
-\`\`\`
-"
-                  else
-                    DIFF_OUTPUT="${DIFF_OUTPUT}
-### ${app}
-> Could not generate diff: ${DIFF_RESULT}
-"
-                  fi
-                fi
               fi
             fi
           done
@@ -192,14 +143,12 @@ ${DIFF_RESULT}
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ ! -f /tmp/diff-comment.md ]; then
-            # Token was not available, post list of affected apps only
             {
               echo "## ArgoCD Diff"
               echo ""
               echo "Affected applications: \`${{ steps.affected.outputs.apps }}\`"
               echo ""
-              echo "> ArgoCD CI token not configured yet. Diff output unavailable."
-              echo "> See PR description for manual setup steps."
+              echo "> No diff output available."
             } > /tmp/diff-comment.md
           fi
 
