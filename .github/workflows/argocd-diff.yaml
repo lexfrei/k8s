@@ -104,8 +104,11 @@ jobs:
 
           HAS_DIFF="false"
 
-          # Set default namespace to argocd so --core finds argocd-cm configmap
-          kubectl config set-context --current --namespace=argocd
+          # Create kubeconfig with argocd namespace so --core finds argocd-cm
+          SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          SA_CA=$(base64 --wrap=0 /var/run/secrets/kubernetes.io/serviceaccount/ca.crt)
+          printf '{"apiVersion":"v1","kind":"Config","clusters":[{"cluster":{"certificate-authority-data":"%s","server":"https://kubernetes.default.svc"},"name":"c"}],"contexts":[{"context":{"cluster":"c","namespace":"argocd","user":"u"},"name":"ctx"}],"current-context":"ctx","users":[{"name":"u","user":{"token":"%s"}}]}' "${SA_CA}" "${SA_TOKEN}" > /tmp/kubeconfig
+          export KUBECONFIG=/tmp/kubeconfig
 
           for app in ${{ steps.affected.outputs.apps }}; do
             echo "--- Diffing app: ${app} ---"
