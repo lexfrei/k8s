@@ -94,8 +94,6 @@ jobs:
       - name: Run ArgoCD diff
         if: steps.affected.outputs.apps != ''
         id: diff
-        env:
-          ARGOCD_NAMESPACE: argocd
         run: |
           {
             echo "## ArgoCD Diff"
@@ -106,12 +104,14 @@ jobs:
 
           HAS_DIFF="false"
 
+          # Set default namespace to argocd so --core finds argocd-cm configmap
+          kubectl config set-context --current --namespace=argocd
+
           for app in ${{ steps.affected.outputs.apps }}; do
             echo "--- Diffing app: ${app} ---"
 
             DIFF_RESULT=$(argocd app diff "argocd/${app}" \
-              --core \
-              --namespace argocd 2>&1) || EXIT_CODE=$?
+              --core 2>&1) || EXIT_CODE=$?
             EXIT_CODE=${EXIT_CODE:-0}
 
             echo "### ${app}" >> /tmp/diff-comment.md
