@@ -27,16 +27,6 @@ spec:
           template:
             spec:
               serviceAccountName: arc-runner
-              containers:
-                - name: runner
-                  image: ghcr.io/actions/actions-runner:latest
-                  resources:
-                    requests:
-                      cpu: 200m
-                      memory: 256Mi
-                    limits:
-                      cpu: "1"
-                      memory: 512Mi
     - path: manifests/arc-runners
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
