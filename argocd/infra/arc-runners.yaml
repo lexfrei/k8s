@@ -21,6 +21,9 @@ spec:
           minRunners: 0
           maxRunners: 3
           runnerScaleSetName: "homelab"
+          controllerServiceAccount:
+            name: arc-controller-gha-rs-controller
+            namespace: arc-system
           template:
             spec:
               serviceAccountName: arc-runner
