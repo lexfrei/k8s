@@ -146,14 +146,18 @@ jobs:
             } > /tmp/diff-comment.md
           fi
 
-          COMMENT_BODY=$(cat /tmp/diff-comment.md)
-
           # Delete previous ArgoCD diff comment if exists
           PREVIOUS_COMMENT_ID=$(curl --silent \
             --header "Authorization: Bearer ${GH_TOKEN}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-            | grep --before-context=1 '"## ArgoCD Diff"' \
-            | grep '"id"' | head -1 | grep --only-matching '[0-9]*')
+            | python3 -c "
+          import sys, json
+          comments = json.load(sys.stdin)
+          for c in comments:
+              if '## ArgoCD Diff' in c.get('body', ''):
+                  print(c['id'])
+                  break
+          " 2>/dev/null)
 
           if [ -n "${PREVIOUS_COMMENT_ID}" ]; then
             curl --silent --request DELETE \
@@ -161,8 +165,13 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/issues/comments/${PREVIOUS_COMMENT_ID}"
           fi
 
-          curl --silent --request POST \
+          # Post new comment using python for JSON escaping
+          python3 -c "
+          import sys, json
+          body = open('/tmp/diff-comment.md').read()
+          json.dump({'body': body}, sys.stdout)
+          " | curl --silent --request POST \
             --header "Authorization: Bearer ${GH_TOKEN}" \
             --header "Content-Type: application/json" \
-            --data "$(jq --null-input --arg body "${COMMENT_BODY}" '{"body": $body}')" \
+            --data @- \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
