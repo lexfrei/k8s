@@ -5,6 +5,7 @@ metadata:
   labels:
     dashboards: "grafana"
     app.kubernetes.io/managed-by: "argocd"
+    test-diff: "remove-me"
 spec:
   config:
     log:
