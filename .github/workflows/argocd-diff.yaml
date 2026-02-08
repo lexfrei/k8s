@@ -94,6 +94,8 @@ jobs:
       - name: Run ArgoCD diff
         if: steps.affected.outputs.apps != ''
         id: diff
+        env:
+          ARGOCD_NAMESPACE: argocd
         run: |
           {
             echo "## ArgoCD Diff"
@@ -108,9 +110,7 @@ jobs:
             echo "--- Diffing app: ${app} ---"
 
             DIFF_RESULT=$(argocd app diff "argocd/${app}" \
-              --core \
-              --port-forward-namespace argocd \
-              --hard-refresh 2>&1) || EXIT_CODE=$?
+              --core 2>&1) || EXIT_CODE=$?
             EXIT_CODE=${EXIT_CODE:-0}
 
             echo "### ${app}" >> /tmp/diff-comment.md
