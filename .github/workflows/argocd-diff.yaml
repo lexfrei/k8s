@@ -29,10 +29,11 @@ jobs:
           fi
 
           echo "Installing ArgoCD CLI ${LATEST}"
-          curl --silent --location --fail --output argocd \
+          curl --location --fail --output /tmp/argocd \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
             "https://github.com/argoproj/argo-cd/releases/download/${LATEST}/argocd-linux-arm64"
-          chmod +x argocd
-          sudo mv argocd /usr/local/bin/
+          chmod +x /tmp/argocd
+          sudo mv /tmp/argocd /usr/local/bin/argocd
 
       - name: Find affected ArgoCD apps
         id: affected
@@ -94,46 +95,45 @@ jobs:
         if: steps.affected.outputs.apps != ''
         id: diff
         run: |
-          DIFF_OUTPUT=""
+          {
+            echo "## ArgoCD Diff"
+            echo ""
+            echo 'Affected applications: `'"${{ steps.affected.outputs.apps }}"'`'
+            echo ""
+          } > /tmp/diff-comment.md
+
           HAS_DIFF="false"
+
+          # Create kubeconfig with argocd namespace so --core finds argocd-cm
+          SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          SA_CA=$(base64 --wrap=0 /var/run/secrets/kubernetes.io/serviceaccount/ca.crt)
+          printf '{"apiVersion":"v1","kind":"Config","clusters":[{"cluster":{"certificate-authority-data":"%s","server":"https://kubernetes.default.svc"},"name":"c"}],"contexts":[{"context":{"cluster":"c","namespace":"argocd","user":"u"},"name":"ctx"}],"current-context":"ctx","users":[{"name":"u","user":{"token":"%s"}}]}' "${SA_CA}" "${SA_TOKEN}" > /tmp/kubeconfig
+          export KUBECONFIG=/tmp/kubeconfig
 
           for app in ${{ steps.affected.outputs.apps }}; do
             echo "--- Diffing app: ${app} ---"
 
-            # Use --core to bypass ArgoCD API server (direct Kubernetes API access)
-            if DIFF_RESULT=$(argocd app diff "argocd/${app}" \
+            DIFF_RESULT=$(argocd app diff "argocd/${app}" \
               --core \
-              --hard-refresh 2>&1); then
-              DIFF_OUTPUT="${DIFF_OUTPUT}
-### ${app}
-No changes detected.
-"
-            else
-              EXIT_CODE=$?
-              if [ ${EXIT_CODE} -eq 1 ]; then
-                HAS_DIFF="true"
-                DIFF_OUTPUT="${DIFF_OUTPUT}
-### ${app}
-\`\`\`diff
-${DIFF_RESULT}
-\`\`\`
-"
-              else
-                DIFF_OUTPUT="${DIFF_OUTPUT}
-### ${app}
-> Could not generate diff (exit code ${EXIT_CODE}): ${DIFF_RESULT}
-"
-              fi
-            fi
-          done
+              --revision "${{ github.event.pull_request.head.sha }}" 2>&1) || EXIT_CODE=$?
+            EXIT_CODE=${EXIT_CODE:-0}
 
-          {
-            echo "## ArgoCD Diff"
-            echo ""
-            echo "Affected applications: \`${{ steps.affected.outputs.apps }}\`"
-            echo ""
-            echo "${DIFF_OUTPUT}"
-          } > /tmp/diff-comment.md
+            echo "### ${app}" >> /tmp/diff-comment.md
+            echo "" >> /tmp/diff-comment.md
+
+            if [ "${EXIT_CODE}" -eq 0 ]; then
+              echo "No changes detected." >> /tmp/diff-comment.md
+            elif [ "${EXIT_CODE}" -eq 1 ]; then
+              HAS_DIFF="true"
+              echo '```diff' >> /tmp/diff-comment.md
+              echo "${DIFF_RESULT}" >> /tmp/diff-comment.md
+              echo '```' >> /tmp/diff-comment.md
+            else
+              echo "> Could not generate diff (exit code ${EXIT_CODE}): ${DIFF_RESULT}" >> /tmp/diff-comment.md
+            fi
+
+            echo "" >> /tmp/diff-comment.md
+          done
 
           echo "has_diff=${HAS_DIFF}" >> "${GITHUB_OUTPUT}"
 
@@ -146,20 +146,24 @@ ${DIFF_RESULT}
             {
               echo "## ArgoCD Diff"
               echo ""
-              echo "Affected applications: \`${{ steps.affected.outputs.apps }}\`"
+              echo 'Affected applications: `'"${{ steps.affected.outputs.apps }}"'`'
               echo ""
               echo "> No diff output available."
             } > /tmp/diff-comment.md
           fi
 
-          COMMENT_BODY=$(cat /tmp/diff-comment.md)
-
           # Delete previous ArgoCD diff comment if exists
           PREVIOUS_COMMENT_ID=$(curl --silent \
             --header "Authorization: Bearer ${GH_TOKEN}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-            | grep --before-context=1 '"## ArgoCD Diff"' \
-            | grep '"id"' | head -1 | grep --only-matching '[0-9]*')
+            | python3 -c "
+          import sys, json
+          comments = json.load(sys.stdin)
+          for c in comments:
+              if '## ArgoCD Diff' in c.get('body', ''):
+                  print(c['id'])
+                  break
+          " 2>/dev/null)
 
           if [ -n "${PREVIOUS_COMMENT_ID}" ]; then
             curl --silent --request DELETE \
@@ -167,8 +171,13 @@ ${DIFF_RESULT}
               "https://api.github.com/repos/${{ github.repository }}/issues/comments/${PREVIOUS_COMMENT_ID}"
           fi
 
-          curl --silent --request POST \
+          # Post new comment using python for JSON escaping
+          python3 -c "
+          import sys, json
+          body = open('/tmp/diff-comment.md').read()
+          json.dump({'body': body}, sys.stdout)
+          " | curl --silent --request POST \
             --header "Authorization: Bearer ${GH_TOKEN}" \
             --header "Content-Type: application/json" \
-            --data "$(jq --null-input --arg body "${COMMENT_BODY}" '{"body": $body}')" \
+            --data @- \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
