@@ -110,7 +110,8 @@ jobs:
             echo "--- Diffing app: ${app} ---"
 
             DIFF_RESULT=$(argocd app diff "argocd/${app}" \
-              --core 2>&1) || EXIT_CODE=$?
+              --core \
+              --namespace argocd 2>&1) || EXIT_CODE=$?
             EXIT_CODE=${EXIT_CODE:-0}
 
             echo "### ${app}" >> /tmp/diff-comment.md
