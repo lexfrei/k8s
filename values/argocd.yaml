@@ -7,6 +7,7 @@ configs:
     # Disable local admin login - OIDC only
     admin.enabled: "false"
     accounts.homepage: apiKey
+    accounts.ci: apiKey
     url: https://argocd.home.lex.la
     # Using Dex for OIDC - Authelia includes all claims in ID token via claims_policy
     dex.config: |
@@ -33,6 +34,7 @@ configs:
     policy.csv: |
       g, admins, role:admin
       p, homepage, applications, get, */*, allow
+      p, ci, applications, get, */*, allow
   secret:
     extra:
       dex.authelia.clientSecret: c6d255b2b92e2fec47c1b56dea8ab2bff77a7a7c7f46ef3c99859779c7932afd
