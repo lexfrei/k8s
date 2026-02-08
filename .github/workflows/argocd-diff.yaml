@@ -18,16 +18,41 @@ jobs:
       - name: Get ArgoCD token
         id: token
         run: |
+          if ! kubectl get secret argocd-ci-token --namespace arc-runners > /dev/null 2>&1; then
+            echo "ArgoCD CI token secret not found. Manual setup required."
+            echo "available=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
           ARGOCD_AUTH_TOKEN=$(kubectl get secret argocd-ci-token \
             --namespace arc-runners \
             --output jsonpath='{.data.token}' | base64 --decode)
+
+          if [ -z "${ARGOCD_AUTH_TOKEN}" ]; then
+            echo "ArgoCD CI token is empty. Manual setup required."
+            echo "available=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
           echo "::add-mask::${ARGOCD_AUTH_TOKEN}"
           echo "ARGOCD_AUTH_TOKEN=${ARGOCD_AUTH_TOKEN}" >> "${GITHUB_ENV}"
+          echo "available=true" >> "${GITHUB_OUTPUT}"
 
       - name: Install ArgoCD CLI
+        if: steps.token.outputs.available == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          LATEST=$(curl --silent "https://api.github.com/repos/argoproj/argo-cd/releases/latest" \
+          LATEST=$(curl --silent --header "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/argoproj/argo-cd/releases/latest" \
             | grep '"tag_name"' | sed 's/.*"\(.*\)".*/\1/')
+
+          if [ -z "${LATEST}" ]; then
+            echo "Failed to get latest ArgoCD version"
+            exit 1
+          fi
+
+          echo "Installing ArgoCD CLI ${LATEST}"
           curl --silent --location --fail --output argocd \
             "https://github.com/argoproj/argo-cd/releases/download/${LATEST}/argocd-linux-arm64"
           chmod +x argocd
@@ -47,9 +72,8 @@ jobs:
 
           for file in ${CHANGED_FILES}; do
             case "${file}" in
-              # Direct ArgoCD app definition changes
+              # Direct ArgoCD app definition changes (skip project.yaml files)
               argocd/*/[!p]*.yaml)
-                # Extract app name from metadata.name field
                 APP_NAME=$(grep '^  name:' "${file}" 2>/dev/null | head -1 | awk '{print $2}')
                 if [ -n "${APP_NAME}" ]; then
                   AFFECTED_APPS="${AFFECTED_APPS} ${APP_NAME}"
@@ -59,7 +83,6 @@ jobs:
               # Manifest directory changes
               manifests/*/*)
                 MANIFEST_DIR=$(echo "${file}" | cut --delimiter='/' --fields=1-2)
-                # Find ArgoCD apps that reference this manifest path
                 for app_file in argocd/*/*.yaml; do
                   if grep --quiet "path: ${MANIFEST_DIR}" "${app_file}" 2>/dev/null; then
                     APP_NAME=$(grep '^  name:' "${app_file}" 2>/dev/null | head -1 | awk '{print $2}')
@@ -92,7 +115,7 @@ jobs:
           echo "Affected apps: ${AFFECTED_APPS}"
 
       - name: Run ArgoCD diff
-        if: steps.affected.outputs.apps != ''
+        if: steps.token.outputs.available == 'true' && steps.affected.outputs.apps != ''
         id: diff
         run: |
           argocd login api.argocd.home.lex.la:443 \
@@ -105,59 +128,54 @@ jobs:
 
           for app in ${{ steps.affected.outputs.apps }}; do
             echo "--- Diffing app: ${app} ---"
-
-            # Get the source position of the git repo source (for --revision)
             DIFF_RESULT=""
 
             # Try diff with revision (works for git-sourced apps)
             if DIFF_RESULT=$(argocd app diff "argocd/${app}" \
               --revision "${PR_SHA}" \
               --hard-refresh 2>&1); then
-              # Exit code 0 = no diff
               DIFF_OUTPUT="${DIFF_OUTPUT}
-          ### ${app}
-          No changes detected.
-          "
+### ${app}
+No changes detected.
+"
             else
               EXIT_CODE=$?
               if [ ${EXIT_CODE} -eq 1 ]; then
-                # Exit code 1 = diff found (normal)
                 HAS_DIFF="true"
                 DIFF_OUTPUT="${DIFF_OUTPUT}
-          ### ${app}
-          \`\`\`diff
-          ${DIFF_RESULT}
-          \`\`\`
-          "
+### ${app}
+\`\`\`diff
+${DIFF_RESULT}
+\`\`\`
+"
               else
-                # Exit code 2+ = error, try without --revision
+                # Error with --revision, try without
                 if DIFF_RESULT=$(argocd app diff "argocd/${app}" 2>&1); then
                   DIFF_OUTPUT="${DIFF_OUTPUT}
-          ### ${app}
-          No changes detected (current state).
-          "
+### ${app}
+No changes detected (current state).
+"
                 else
                   FALLBACK_CODE=$?
                   if [ ${FALLBACK_CODE} -eq 1 ]; then
                     HAS_DIFF="true"
                     DIFF_OUTPUT="${DIFF_OUTPUT}
-          ### ${app}
-          \`\`\`diff
-          ${DIFF_RESULT}
-          \`\`\`
-          "
+### ${app}
+\`\`\`diff
+${DIFF_RESULT}
+\`\`\`
+"
                   else
                     DIFF_OUTPUT="${DIFF_OUTPUT}
-          ### ${app}
-          > Could not generate diff: ${DIFF_RESULT}
-          "
+### ${app}
+> Could not generate diff: ${DIFF_RESULT}
+"
                   fi
                 fi
               fi
             fi
           done
 
-          # Write to file to preserve formatting
           {
             echo "## ArgoCD Diff"
             echo ""
@@ -173,6 +191,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [ ! -f /tmp/diff-comment.md ]; then
+            # Token was not available, post list of affected apps only
+            {
+              echo "## ArgoCD Diff"
+              echo ""
+              echo "Affected applications: \`${{ steps.affected.outputs.apps }}\`"
+              echo ""
+              echo "> ArgoCD CI token not configured yet. Diff output unavailable."
+              echo "> See PR description for manual setup steps."
+            } > /tmp/diff-comment.md
+          fi
+
           COMMENT_BODY=$(cat /tmp/diff-comment.md)
 
           # Delete previous ArgoCD diff comment if exists
@@ -188,16 +218,8 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/issues/comments/${PREVIOUS_COMMENT_ID}"
           fi
 
-          # Post new comment
           curl --silent --request POST \
             --header "Authorization: Bearer ${GH_TOKEN}" \
             --header "Content-Type: application/json" \
             --data "$(jq --null-input --arg body "${COMMENT_BODY}" '{"body": $body}')" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
-
-      - name: Post no-apps comment
-        if: steps.affected.outputs.apps == ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "No ArgoCD applications affected by this PR."
