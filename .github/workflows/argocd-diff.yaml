@@ -94,46 +94,39 @@ jobs:
         if: steps.affected.outputs.apps != ''
         id: diff
         run: |
-          DIFF_OUTPUT=""
+          {
+            echo "## ArgoCD Diff"
+            echo ""
+            echo 'Affected applications: `'"${{ steps.affected.outputs.apps }}"'`'
+            echo ""
+          } > /tmp/diff-comment.md
+
           HAS_DIFF="false"
 
           for app in ${{ steps.affected.outputs.apps }}; do
             echo "--- Diffing app: ${app} ---"
 
-            # Use --core to bypass ArgoCD API server (direct Kubernetes API access)
-            if DIFF_RESULT=$(argocd app diff "argocd/${app}" \
+            DIFF_RESULT=$(argocd app diff "argocd/${app}" \
               --core \
-              --hard-refresh 2>&1); then
-              DIFF_OUTPUT="${DIFF_OUTPUT}
-### ${app}
-No changes detected.
-"
-            else
-              EXIT_CODE=$?
-              if [ ${EXIT_CODE} -eq 1 ]; then
-                HAS_DIFF="true"
-                DIFF_OUTPUT="${DIFF_OUTPUT}
-### ${app}
-\`\`\`diff
-${DIFF_RESULT}
-\`\`\`
-"
-              else
-                DIFF_OUTPUT="${DIFF_OUTPUT}
-### ${app}
-> Could not generate diff (exit code ${EXIT_CODE}): ${DIFF_RESULT}
-"
-              fi
-            fi
-          done
+              --hard-refresh 2>&1) || EXIT_CODE=$?
+            EXIT_CODE=${EXIT_CODE:-0}
 
-          {
-            echo "## ArgoCD Diff"
-            echo ""
-            echo "Affected applications: \`${{ steps.affected.outputs.apps }}\`"
-            echo ""
-            echo "${DIFF_OUTPUT}"
-          } > /tmp/diff-comment.md
+            echo "### ${app}" >> /tmp/diff-comment.md
+            echo "" >> /tmp/diff-comment.md
+
+            if [ "${EXIT_CODE}" -eq 0 ]; then
+              echo "No changes detected." >> /tmp/diff-comment.md
+            elif [ "${EXIT_CODE}" -eq 1 ]; then
+              HAS_DIFF="true"
+              echo '```diff' >> /tmp/diff-comment.md
+              echo "${DIFF_RESULT}" >> /tmp/diff-comment.md
+              echo '```' >> /tmp/diff-comment.md
+            else
+              echo "> Could not generate diff (exit code ${EXIT_CODE}): ${DIFF_RESULT}" >> /tmp/diff-comment.md
+            fi
+
+            echo "" >> /tmp/diff-comment.md
+          done
 
           echo "has_diff=${HAS_DIFF}" >> "${GITHUB_OUTPUT}"
 
@@ -146,7 +139,7 @@ ${DIFF_RESULT}
             {
               echo "## ArgoCD Diff"
               echo ""
-              echo "Affected applications: \`${{ steps.affected.outputs.apps }}\`"
+              echo 'Affected applications: `'"${{ steps.affected.outputs.apps }}"'`'
               echo ""
               echo "> No diff output available."
             } > /tmp/diff-comment.md
