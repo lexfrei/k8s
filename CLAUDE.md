@@ -80,7 +80,7 @@ The cluster runs on K3s with these core components (in deployment order):
 4. **GitOps**: ArgoCD (self-managed via the meta application)
 5. **Storage**: Longhorn for distributed block storage
 6. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
-7. **Gateway API**: Cilium Gateway API v1.3.0 for HTTP/HTTPS routing with automatic HTTP→HTTPS redirect
+7. **Gateway API**: Cilium Gateway API for internal routing + Cloudflare Tunnel for public routing
 8. **Certificate Management**: cert-manager with automatic Gateway API integration
 9. **External DNS**: external-dns with Gateway API HTTPRoute support
 10. **Monitoring**: Grafana operator, node-exporter, metrics-server
@@ -100,19 +100,21 @@ The cluster runs on K3s with these core components (in deployment order):
 - **Pod network**: 10.42.0.0/16 (Cilium tunnel mode with VXLAN)
 - **Cilium kube-proxy replacement** for service load balancing and NodePort
 - **Cilium L2 Announcements** for LoadBalancer IP allocation:
-  - Public Gateway pool: 172.16.100.251
   - Internal Gateway pool: 172.16.100.250
+  - Syslog pool: 172.16.100.249
   - Transmission pool: 172.16.100.252
   - Minecraft pool: 172.16.100.253
+  - ArgoCD API pool: 172.16.100.254
   - Default pool: 172.16.100.101-110
-- **Cilium Gateway API** for HTTP/HTTPS routing with **security-hardened dual Gateway setup**:
-  - **Public Gateway** (cilium-gateway): 172.16.100.251
-    - Port-forwarded from public IP 217.78.182.161
-    - Uses **explicit hostnames only** (no wildcards) to prevent Host header manipulation attacks
-    - Configured hostnames: eta.lex.la, job.lex.la, map.lex.la, aleksei.sviridk.in
-    - Cloudflare proxy enabled (orange cloud) for DDoS protection
-    - Automatic HTTP→HTTPS redirect (301) via dedicated HTTPRoute
+- **Dual Gateway setup** for HTTP/HTTPS routing:
+  - **Public Gateway** (cloudflare-tunnel): via Cloudflare Tunnel
+    - GatewayClass: `cloudflare-tunnel` (managed by cloudflare-tunnel-gateway-controller)
+    - Traffic routed through Cloudflare Tunnel (no direct IP/port-forwarding)
+    - Tunnel ID: 59db961d-3851-468a-bf80-4d39f942b9e0
+    - Public hostnames: eta.lex.la, job.lex.la, map.lex.la, aleksei.sviridk.in, abs.lex.la, wish.lex.la, test.lex.la, authelia.lex.la
+    - DDoS protection via Cloudflare
   - **Internal Gateway** (cilium-gateway-internal): 172.16.100.250
+    - GatewayClass: `cilium` (managed by Cilium)
     - **NOT port-forwarded** - accessible only from local network
     - Uses **wildcard listener** (*.home.lex.la) for simplified internal routing
     - Cloudflare DNS-only mode (grey cloud) - no proxy
@@ -120,8 +122,8 @@ The cluster runs on K3s with these core components (in deployment order):
   - TLS certificates automatically managed by cert-manager via Gateway API integration
   - Supports wildcard certificates for *.lex.la, *.home.lex.la, *.k8s.home.lex.la, *.sviridk.in
 - **External DNS** automatically creates DNS records from Gateway annotations
-  - Public Gateway: external-dns.alpha.kubernetes.io/target: "217.78.182.161" (proxied)
   - Internal Gateway: external-dns.alpha.kubernetes.io/target: "172.16.100.250" (DNS-only)
+  - Public DNS records managed by Cloudflare Tunnel automatically
 - **Cluster domain**: `k8s.home.lex.la` (configured in K3s and CoreDNS)
 - **Hubble**: Enabled for network observability
   - Web UI: https://hubble.home.lex.la (internal Gateway)
@@ -361,22 +363,21 @@ ansible-galaxy collection install --requirements-file requirements.yaml
 2. Create ArgoCD Application in appropriate `argocd/CATEGORY/` directory
 3. Reference the manifests directory in the Application spec
 4. **Choose appropriate Gateway based on service accessibility**:
-   - **Public services** (accessible from internet): Use `cilium-gateway`
+   - **Public services** (accessible from internet): Use `cloudflare-tunnel` Gateway
    - **Internal services** (home network only): Use `cilium-gateway-internal`
 5. Create HTTPRoute resource:
    ```yaml
-   # Example for PUBLIC service
+   # Example for PUBLIC service (via Cloudflare Tunnel)
    apiVersion: gateway.networking.k8s.io/v1
    kind: HTTPRoute
    metadata:
      name: your-app
      namespace: your-namespace
-     annotations: {}
    spec:
      parentRefs:
-       - name: cilium-gateway
-         namespace: kube-system
-         sectionName: https-YOUR-HOSTNAME-lex-la  # Must match explicit listener name
+       - name: cloudflare-tunnel
+         namespace: cloudflare-tunnel-system
+         sectionName: https
      hostnames:
        - your-app.lex.la
      rules:
@@ -395,7 +396,6 @@ ansible-galaxy collection install --requirements-file requirements.yaml
    metadata:
      name: your-app
      namespace: your-namespace
-     annotations: {}
    spec:
      parentRefs:
        - name: cilium-gateway-internal
@@ -412,9 +412,9 @@ ansible-galaxy collection install --requirements-file requirements.yaml
            - name: your-service
              port: 80
    ```
-6. **For PUBLIC services**: Add new explicit hostname listener to `manifests/cilium/gateway.yaml`
+6. **For PUBLIC services**: Configure DNS in Cloudflare to point to the tunnel (automatic via cloudflare-tunnel-gateway-controller)
 7. **For INTERNAL services**: Use existing wildcard listener `https-home-lex-la` (no Gateway changes needed)
-8. Add your namespace to ReferenceGrant in `manifests/cilium/reference-grant.yaml`
+8. Add your namespace to ReferenceGrant in `manifests/cilium/reference-grant.yaml` (for internal Gateway routes)
 9. Commit and push - ArgoCD meta app will auto-deploy
 
 ### Modifying Infrastructure Components
@@ -436,11 +436,11 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 - **Node access**: Only network (SSH/Talos API) and UART available — no HDMI/display access to nodes
 - All changes deploy automatically via ArgoCD (selfHeal: true, prune: true)
 - Domain references throughout use `lex.la` - must be updated for different domains
-- Public services use direct IP access without Cloudflare Tunnel due to ISP DPI blocking
+- Public services use Cloudflare Tunnel via cloudflare-tunnel-gateway-controller (GatewayClass: cloudflare-tunnel)
 - cert-manager automatically manages certificates for Gateway API listeners
 - TLS certificates issued via DNS-01 ACME challenge with Cloudflare API
 - Gateway API provides modern, role-oriented routing instead of legacy Ingress
-- **SECURITY**: Public Gateway uses EXPLICIT hostnames only - NO wildcards allowed to prevent Host header manipulation attacks
+- **SECURITY**: Public Gateway uses Cloudflare Tunnel — traffic never touches local IP directly
 - **SECURITY**: Internal Gateway uses wildcard (*.home.lex.la) since it's not exposed to internet
 - **SECURITY**: Internal Gateway (172.16.100.250) MUST NOT be port-forwarded - local network access only
 - **Cluster domain**: k8s.home.lex.la is configured in both K3s and CoreDNS, must be consistent across all components
