@@ -27,6 +27,9 @@ spec:
               repository: "openbao/openbao"
               tag: "2.4.4"
 
+            annotations:
+              container.apparmor.security.beta.kubernetes.io/openbao: unconfined
+
             resources:
               requests:
                 cpu: 100m
