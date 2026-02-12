@@ -24,11 +24,10 @@ spec:
               limits:
                 cpu: 1000m
                 memory: 1Gi
-
-          persistence:
-            enabled: true
-            storageClass: longhorn
-            size: 5Gi
+            persistence:
+              enabled: true
+              storageClass: longhorn
+              size: 5Gi
 
           db:
             type: sqlite
