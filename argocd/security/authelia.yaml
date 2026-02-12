@@ -85,7 +85,7 @@ spec:
                 secret_name: authelia-secrets
                 path: SESSION_SECRET
               cookies:
-                - domain: home.lex.la
+                - domain: lex.la
                   authelia_url: https://authelia.lex.la
                   default_redirection_url: https://grafana.home.lex.la
 
