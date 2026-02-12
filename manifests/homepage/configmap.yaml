@@ -88,12 +88,7 @@ data:
             href: https://plex.lex.la
             description: Media server
             siteMonitor: https://plex.lex.la
-        - Audiobookshelf:
-            icon: audiobookshelf.svg
-            href: https://abs.lex.la
-            description: Audiobook server
-            siteMonitor: https://abs.lex.la
-        - Transmission:
+- Transmission:
             icon: transmission.svg
             href: https://transmission.home.lex.la
             description: BitTorrent client
