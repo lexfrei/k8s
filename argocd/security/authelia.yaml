@@ -28,15 +28,6 @@ spec:
               limits:
                 cpu: 500m
                 memory: 256Mi
-            extraVolumeMounts:
-              - name: users-config
-                mountPath: /config/users_database.yml
-                subPath: users_database.yml
-                readOnly: true
-            extraVolumes:
-              - name: users-config
-                configMap:
-                  name: authelia-users
 
           secret:
             additionalSecrets:
@@ -71,7 +62,7 @@ spec:
                 disable: true
               file:
                 enabled: true
-                path: /config/users_database.yml
+                path: /config/users.yml
                 password:
                   algorithm: argon2
 
