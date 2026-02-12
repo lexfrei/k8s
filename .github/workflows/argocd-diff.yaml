@@ -94,6 +94,9 @@ jobs:
       - name: Run ArgoCD diff
         if: steps.affected.outputs.apps != ''
         id: diff
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
+          GIT_REPO: https://github.com/lexfrei/k8s.git
         run: |
           {
             echo "## ArgoCD Diff"
@@ -113,13 +116,58 @@ jobs:
           for app in ${{ steps.affected.outputs.apps }}; do
             echo "--- Diffing app: ${app} ---"
 
-            DIFF_RESULT=$(argocd app diff "argocd/${app}" \
-              --core \
-              --revision "${{ github.event.pull_request.head.sha }}" 2>&1) || EXIT_CODE=$?
-            EXIT_CODE=${EXIT_CODE:-0}
-
             echo "### ${app}" >> /tmp/diff-comment.md
             echo "" >> /tmp/diff-comment.md
+
+            # Check if app exists in cluster (new apps can't be diffed)
+            if ! argocd app get "argocd/${app}" --core >/dev/null 2>&1; then
+              echo "> New application — not yet deployed to the cluster." >> /tmp/diff-comment.md
+              echo "" >> /tmp/diff-comment.md
+              continue
+            fi
+
+            # Find app definition file
+            APP_FILE=$(grep -rl "^  name: ${app}$" argocd/ 2>/dev/null | grep -v project.yaml | head -1)
+
+            # Build diff flags: multi-source apps need --source-positions/--revisions
+            DIFF_FLAGS="--revision ${SHA}"
+            if [ -n "${APP_FILE}" ] && grep -q "^  sources:" "${APP_FILE}"; then
+              export APP_FILE
+              MULTI_FLAGS=$(python3 << 'PYEOF'
+import os
+app_file = os.environ["APP_FILE"]
+git_repo = os.environ["GIT_REPO"]
+sha = os.environ["SHA"]
+positions = []
+pos = 0
+in_sources = False
+with open(app_file) as f:
+    for line in f:
+        s = line.strip()
+        if line.rstrip() == "  sources:":
+            in_sources = True
+            continue
+        if in_sources and not line.startswith("    ") and s:
+            break
+        if in_sources and s.startswith("- repoURL:"):
+            pos += 1
+            if git_repo in s:
+                positions.append(str(pos))
+if positions:
+    p = ",".join(positions)
+    r = ",".join([sha] * len(positions))
+    print(f"--source-positions {p} --revisions {r}")
+PYEOF
+              )
+              if [ -n "${MULTI_FLAGS}" ]; then
+                DIFF_FLAGS="${MULTI_FLAGS}"
+              fi
+            fi
+
+            EXIT_CODE=0
+            DIFF_RESULT=$(argocd app diff "argocd/${app}" \
+              --core \
+              ${DIFF_FLAGS} 2>&1) || EXIT_CODE=$?
 
             if [ "${EXIT_CODE}" -eq 0 ]; then
               echo "No changes detected." >> /tmp/diff-comment.md
