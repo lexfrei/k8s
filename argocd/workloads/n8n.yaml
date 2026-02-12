@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: n8n
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  destination:
+    namespace: n8n
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://community-charts.github.io/helm-charts"
+      targetRevision: "1.16.28"
+      chart: n8n
+      helm:
+        valuesObject:
+          main:
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 1000m
+                memory: 1Gi
+
+          persistence:
+            enabled: true
+            storageClass: longhorn
+            size: 5Gi
+
+          db:
+            type: sqlite
+
+          service:
+            enabled: true
+            type: ClusterIP
+            port: 5678
+
+          ingress:
+            enabled: false
+
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/n8n
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
