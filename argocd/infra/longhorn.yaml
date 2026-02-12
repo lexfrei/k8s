@@ -36,6 +36,7 @@ spec:
           # This is not safe for production.
           defaultSettings:
             defaultReplicaCount: 1
+            concurrentAutomaticEngineUpgradePerNodeLimit: 1
             taintToleration: "minecraft=true:NoExecute"
           longhornUI:
             replicas: 1
