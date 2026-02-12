@@ -28,6 +28,13 @@ spec:
               enabled: true
               storageClass: longhorn
               size: 5Gi
+            extraEnvVars:
+              - name: N8N_TEMPLATES_ENABLED
+                value: "false"
+              - name: N8N_COMMUNITY_PACKAGES_ENABLED
+                value: "false"
+              - name: EXTERNAL_FRONTEND_HOOKS_URLS
+                value: ""
 
           db:
             type: sqlite
@@ -36,6 +43,15 @@ spec:
             enabled: true
             type: ClusterIP
             port: 5678
+
+          diagnostics:
+            enabled: false
+
+          versionNotifications:
+            enabled: false
+
+          sentry:
+            enabled: false
 
           ingress:
             enabled: false
