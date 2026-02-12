@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kuberture
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: kuberture
+    server: "https://kubernetes.default.svc"
+  source:
+    chart: kuberture
+    repoURL: ghcr.io/lexfrei/kuberture/charts
+    targetRevision: 0.0.2
+    helm:
+      valuesObject:
+        replicaCount: 3
+        config:
+          outputs:
+            - name: kubeapi
+              hostname:
+                - kubeapi.lex.la
+              serviceName: kuberture-kubeapi
+              serviceNamespace: default
+              recordTTL: 60
+              addressSource: endpointslice
+              annotationPrefix: "internal-dns/"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
