@@ -66,6 +66,11 @@
       tags:
         - cpu-governor
 
+    - name: Configure k3s IO priority
+      ansible.builtin.include_tasks: k3s-iopriority.yml
+      tags:
+        - k3s-iopriority
+
     - name: Perform system upgrade (optional)
       ansible.builtin.include_tasks: system-upgrade.yml
       when: node_prep_system_upgrade_enabled | bool
@@ -87,6 +92,7 @@
           - Timezone set to {{ node_prep_timezone }}
           - Watchdog configured and running
           - CPU governor set to {{ node_prep_cpu_governor }}
+          - k3s IO priority configured (best-effort/0, nice -10)
           {% if node_prep_system_upgrade_enabled | bool -%}
           - System upgrade completed
           {% endif -%}

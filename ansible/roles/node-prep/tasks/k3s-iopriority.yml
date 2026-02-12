@@ -1,0 +1,26 @@
+---
+# Configure IO priority for k3s service
+# Gives k3s (including etcd) higher IO scheduling priority
+# to prevent I/O saturation from workloads starving the control plane
+
+- name: Create k3s systemd override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/k3s.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy k3s IO priority override
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/k3s.service.d/iopriority.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Service]
+      IOSchedulingClass=best-effort
+      IOSchedulingPriority=0
+      Nice=-10
+  notify:
+    - reload systemd
