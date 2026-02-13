@@ -16,7 +16,7 @@ spec:
     targetRevision: 0.0.4
     helm:
       valuesObject:
-        replicaCount: 3
+        replicaCount: 2
         config:
           outputs:
             - name: kubeapi
