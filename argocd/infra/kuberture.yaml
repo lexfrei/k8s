@@ -13,7 +13,7 @@ spec:
   source:
     chart: kuberture
     repoURL: ghcr.io/lexfrei/kuberture/charts
-    targetRevision: 0.0.2
+    targetRevision: 0.0.3
     helm:
       valuesObject:
         replicaCount: 3
@@ -23,7 +23,6 @@ spec:
               hostname:
                 - kubeapi.lex.la
               serviceName: kuberture-kubeapi
-              serviceNamespace: default
               recordTTL: 60
               addressSource: endpointslice
               annotationPrefix: "internal-dns/"
