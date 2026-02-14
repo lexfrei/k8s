@@ -10,22 +10,25 @@ spec:
       namespace: argocd
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: argo
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: argo-events
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
       namespace: argocd
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: default
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: estimator
+      namespace: homepage
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: longhorn-system
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: monitoring
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: security
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: transmission-system
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: estimator
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: me-site
@@ -34,40 +37,10 @@ spec:
       namespace: paper
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: transmission-system
+      namespace: wish-operator
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: security
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: minecraft-operator-system
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: plex
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: monitoring
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: vpa-system
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: homepage
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: n8n
-  to:
-    - group: ""
-      kind: Service
-      name: "*"
----
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: ReferenceGrant
-metadata:
-  name: allow-gateway-access-extra
-  namespace: kube-system
-spec:
-  from:
+      namespace: job-countdown
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: homebridge
