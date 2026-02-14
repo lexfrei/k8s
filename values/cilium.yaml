@@ -53,8 +53,8 @@ bpf:
   # Distributed LRU for reduced spinlock contention under high connection load
   distributedLRU:
     enabled: true
-  # Dynamic map sizing (8% of node memory for CT/NAT maps)
-  mapDynamicSizeRatio: 0.08
+  # Dynamic map sizing (1% of node memory for CT/NAT maps)
+  mapDynamicSizeRatio: 0.01
 
 # Enable L2 neighbor discovery
 l2NeighDiscovery:
