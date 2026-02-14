@@ -1,13 +1,32 @@
 global:
   domain: argocd.home.lex.la
+  affinity:
+    podAntiAffinity: soft
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
 configs:
   params:
     server.insecure: true
+    controller.status.processors: "10"
+    controller.operation.processors: "5"
+    controller.kubectl.parallelism.limit: "5"
+    controller.repo.server.timeout.seconds: "90"
+    controller.self.heal.backoff.timeout.seconds: "5"
+    controller.self.heal.backoff.cap.seconds: "600"
+    controller.cluster.cache.events.processing.interval: "200ms"
+    controller.k8s.client.qps: "20"
+    controller.k8s.client.burst: "40"
+    reposerver.parallelism.limit: "2"
   cm:
     # Disable local admin login - OIDC only
     admin.enabled: "false"
     accounts.homepage: apiKey
     url: https://argocd.home.lex.la
+    timeout.reconciliation: 300s
+    timeout.hard.reconciliation: 0s
+    resource.ignoreResourceUpdatesEnabled: "true"
     # Using Dex for OIDC - Authelia includes all claims in ID token via claims_policy
     dex.config: |
       connectors:
@@ -174,16 +193,39 @@ configs:
           end
 
           return health_status
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 768Mi
+  env:
+    - name: GOMEMLIMIT
+      value: "600MiB"
 repoServer:
-  replicas: 2
+  replicas: 1
   pdb:
-    enabled: true
-    minAvailable: 1
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  env:
+    - name: GOMEMLIMIT
+      value: "200MiB"
 server:
-  replicas: 2
+  replicas: 1
   pdb:
-    enabled: true
-    minAvailable: 1
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
   service:
     type: LoadBalancer
     annotations:
@@ -205,12 +247,21 @@ server:
           - path:
               type: PathPrefix
               value: /
-  # extensions:
-  #   enabled: true
-  #   extensionList:
-  #     - name: extension-trivy
-  #       env:
-  #         - name: EXTENSION_URL
-  #           value: https://github.com/lexfrei/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy.tar
-  #         - name: EXTENSION_CHECKSUM_URL
-  #           value: https://github.com/lexfrei/argocd-trivy-extension/releases/download/v0.2.0/extension-trivy_checksums.txt
+redis:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+dex:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+notifications:
+  enabled: false
+applicationSet:
+  enabled: false
