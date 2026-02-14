@@ -13,7 +13,7 @@ spec:
   source:
     chart: kuberture
     repoURL: ghcr.io/lexfrei/kuberture/charts
-    targetRevision: 0.1.0
+    targetRevision: 0.1.1
     helm:
       valuesObject:
         replicaCount: 2
