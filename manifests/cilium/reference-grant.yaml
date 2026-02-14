@@ -4,6 +4,7 @@ metadata:
   name: allow-gateway-access
   namespace: kube-system
 spec:
+  # spec.from has a hard limit of 16 items; split into a second resource if exceeded
   from:
     - group: gateway.networking.k8s.io
       kind: GRPCRoute
