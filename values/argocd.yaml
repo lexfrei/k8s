@@ -107,7 +107,9 @@ server:
     enabled: true
     annotations: {}
     parentRefs:
-      - name: cilium-gateway-internal
+      - group: gateway.networking.k8s.io
+        kind: Gateway
+        name: cilium-gateway-internal
         namespace: kube-system
         sectionName: https-home-lex-la
     hostnames:
