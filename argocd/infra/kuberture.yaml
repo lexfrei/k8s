@@ -26,7 +26,7 @@ spec:
           outputs:
             - name: kubeapi
               hostname:
-                - kubeapi.lex.la
+                - kubeapi.home.lex.la
               serviceName: kuberture-kubeapi
               recordTTL: 60
               addressSource: endpointslice
