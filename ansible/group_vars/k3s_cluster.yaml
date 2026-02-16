@@ -32,6 +32,7 @@ extra_server_args: >-
   --disable-kube-proxy
   --flannel-backend=none
   --tls-san=172.16.101.1
+  --tls-san=kubeapi.home.lex.la
   --etcd-arg=quota-backend-bytes=536870912
   --etcd-arg=auto-compaction-mode=periodic
   --etcd-arg=auto-compaction-retention=1h
