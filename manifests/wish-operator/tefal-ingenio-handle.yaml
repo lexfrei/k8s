@@ -1,0 +1,19 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: tefal-ingenio-handle
+  namespace: wish-operator
+spec:
+  title: "Tefal Ingenio 6 Removable Handle (L9863353)"
+  imageURL: "https://tefal.ru/sites/default/files/products/3535/e591d1e8d3.jpg"
+  officialURL: "https://tefal.ru/product/posuda/posuda-so-s-emnoj-ruchkoj/saemnaja-ruchka-tefal-ingenio-6-l9863353"
+  purchaseURLs:
+    - "https://www.ozon.ru/product/semnaya-ruchka-tefal-ingenio-6-l9863353-2338335335/"
+  msrp: "₽ 2199"
+  tags:
+    - kitchen
+    - cookware
+  contextTags:
+    - any-occasion
+  description: "Removable handle for all Tefal Ingenio cookware. Bakelite, 3-point safety lock, holds up to 10 kg, dishwasher safe, 10-year warranty. Made in France."
+  priority: 3
