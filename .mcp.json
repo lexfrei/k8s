@@ -1,15 +1,7 @@
 {
   "mcpServers": {
     "victoriametrics": {
-      "command": "podman",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e", "VM_INSTANCE_ENTRYPOINT",
-        "-e", "VM_INSTANCE_TYPE",
-        "ghcr.io/victoriametrics-community/mcp-victoriametrics"
-      ],
+      "command": "/Users/lex/go/bin/mcp-victoriametrics",
       "env": {
         "VM_INSTANCE_ENTRYPOINT": "https://vm.home.lex.la",
         "VM_INSTANCE_TYPE": "single"
