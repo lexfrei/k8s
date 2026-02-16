@@ -1,0 +1,19 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: tefal-ingenio-unlimited-wok
+  namespace: wish-operator
+spec:
+  title: "Tefal Ingenio Unlimited Wok 26 cm (L7637732)"
+  imageURL: "https://tefal.ru/sites/default/files/products/3586/eaafa7e792.jpg"
+  officialURL: "https://tefal.ru/product/posuda/skovorody/skovoroda-vok-tefal-ingenio-unlimited-26-sm-l7637732"
+  purchaseURLs:
+    - "https://www.ozon.ru/product/vok-skovoroda-tefal-ingenio-unlimited-26-sm-s-antiprigarnym-pokrytiem-indikatorom-temperatury-dlya-916743944/"
+  msrp: "₽ 5299"
+  tags:
+    - kitchen
+    - cookware
+  contextTags:
+    - any-occasion
+  description: "Wok 26 cm with removable handle. Titanium 6X non-stick coating, Thermo-Signal temperature indicator, induction compatible. Stackable Ingenio design, oven-safe without handle."
+  priority: 3

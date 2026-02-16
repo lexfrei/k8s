@@ -1,0 +1,19 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: tefal-unlimited-crepe-pan
+  namespace: wish-operator
+spec:
+  title: "Tefal Unlimited Crepe Pan 25 cm (G2553872)"
+  imageURL: "https://twicpics.tefal.pl/https://dam.groupeseb.com/m/35c1bcfb0ec36638/Digital-G2553802-Unlimited-Pancake-Pan-25cm-06GJ-3940-2-tif.png"
+  officialURL: "https://tefal.ru/product/posuda/skovorody/skovoroda-blinnaja-tefal-unlimited-25-sm-g2553872"
+  purchaseURLs:
+    - "https://www.ozon.ru/product/skovoroda-blinnaya-tefal-unlimited-25-sm-g2553872-1761975760/"
+  msrp: "₽ 5699"
+  tags:
+    - kitchen
+    - cookware
+  contextTags:
+    - any-occasion
+  description: "Блинная сковорода 25 см. Titanium 6X non-stick coating, Thermo-Signal temperature indicator, induction compatible. Forged aluminium body."
+  priority: 3
