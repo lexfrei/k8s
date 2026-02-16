@@ -1,0 +1,19 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: tefal-ingenio-crepe-pan
+  namespace: wish-operator
+spec:
+  title: "Tefal Ingenio Crepe Pan 27 cm (L8551055)"
+  imageURL: "https://tefal.ru/sites/default/files/products/3140/68da4b028e.jpg"
+  officialURL: "https://tefal.ru/product/posuda/posuda-so-s-emnoj-ruchkoj/skovoroda-dlja-blinov-27-sm-tefal-ingenio-l8551055"
+  purchaseURLs:
+    - "https://www.ozon.ru/product/skovoroda-dlya-blinov-tefal-ingenio-ingenio-expertise-27-sm-265722802/"
+  msrp: "₽ 4899"
+  tags:
+    - kitchen
+    - cookware
+  contextTags:
+    - any-occasion
+  description: "Crepe pan 27 cm with removable Ingenio handle. Non-stick coating, induction compatible. Stackable with other Ingenio cookware."
+  priority: 3
