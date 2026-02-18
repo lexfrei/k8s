@@ -31,7 +31,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: https://helm.cilium.io/
-      targetRevision: 1.19.0
+      targetRevision: 1.19.1
       chart: cilium
       helm:
         valueFiles:
