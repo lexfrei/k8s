@@ -4,3 +4,4 @@ secrets/*
 # Exclude (unignore) all .asc files in the secrets directory
 !secrets/*.asc
 recovery-bao.txt
+secrets-backup-*/
