@@ -61,7 +61,7 @@ spec:
             dataStorage:
               enabled: true
               size: 5Gi
-              storageClass: longhorn-remote
+              storageClass: truenas-nfs-csi
               accessMode: ReadWriteOnce
 
             volumes:
@@ -82,15 +82,6 @@ spec:
             ha:
               enabled: false
 
-            affinity:
-              nodeAffinity:
-                requiredDuringSchedulingIgnoredDuringExecution:
-                  nodeSelectorTerms:
-                    - matchExpressions:
-                        - key: kubernetes.io/hostname
-                          operator: NotIn
-                          values:
-                            - k8s-cp-03
 
           ui:
             enabled: true
