@@ -96,6 +96,9 @@ node_prep_cpu_governor: "performance"
 # UTC is standard for servers - ensures consistent log timestamps across cluster
 node_prep_timezone: "Etc/UTC"
 
+# Journald configuration
+node_prep_journald_runtime_max_use: "100M"   # Max volatile log size in tmpfs
+
 # System upgrade configuration
 node_prep_system_upgrade_enabled: false      # Upgrade disabled by default (use playbook)
 node_prep_reboot_if_required: true           # Auto-reboot enabled by default

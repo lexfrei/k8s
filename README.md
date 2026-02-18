@@ -25,7 +25,10 @@ A Kubernetes cluster configuration designed for ARM64 systems (like Raspberry Pi
 3. Update all DNS references in the repo (search for the `lex.la` domain)
 4. Gateway API will automatically create DNS records via external-dns
 5. For Raspberry Pi or similar ARM devices:
-   - Add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to `/boot/cmdline.txt`
+   - Add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to kernel cmdline:
+     - Ubuntu 25.10+ (A/B boot): `/boot/firmware/current/cmdline.txt`
+     - Ubuntu 24.04 and earlier: `/boot/firmware/cmdline.txt`
+   - Note: Ubuntu 25.10 RPi firmware adds `cgroup_disable=memory` by default; the `cgroup_enable=memory` parameter overrides it
    - Set `Storage=volatile` in `/etc/systemd/journald.conf` to prevent SD card wear
 6. System preparation:
    - Disable firewall: `systemctl disable --now firewalld`

@@ -71,6 +71,16 @@
       tags:
         - k3s-iopriority
 
+    - name: Configure journald volatile storage
+      ansible.builtin.include_tasks: journald.yml
+      tags:
+        - journald
+
+    - name: Disable firewall services
+      ansible.builtin.include_tasks: firewall.yml
+      tags:
+        - firewall
+
     - name: Perform system upgrade (optional)
       ansible.builtin.include_tasks: system-upgrade.yml
       when: node_prep_system_upgrade_enabled | bool
@@ -93,6 +103,8 @@
           - Watchdog configured and running
           - CPU governor set to {{ node_prep_cpu_governor }}
           - k3s IO priority configured (best-effort/0, nice -10)
+          - Journald set to volatile storage ({{ node_prep_journald_runtime_max_use }})
+          - Firewall services disabled
           {% if node_prep_system_upgrade_enabled | bool -%}
           - System upgrade completed
           {% endif -%}

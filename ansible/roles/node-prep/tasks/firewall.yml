@@ -1,0 +1,32 @@
+---
+# Disable firewall services
+# K3s and Cilium manage their own iptables/nftables rules
+# Having a separate firewall causes conflicts with CNI networking
+
+- name: Check if ufw is installed
+  ansible.builtin.command:
+    cmd: which ufw
+  register: ufw_check
+  changed_when: false
+  failed_when: false
+
+- name: Disable and stop ufw
+  ansible.builtin.systemd:
+    name: ufw
+    state: stopped
+    enabled: false
+  when: ufw_check.rc == 0
+
+- name: Check if firewalld is installed
+  ansible.builtin.command:
+    cmd: which firewalld
+  register: firewalld_check
+  changed_when: false
+  failed_when: false
+
+- name: Disable and stop firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: stopped
+    enabled: false
+  when: firewalld_check.rc == 0

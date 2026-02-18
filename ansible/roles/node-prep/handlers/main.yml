@@ -37,3 +37,9 @@
     state: restarted
   listen: Restart cpufrequtils
   ignore_errors: true
+
+- name: Restart journald service
+  ansible.builtin.systemd:
+    name: systemd-journald
+    state: restarted
+  listen: Restart journald

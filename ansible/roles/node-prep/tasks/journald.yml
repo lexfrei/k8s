@@ -1,0 +1,20 @@
+---
+# Configure journald for volatile storage
+# Prevents SD card/NVMe wear from excessive logging
+# Logs are stored in tmpfs (/run/log/journal) instead of disk
+
+- name: Set journald storage to volatile
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/journald.conf
+    regexp: "^#?Storage="
+    line: "Storage=volatile"
+    state: present
+  notify: Restart journald
+
+- name: Set journald max runtime size
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/journald.conf
+    regexp: "^#?RuntimeMaxUse="
+    line: "RuntimeMaxUse={{ node_prep_journald_runtime_max_use }}"
+    state: present
+  notify: Restart journald
