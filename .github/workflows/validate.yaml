@@ -1,0 +1,23 @@
+name: Validate YAML
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install --quiet yamllint
+
+      - name: Run yamllint
+        run: |
+          yamllint \
+            --strict \
+            --config-file .yamllint.yaml \
+            --format github \
+            .
