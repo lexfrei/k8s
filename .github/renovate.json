@@ -51,6 +51,15 @@
             "datasourceTemplate": "git-refs",
             "versioningTemplate": "git",
             "currentValueTemplate": "main"
+        },
+        {
+            "customType": "regex",
+            "fileMatch": [
+                "argocd/.+\\.yaml$"
+            ],
+            "matchStrings": [
+                "#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\n\\s*tag:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
+            ]
         }
     ],
     "automerge": true,
