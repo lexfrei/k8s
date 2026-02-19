@@ -24,6 +24,7 @@ spec:
 
           image:
             repository: lexfrei/papermc
+            # renovate: datasource=docker depName=lexfrei/papermc versioning=loose
             tag: "1.21.11-116"
             pullPolicy: IfNotPresent
 
