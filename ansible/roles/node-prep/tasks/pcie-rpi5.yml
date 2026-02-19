@@ -1,0 +1,41 @@
+---
+# PCIe Gen 3 and ASPM configuration for Raspberry Pi 5
+# Gen 3 is experimental on RPi5 but stable in our testing (0 AER errors)
+# ASPM disabled to prevent power management latency on NVMe
+
+- name: Detect Raspberry Pi 5
+  ansible.builtin.command: grep -q "Raspberry Pi 5" /proc/device-tree/model
+  register: rpi5_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - pcie
+    - rpi5
+
+- name: Configure PCIe for Raspberry Pi 5
+  when: rpi5_check.rc == 0
+  tags:
+    - pcie
+    - rpi5
+  block:
+    - name: Enable PCIe Gen 3 in config.txt
+      ansible.builtin.blockinfile:
+        path: /boot/firmware/config.txt
+        marker: "# {mark} ANSIBLE MANAGED - PCIe Gen 3"
+        block: |
+          dtparam=pciex1
+          dtparam=pciex1_gen=3
+      register: pcie_config_changed
+
+    - name: Add pcie_aspm=off to kernel cmdline
+      ansible.builtin.replace:
+        path: /boot/firmware/current/cmdline.txt
+        regexp: '^((?!.*pcie_aspm=off).+)$'
+        replace: '\1 pcie_aspm=off'
+      register: aspm_config_changed
+
+    - name: Notify reboot required for PCIe changes
+      ansible.builtin.debug:
+        msg: "PCIe configuration changed - reboot required to apply"
+      when: pcie_config_changed.changed or aspm_config_changed.changed
+      changed_when: true

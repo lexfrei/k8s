@@ -71,6 +71,12 @@
       tags:
         - k3s-iopriority
 
+    - name: Configure PCIe for Raspberry Pi 5
+      ansible.builtin.include_tasks: pcie-rpi5.yml
+      tags:
+        - pcie
+        - rpi5
+
     - name: Configure journald volatile storage
       ansible.builtin.include_tasks: journald.yml
       tags:
@@ -103,6 +109,7 @@
           - Watchdog configured and running
           - CPU governor set to {{ node_prep_cpu_governor }}
           - k3s IO priority configured (best-effort/0, nice -10)
+          - PCIe Gen 3 and ASPM off configured (RPi5 only)
           - Journald set to volatile storage ({{ node_prep_journald_runtime_max_use }})
           - Firewall services disabled
           {% if node_prep_system_upgrade_enabled | bool -%}
