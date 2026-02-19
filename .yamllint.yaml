@@ -1,0 +1,10 @@
+extends: relaxed
+
+ignore:
+  - secrets/
+  - ansible/
+
+rules:
+  line-length: disable
+  truthy: disable
+  comments-indentation: disable
