@@ -24,7 +24,7 @@ spec:
 
           image:
             repository: lexfrei/papermc
-            tag: "1.21.11-74"
+            tag: "1.21.11-116"
             pullPolicy: IfNotPresent
 
           ports:
