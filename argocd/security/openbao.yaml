@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://openbao.github.io/openbao-helm"
-      targetRevision: "0.25.4"
+      targetRevision: "0.25.5"
       chart: openbao
       helm:
         valuesObject:
