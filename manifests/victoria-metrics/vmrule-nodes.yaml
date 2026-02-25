@@ -1,0 +1,39 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: nodes
+  namespace: monitoring
+spec:
+  groups:
+    - name: node-health
+      rules:
+        - alert: NodeRebooted
+          expr: changes(node_boot_time_seconds[15m]) > 0
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node {{ $labels.instance }} rebooted"
+            description: >-
+              Node {{ $labels.instance }} boot time changed in the
+              last 15 minutes, indicating a reboot.
+        - alert: NodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.node }} is NotReady"
+            description: >-
+              Node {{ $labels.node }} has been in NotReady state
+              for more than 2 minutes.
+        - alert: NodeUnreachable
+          expr: up{job=~".*node-exporter.*"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.instance }} unreachable"
+            description: >-
+              node-exporter on {{ $labels.instance }} has been
+              unreachable for more than 1 minute. Possible network
+              failure (macb NIC death) or node crash.
