@@ -28,7 +28,10 @@ spec:
                   name: transmission-bot-secrets
                   key: TB_TELEGRAM_TOKEN
             - name: TB_TELEGRAM_ALLOWED_USERS
-              value: "74194657"
+              valueFrom:
+                secretKeyRef:
+                  name: transmission-bot-secrets
+                  key: TB_TELEGRAM_ALLOWED_USERS
             - name: TB_TRANSMISSION_URL
               value: "http://transmission:9091/transmission/rpc"
             - name: TB_LOG_LEVEL
