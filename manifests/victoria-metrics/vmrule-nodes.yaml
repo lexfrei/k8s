@@ -8,14 +8,16 @@ spec:
     - name: node-health
       rules:
         - alert: NodeRebooted
-          expr: changes(node_boot_time_seconds[15m]) > 0
+          expr: >-
+            (changes(node_boot_time_seconds[15m]) > 0)
+            * on(instance) group_left(nodename) node_uname_info
           labels:
             severity: warning
           annotations:
-            summary: "Node {{ $labels.instance }} rebooted"
+            summary: "Node {{ $labels.nodename }} rebooted"
             description: >-
-              Node {{ $labels.instance }} boot time changed in the
-              last 15 minutes, indicating a reboot.
+              Node {{ $labels.nodename }} ({{ $labels.instance }}) boot
+              time changed in the last 15 minutes, indicating a reboot.
         - alert: NodeNotReady
           expr: kube_node_status_condition{condition="Ready",status="true"} == 0
           for: 2m
@@ -27,13 +29,17 @@ spec:
               Node {{ $labels.node }} has been in NotReady state
               for more than 2 minutes.
         - alert: NodeUnreachable
-          expr: up{job=~".*node-exporter.*"} == 0
+          expr: >-
+            (up{job=~".*node-exporter.*"} == 0)
+            * on(instance) group_left(nodename)
+            last_over_time(node_uname_info[1h])
           for: 1m
           labels:
             severity: critical
           annotations:
-            summary: "Node {{ $labels.instance }} unreachable"
+            summary: "Node {{ $labels.nodename }} unreachable"
             description: >-
-              node-exporter on {{ $labels.instance }} has been
-              unreachable for more than 1 minute. Possible network
-              failure (macb NIC death) or node crash.
+              node-exporter on {{ $labels.nodename }}
+              ({{ $labels.instance }}) has been unreachable for more
+              than 1 minute. Possible network failure (macb NIC death)
+              or node crash.
