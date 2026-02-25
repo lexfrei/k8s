@@ -1,0 +1,19 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: vmalert
+  namespace: monitoring
+spec:
+  datasource:
+    url: http://vmsingle-vmsingle.monitoring.svc:8428
+  remoteWrite:
+    url: http://vmsingle-vmsingle.monitoring.svc:8428
+  selectAllByDefault: true
+  evaluationInterval: 30s
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
