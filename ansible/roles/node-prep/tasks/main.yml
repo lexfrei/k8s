@@ -3,6 +3,8 @@
 # Prepares K3s cluster nodes with required packages and configurations
 
 - name: Node preparation
+  tags:
+    - node-prep
   block:
     - name: Set system hostname
       ansible.builtin.include_tasks: set-hostname.yml
@@ -142,6 +144,3 @@
     - name: Fail the play
       ansible.builtin.fail:
         msg: "Node preparation failed. See error above."
-
-  tags:
-    - node-prep

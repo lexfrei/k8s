@@ -52,7 +52,7 @@
     - zfs-import-cache.service
     - zfs-mount.service
     - zfs.target
-  ignore_errors: true
+  failed_when: false
   tags:
     - zfs
 
