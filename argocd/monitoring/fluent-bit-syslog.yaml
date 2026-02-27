@@ -60,7 +60,7 @@ spec:
                   Mode udp
                   Listen 0.0.0.0
                   Port 5141
-                  Parser syslog-rfc3164
+                  Parser syslog-rfc5424
                   Tag truenas
 
             filters: |
