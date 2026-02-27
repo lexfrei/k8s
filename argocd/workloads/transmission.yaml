@@ -10,55 +10,58 @@ spec:
   destination:
     namespace: transmission-system
     server: "https://kubernetes.default.svc"
-  source:
-    chart: transmission
-    repoURL: ghcr.io/lexfrei/charts
-    targetRevision: 1.7.2
-    helm:
-      valuesObject:
-        podSecurityContext:
-          fsGroup: 1000
-          fsGroupChangePolicy: OnRootMismatch
-        terminationGracePeriodSeconds: 120
-        env:
-          S6_KILL_FINISH_MAXTIME: "90000"
-        livenessProbe: null
-        readinessProbe: null
-        resources:
-          requests:
-            cpu: 200m
-            memory: 256Mi
-          limits:
-            cpu: 800m
-            memory: 512Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            add:
-              - SETUID
-              - SETGID
-              - CHOWN
-            drop:
-              - ALL
-          readOnlyRootFilesystem: false
-        service:
-          torrent:
-            annotations:
-              io.cilium/lb-ipam-ips: "172.16.100.252"
-        httpRoute:
-          enabled: true
-          parentRefs:
-            - name: cilium-gateway-internal
-              namespace: kube-system
-              sectionName: https-home-lex-la
-          hostnames:
-            - transmission.home.lex.la
-        persistence:
-          config:
-            existingClaim: "transmission-config"
-          downloads:
-            type: pvc
-            existingClaim: "transmission-downloads-nfs"
+  sources:
+    - chart: transmission
+      repoURL: ghcr.io/lexfrei/charts
+      targetRevision: 1.7.2
+      helm:
+        valuesObject:
+          podSecurityContext:
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+          terminationGracePeriodSeconds: 120
+          env:
+            S6_KILL_FINISH_MAXTIME: "90000"
+          livenessProbe: null
+          readinessProbe: null
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 800m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - SETUID
+                - SETGID
+                - CHOWN
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false
+          service:
+            torrent:
+              annotations:
+                io.cilium/lb-ipam-ips: "172.16.100.252"
+          httpRoute:
+            enabled: true
+            parentRefs:
+              - name: cilium-gateway-internal
+                namespace: kube-system
+                sectionName: https-home-lex-la
+            hostnames:
+              - transmission.home.lex.la
+          persistence:
+            config:
+              existingClaim: "transmission-config"
+            downloads:
+              type: pvc
+              existingClaim: "transmission-downloads-nfs"
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/transmission
   syncPolicy:
     automated:
       prune: true
