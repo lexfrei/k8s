@@ -28,9 +28,6 @@ spec:
                 namespace: cloudflare-tunnel-system
             hostnames:
               - aleksei.sviridk.in
-    - path: manifests/me-site
-      repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
   project: workloads
   syncPolicy:
     automated:
