@@ -28,6 +28,8 @@ spec:
           serviceMonitor:
             enabled: true
           deschedulerPolicy:
+            metricsProviders:
+              - source: KubernetesMetrics
             profiles:
               - name: default
                 pluginConfig:
@@ -40,12 +42,13 @@ spec:
                           - "PodsWithPVC"
                   - name: LowNodeUtilization
                     args:
-                      thresholds:
-                        cpu: 30
-                        memory: 30
-                      targetThresholds:
-                        cpu: 70
-                        memory: 75
+                      metricsUtilization:
+                        thresholds:
+                          cpu: 30
+                          memory: 30
+                        targetThresholds:
+                          cpu: 70
+                          memory: 75
                   - name: RemoveDuplicates
                   - name: RemovePodsHavingTooManyRestarts
                     args:
