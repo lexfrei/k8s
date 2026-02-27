@@ -18,9 +18,9 @@ galaxy_info:
     - kubernetes
     - k3s
     - cluster
-    - node-preparation
+    - nodeprep
     - arm64
-    - raspberry-pi
+    - raspberrypi
 
 dependencies: []
 

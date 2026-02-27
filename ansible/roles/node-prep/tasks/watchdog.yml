@@ -52,7 +52,7 @@
     name: wd_keepalive
     state: stopped
     enabled: false
-  ignore_errors: true
+  failed_when: false
   tags:
     - watchdog
 

@@ -174,7 +174,7 @@
         daemon_reload: true
 
     - name: Verify timers are active
-      ansible.builtin.command: systemctl list-timers --no-pager
+      ansible.builtin.command: systemctl list-timers --no-pager  # noqa: command-instead-of-module
       register: timer_status
       changed_when: false
 
