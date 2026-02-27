@@ -1,0 +1,93 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: truenas
+  namespace: monitoring
+spec:
+  groups:
+    - name: truenas-health
+      rules:
+        - alert: TrueNASProbeDown
+          expr: probe_success{job="truenas-probe"} == 0
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: "TrueNAS web UI is unreachable"
+            description: >-
+              HTTPS probe to TrueNAS (172.16.10.19) has been failing
+              for more than 3 minutes.
+
+        - alert: TrueNASMetricsDown
+          expr: up{job="graphite-exporter"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "TrueNAS is not sending metrics"
+            description: >-
+              graphite_exporter has not received metrics from TrueNAS
+              for more than 5 minutes. TrueNAS may be down or Graphite
+              reporting is misconfigured.
+
+        - alert: TrueNASZFSPoolNotOnline
+          expr: zfs_pool{state!="online", job="truenas"} > 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              ZFS pool {{ $labels.pool }} is {{ $labels.state }}
+              on TrueNAS
+            description: >-
+              ZFS pool {{ $labels.pool }} on TrueNAS
+              ({{ $labels.instance }}) is in {{ $labels.state }} state.
+              Immediate investigation required.
+
+        - alert: TrueNASDiskTemperatureHigh
+          expr: disk_temperature{job="truenas"} > 50
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Disk temperature high on TrueNAS"
+            description: >-
+              Disk (serial: {{ $labels.serial }}) on TrueNAS has been
+              above 50C for more than 10 minutes. Current: {{ $value }}C.
+
+        - alert: TrueNASHighMemoryUsage
+          expr: >-
+            physical_memory{kind="used", job="truenas"}
+            / (physical_memory{kind="used", job="truenas"}
+            + physical_memory{kind="free", job="truenas"})
+            > 0.95
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "TrueNAS memory usage above 95%"
+            description: >-
+              TrueNAS ({{ $labels.instance }}) memory usage has been
+              above 95% for more than 10 minutes.
+
+        - alert: TrueNASHighCPUUsage
+          expr: 100 - cpu_total{kind="idle", job="truenas"} > 90
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "TrueNAS CPU usage above 90%"
+            description: >-
+              TrueNAS ({{ $labels.instance }}) CPU usage has been
+              above 90% for more than 15 minutes.
+
+        - alert: TrueNASHighSystemLoad
+          expr: system_load{kind="load15", job="truenas"} > 8
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "TrueNAS 15min load average is high"
+            description: >-
+              TrueNAS ({{ $labels.instance }}) 15-minute load average
+              is {{ $value }}, sustained for 10 minutes.
