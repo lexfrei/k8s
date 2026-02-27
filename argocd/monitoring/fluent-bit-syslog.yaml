@@ -41,10 +41,20 @@ spec:
                   Flush 1
                   Log_Level info
                   Parsers_File /fluent-bit/etc/parsers.conf
+                  Parsers_File /fluent-bit/etc/conf/custom_parsers.conf
                   HTTP_Server On
                   HTTP_Listen 0.0.0.0
                   HTTP_Port 2020
                   Health_Check On
+
+            customParsers: |
+              [PARSER]
+                  Name        syslog-rfc5424-nofrac
+                  Format      regex
+                  Regex       ^\<(?<pri>[0-9]{1,5})>1 (?<time>[^ ]+) (?<host>[^ ]+) (?<ident>[^ ]+) (?<pid>[-0-9]+) (?<msgid>[^ ]+) (?<extradata>(\[(.*?)\]|-)+) (?<message>.+)$
+                  Time_Key    time
+                  Time_Format %Y-%m-%dT%H:%M:%S%z
+                  Time_Keep   On
 
             inputs: |
               [INPUT]
@@ -52,7 +62,7 @@ spec:
                   Mode udp
                   Listen 0.0.0.0
                   Port 5140
-                  Parser syslog-rfc5424
+                  Parser syslog-rfc5424-nofrac
                   Tag ilo
 
               [INPUT]
@@ -60,7 +70,7 @@ spec:
                   Mode udp
                   Listen 0.0.0.0
                   Port 5141
-                  Parser syslog-rfc5424
+                  Parser syslog-rfc5424-nofrac
                   Tag truenas
 
             filters: |
