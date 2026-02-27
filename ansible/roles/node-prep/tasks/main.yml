@@ -56,13 +56,15 @@
       tags:
         - timezone
 
-    - name: Configure watchdog
+    - name: Configure watchdog (RPi only - macb/bcm2835_wdt)
       ansible.builtin.include_tasks: watchdog.yml
+      when: inventory_hostname in groups.get('rpi', [])
       tags:
         - watchdog
 
-    - name: Configure CPU governor
+    - name: Configure CPU governor (RPi only - RP1 RCU stalls)
       ansible.builtin.include_tasks: cpu-governor.yml
+      when: inventory_hostname in groups.get('rpi', [])
       tags:
         - cpu-governor
 
@@ -73,14 +75,23 @@
 
     - name: Configure PCIe for Raspberry Pi 5
       ansible.builtin.include_tasks: pcie-rpi5.yml
+      when: inventory_hostname in groups.get('rpi', [])
       tags:
         - pcie
         - rpi5
 
-    - name: Configure journald volatile storage
+    - name: Configure journald volatile storage (RPi only - SD card wear)
       ansible.builtin.include_tasks: journald.yml
+      when: inventory_hostname in groups.get('rpi', [])
       tags:
         - journald
+
+    - name: Configure ZFS (storage nodes only)
+      ansible.builtin.include_tasks: zfs.yml
+      when: inventory_hostname in groups.get('storage', [])
+      tags:
+        - zfs
+        - storage
 
     - name: Disable firewall services
       ansible.builtin.include_tasks: firewall.yml
@@ -106,11 +117,16 @@
           - Network optimization applied (BBR, TCP buffers, security)
           - DNS fallback and caching configured
           - Timezone set to {{ node_prep_timezone }}
-          - Watchdog configured and running
+          {% if inventory_hostname in groups.get('rpi', []) -%}
+          - Watchdog configured and running (macb/bcm2835_wdt)
           - CPU governor set to {{ node_prep_cpu_governor }}
-          - k3s IO priority configured (best-effort/0, nice -10)
-          - PCIe Gen 3 and ASPM off configured (RPi5 only)
+          - PCIe Gen 3 and ASPM off configured
           - Journald set to volatile storage ({{ node_prep_journald_runtime_max_use }})
+          {% endif -%}
+          {% if inventory_hostname in groups.get('storage', []) -%}
+          - ZFS ARC configured (zfs_arc_max)
+          {% endif -%}
+          - k3s IO priority configured (best-effort/0, nice -10)
           - Firewall services disabled
           {% if node_prep_system_upgrade_enabled | bool -%}
           - System upgrade completed

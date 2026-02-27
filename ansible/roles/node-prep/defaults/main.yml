@@ -4,6 +4,8 @@
 
 # Kubernetes dependencies
 # Required for K3s storage and networking functionality
+# TODO: After TrueNAS migration, nfs-common only needed on RPi nodes (if at all)
+# TODO: cpufrequtils only needed on RPi nodes (Xeon uses intel_pstate)
 node_prep_k8s_packages:
   - nfs-common          # NFS client for NFS-based storage (documented in Error 14)
   - multipath-tools     # Device mapper multipath support for storage
@@ -98,6 +100,10 @@ node_prep_timezone: "Etc/UTC"
 
 # Journald configuration
 node_prep_journald_runtime_max_use: "100M"   # Max volatile log size in tmpfs
+
+# ZFS configuration (storage nodes only)
+node_prep_zfs_arc_max: 8589934592            # 8 GB ARC limit
+node_prep_zfs_arc_max_human: "8 GB"          # Human-readable for comments
 
 # System upgrade configuration
 node_prep_system_upgrade_enabled: false      # Upgrade disabled by default (use playbook)

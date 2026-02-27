@@ -1,6 +1,7 @@
 ---
 # Kubernetes cluster inventory (k3s-ansible format)
 # Groups: server (control plane), agent (workers)
+# Cross-cutting groups: rpi (Raspberry Pi nodes), storage (ZFS storage nodes)
 all:
   children:
     k3s_cluster:
@@ -15,11 +16,28 @@ all:
             k8s-cp-03:
               ansible_host: 172.16.101.3
 
-        # Agent group kept empty (required by collection defaults)
+        # K3s agent nodes (workers)
         agent:
-          hosts: {}
+          hosts:
+            k8s-storage-01:
+              ansible_host: 172.16.101.4
 
       vars:
         # K3s version for upgrades
         # Note: k3s-ansible requires explicit version, cannot use "stable" or "latest"
         k3s_version: v1.35.0+k3s3
+
+    # Cross-cutting groups for platform-specific configuration
+    # These overlap with server/agent groups intentionally
+
+    # Raspberry Pi 5 nodes (ARM64, macb NIC, bcm2835_wdt, SD/NVMe boot)
+    rpi:
+      hosts:
+        k8s-cp-01:
+        k8s-cp-02:
+        k8s-cp-03:
+
+    # ZFS storage nodes (x86_64, LSI SAS HBA, Intel AHCI, USB boot chain)
+    storage:
+      hosts:
+        k8s-storage-01:

@@ -1,0 +1,71 @@
+---
+# ZFS configuration for storage nodes
+# Installs ZFS packages and configures ARC memory limit
+# Only runs on nodes in the 'storage' group
+
+- name: Install ZFS packages
+  ansible.builtin.apt:
+    name:
+      - zfsutils-linux
+    state: present
+  tags:
+    - zfs
+    - packages
+
+- name: Configure ZFS ARC memory limit
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/zfs.conf
+    content: |
+      # Ansible managed
+      # Limit ZFS ARC to {{ node_prep_zfs_arc_max_human }} to leave RAM for k8s workloads
+      # Tunable at runtime: echo VALUE > /sys/module/zfs/parameters/zfs_arc_max
+      options zfs zfs_arc_max={{ node_prep_zfs_arc_max }}
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - zfs
+
+- name: Apply ZFS ARC limit at runtime (no reboot needed)
+  ansible.builtin.shell: |
+    if [ -f /sys/module/zfs/parameters/zfs_arc_max ]; then
+      current=$(cat /sys/module/zfs/parameters/zfs_arc_max)
+      if [ "$current" != "{{ node_prep_zfs_arc_max }}" ]; then
+        echo {{ node_prep_zfs_arc_max }} > /sys/module/zfs/parameters/zfs_arc_max
+        echo "changed"
+      else
+        echo "ok"
+      fi
+    else
+      echo "skipped (ZFS module not loaded)"
+    fi
+  register: arc_result
+  changed_when: "'changed' in arc_result.stdout"
+  tags:
+    - zfs
+
+- name: Enable ZFS auto-import
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+  loop:
+    - zfs-import-cache.service
+    - zfs-mount.service
+    - zfs.target
+  ignore_errors: true
+  tags:
+    - zfs
+
+- name: Verify ZFS pool status
+  ansible.builtin.command: zpool status
+  register: zpool_status
+  changed_when: false
+  failed_when: false
+  tags:
+    - zfs
+
+- name: Display ZFS pool status
+  ansible.builtin.debug:
+    msg: "{{ zpool_status.stdout_lines | default(['No ZFS pools found']) }}"
+  tags:
+    - zfs
