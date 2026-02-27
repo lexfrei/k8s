@@ -746,16 +746,17 @@ At any point before Phase 7 (NFS decommission):
 ## Decisions Made
 
 - [x] **Node hostname**: `k8s-storage-01`
-- [x] **IP address**: new IP from k8s node range (not 172.16.10.19)
+- [x] **IP address**: 172.16.101.4 (next in k8s node range after .1/.2/.3)
 - [x] **Storage strategy**: OpenEBS ZFS LocalPV (Longhorn incompatible with ZFS, see above)
 - [x] **ZFS ARC memory**: 8 GB (tunable at runtime)
 - [x] **Taint strategy**: no taint, first general-purpose worker node
 - [x] **Transmission downloads**: hostPath (`/pool/transmission`)
+- [x] **Samba image**: built in this repo, pushed to `ghcr.io/lexfrei/samba`
+- [x] **SMART monitoring**: works directly via `smartctl /dev/sdX` (mpt3sas SAT passthrough), no special flags needed
 
 ## Open Questions
 
-- [ ] **pool/Lex backup strategy**: what off-site backup to set up? (Backblaze B2, rsync to another machine, zfs send to remote) -- urgent regardless of migration
-- [ ] Samba image repo: standalone `lexfrei/samba` or monorepo? (TBA)
+- [ ] **pool/Lex backup strategy**: what off-site backup to set up? (Backblaze B2, rsync to another machine, zfs send to remote) -- urgent regardless of migration, owner is doing this independently
 
 ## References
 
