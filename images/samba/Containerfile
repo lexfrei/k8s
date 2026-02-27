@@ -1,0 +1,11 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache samba-server samba-common-tools
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 445/tcp
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["smbd", "--foreground", "--no-process-group"]
