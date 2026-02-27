@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/instance: graphite-exporter
   annotations:
     internal-dns/hostname: graphite.home.lex.la
-    internal-dns/target: "172.16.100.102"
+    internal-dns/target: ""
 spec:
   type: LoadBalancer
   ports:
