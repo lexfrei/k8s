@@ -73,6 +73,8 @@ spec:
               enabled: true
               size: 10Gi
               storageClass: longhorn
+              whenScaled: Retain
+              whenDeleted: Retain
             podSecurityContext:
               fsGroup: 10001
               fsGroupChangePolicy: OnRootMismatch
