@@ -42,13 +42,13 @@ spec:
                           - "PodsWithPVC"
                   - name: LowNodeUtilization
                     args:
-                      metricsUtilization:
-                        thresholds:
-                          cpu: 30
-                          memory: 30
-                        targetThresholds:
-                          cpu: 70
-                          memory: 75
+                      thresholds:
+                        cpu: 30
+                        memory: 30
+                      targetThresholds:
+                        cpu: 70
+                        memory: 75
+                      useActualUsage: true
                   - name: RemoveDuplicates
                   - name: RemovePodsHavingTooManyRestarts
                     args:
