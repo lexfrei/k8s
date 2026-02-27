@@ -24,7 +24,7 @@ or 2 simultaneous disk failures (4x same-model WD Red, same age = correlated fai
 
 ## Goal
 
-Replace TrueNAS SCALE with a standard Linux (Ubuntu 24.04) installation on the same
+Replace TrueNAS SCALE with a standard Linux (Ubuntu 25.10) installation on the same
 hardware, add the server as a 4th node in the k8s cluster, and run SMB/TimeMachine
 as containerized workloads. Eliminate NFS dependency that previously caused a
 cluster-wide cascade failure (see `postmortems/2025-11-14-nfs-dns-cilium-cascade-failure.md`).
@@ -70,7 +70,7 @@ Broadcom BCM5720 is the dual-port 1GbE onboard NIC (standard for ML310e Gen8 v2)
 Realtek RTL8125 is a PCIe add-in 2.5GbE card — all traffic currently runs through it.
 
 **Migration note:** The RTL8125 uses the `r8169` kernel driver (in-tree since Linux 5.9).
-No special driver installation needed for Ubuntu 24.04. The onboard BCM5720 (`tg3` driver)
+No special driver installation needed for Ubuntu 25.10. The onboard BCM5720 (`tg3` driver)
 can serve as a fallback if the Realtek card has issues. RPi nodes use 1 Gbps, so
 the 2.5 Gbps link provides headroom for storage-heavy workloads on this node.
 
@@ -766,7 +766,7 @@ be installed with this constraint in mind.
 
 1. **Disconnect data disks** (sda, sdc, sdd, sde on LSI SAS2008) -- leave only
    boot SSD (sdf on Intel AHCI) and USB flash (sdb on xHCI)
-2. Install Ubuntu 24.04 LTS:
+2. Install Ubuntu 25.10 LTS:
    - Boot from Ubuntu USB installer (temporarily remove DataTraveler, use installer USB)
    - Install root filesystem on SSD (sdf)
    - Install GRUB to the DataTraveler USB (sdb) -- the BIOS boots from USB
@@ -841,7 +841,7 @@ Migrate one at a time, verify after each:
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| ZFS DKMS breaks on kernel update | Pool unavailable until rebuild | Pin kernel version, test updates in staging, keep previous kernel in GRUB |
+| ZFS module breaks on kernel update | Pool unavailable until rebuild | Ubuntu ships ZFS as native package (not DKMS), keep previous kernel in GRUB as fallback. Plan: migrate all nodes to 26.04 LTS when available |
 | Samba container crash | SMB unavailable | k8s auto-restart, Deployment with liveness probe on port 445 |
 | TimeMachine instability in container | Backup corruption | Test thoroughly before go-live, keep TrueNAS config backup for rollback |
 | ZFS LocalPV CSI driver failure | Pods can't mount storage | CSI driver is a DaemonSet with auto-restart, ZFS datasets survive driver restarts |
