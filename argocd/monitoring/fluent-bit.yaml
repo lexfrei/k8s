@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://fluent.github.io/helm-charts"
-    targetRevision: "0.55.0"
+    targetRevision: "0.55.1"
     chart: fluent-bit
     helm:
       valuesObject:
