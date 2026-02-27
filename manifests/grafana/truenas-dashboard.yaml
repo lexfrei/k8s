@@ -1,0 +1,14 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: truenas-server-overview
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  url: https://raw.githubusercontent.com/lexfrei/k8s/master/dashboards/truenas/truenas-server.json
+  datasources:
+    - inputName: "DS_VICTORIAMETRICS"
+      datasourceName: "VictoriaMetrics"
+    - inputName: "DS_LOKI"
+      datasourceName: "Loki"
