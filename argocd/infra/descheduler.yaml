@@ -46,7 +46,7 @@ spec:
                         metricsServer: true
                       thresholds:
                         cpu: 40
-                        memory: 55
+                        memory: 60
                       targetThresholds:
                         cpu: 70
                         memory: 75
