@@ -1,0 +1,7 @@
+FROM alpine:3.23
+
+RUN apk add --no-cache avahi=0.8-r23
+
+COPY services/ /etc/avahi/services/
+
+CMD ["avahi-daemon", "--no-drop-root", "--no-rlimits"]
