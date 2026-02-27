@@ -355,21 +355,28 @@ BEFORE (current):
 
 AFTER (target):
   k8s cluster (4 nodes, including ex-TrueNAS)
-    ├─ ex-TrueNAS node:
-    │   ├─ ZFS pool (imported, hostPath)
-    │   ├─ Samba pod (hostPath to ZFS datasets, LoadBalancer IP)
-    │   ├─ Longhorn replica (using ZFS-backed local storage)
+    ├─ k8s-storage-01 (ex-TrueNAS, 172.16.101.4):
+    │   ├─ ZFS pool (imported)
+    │   ├─ OpenEBS ZFS LocalPV CSI driver
+    │   ├─ Static PVs: pool/lex, pool/dump, pool/timemachine, pool/transmission
+    │   ├─ Dynamic PVs: pool/pvc-* (etcd-backup, VMSingle, etc.)
+    │   ├─ Samba pod (PVC-mounted ZFS datasets, LoadBalancer IP)
+    │   ├─ Transmission pod (PVC for downloads + PVC for config)
     │   └─ node-exporter, kubelet (standard monitoring)
     │
-    ├─ Workloads that used NFS:
-    │   ├─ etcd-backup → Longhorn PVC (or local on ex-TrueNAS)
-    │   ├─ OpenBao → Longhorn PVC (already uses longhorn-remote)
-    │   ├─ VMSingle → Longhorn PVC
-    │   ├─ Transmission config → Longhorn PVC
-    │   └─ Transmission downloads → hostPath on ex-TrueNAS node
+    ├─ Migrated workloads (NFS → ZFS LocalPV):
+    │   ├─ etcd-backup → zfs-localpv PVC (dynamic)
+    │   ├─ VMSingle → zfs-localpv PVC (dynamic, benefits from ZFS compression)
+    │   ├─ Transmission config → zfs-localpv PVC (dynamic)
+    │   ├─ Transmission downloads → zfs-localpv PVC (static import of pool/transmission)
+    │   └─ OpenBao → longhorn-remote PVC (unchanged)
     │
     └─ macOS ──SMB──> Samba pod (LoadBalancer IP)
 ```
+
+**Zero hostPath.** All storage access goes through CSI PVCs — existing datasets are
+imported via static provisioning, new volumes are created dynamically. This gives
+proper k8s lifecycle management, VolumeSnapshot support, and `kubectl get pvc` visibility.
 
 ## ZFS Dataset Restructuring
 
@@ -455,28 +462,48 @@ zfs set mountpoint=/pool/transmission pool/transmission
 zfs list -o name,mountpoint,used,available
 ```
 
-### Samba Paths After Restructuring
+### Volume Mapping After Restructuring
 
-The smb.conf paths map directly to the new mountpoints:
+Each ZFS dataset becomes a static PV via OpenEBS ZFS LocalPV (see "Importing existing
+datasets" section above). Pods mount PVCs, not hostPath.
 
-| Share | Old path (TrueNAS) | New path (Linux) |
-| --- | --- | --- |
-| TimeMachine | /mnt/pool/TimeMachine/lex | /pool/timemachine |
-| Lex | /mnt/pool/Lex/lex | /pool/lex |
-| Dump | /mnt/pool/Dump | /pool/dump |
-| Transmission | /mnt/pool/Transmission | /pool/transmission |
+| Dataset | PV Name | PVC | Consumer(s) | Access Mode |
+| --- | --- | --- | --- | --- |
+| pool/lex | pool-lex | samba-lex | Samba | RWO |
+| pool/dump | pool-dump | samba-dump | Samba | RWO |
+| pool/timemachine | pool-timemachine | samba-timemachine | Samba | RWO |
+| pool/transmission | pool-transmission | transmission-data | Samba + Transmission | **RWX** (shared) |
 
-In the Samba container, these are mounted via hostPath and appear as `/data/*`:
+**pool/transmission is shared** between Samba (read-only SMB access) and Transmission
+(write downloads). Requires `shared: "yes"` in the ZFSVolume CR and `ReadWriteMany`
+access mode on the PV. Both pods run on k8s-storage-01.
+
+In the Samba container, PVCs are mounted as `/data/*`:
 
 ```yaml
+volumeMounts:
+  - name: timemachine
+    mountPath: /data/timemachine
+  - name: lex
+    mountPath: /data/lex
+  - name: dump
+    mountPath: /data/dump
+  - name: transmission
+    mountPath: /data/transmission
+    readOnly: true               # Samba serves Transmission read-only
 volumes:
   - name: timemachine
-    hostPath:
-      path: /pool/timemachine
+    persistentVolumeClaim:
+      claimName: samba-timemachine
   - name: lex
-    hostPath:
-      path: /pool/lex
-# ...
+    persistentVolumeClaim:
+      claimName: samba-lex
+  - name: dump
+    persistentVolumeClaim:
+      claimName: samba-dump
+  - name: transmission
+    persistentVolumeClaim:
+      claimName: transmission-data
 ```
 
 ## Storage Strategy: OpenEBS ZFS LocalPV
@@ -544,6 +571,81 @@ allowVolumeExpansion: true
 - Clones from snapshots (instant, zero copy)
 - Thin provisioning (no pre-allocation)
 - Compression per-volume
+
+**Importing existing datasets (static provisioning):**
+
+ZFS LocalPV supports importing pre-existing ZFS datasets as PVs. This is how
+Samba and Transmission get their existing data without hostPath:
+
+1. Set mountpoint to legacy: `zfs set mountpoint=legacy pool/lex`
+2. Create a `ZFSVolume` CR (registers the dataset with the CSI driver)
+3. Create a `PersistentVolume` with `csi.volumeHandle: pool/lex`
+4. Create a `PersistentVolumeClaim` bound to that PV
+5. Pod mounts the PVC — CSI driver mounts the ZFS dataset
+
+Example for `pool/lex`:
+
+```yaml
+# 1. ZFSVolume CR (registers dataset with CSI driver)
+apiVersion: zfs.openebs.io/v1
+kind: ZFSVolume
+metadata:
+  name: pool-lex
+  namespace: openebs
+  finalizers: []              # no finalizer = CSI won't destroy dataset on PV delete
+spec:
+  capacity: "1099511627776"   # 1 TB (informational, ZFS uses actual dataset size)
+  fsType: zfs
+  ownerNodeID: k8s-storage-01
+  poolName: pool
+  volumeType: DATASET
+status:
+  state: Ready
+---
+# 2. PersistentVolume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pool-lex
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain    # CRITICAL: never delete the dataset
+  storageClassName: zfs-localpv
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeHandle: pool-lex
+    volumeAttributes:
+      openebs.io/poolname: pool
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values: [k8s-storage-01]
+---
+# 3. PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: samba-lex
+  namespace: samba
+spec:
+  storageClassName: zfs-localpv
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Ti
+  volumeName: pool-lex       # binds to specific PV
+```
+
+**IMPORTANT:** `persistentVolumeReclaimPolicy: Retain` and no finalizer on ZFSVolume
+ensure that deleting the PVC/PV will **never** destroy the underlying ZFS dataset.
+
+Same pattern for all 4 datasets: pool/lex, pool/dump, pool/timemachine, pool/transmission.
 
 **Limitations:**
 
@@ -635,15 +737,22 @@ echo 8589934592 > /sys/module/zfs/parameters/zfs_arc_max
 
 ### Phase 2: Prepare k8s Manifests
 
-1. Create `manifests/samba/` with:
-   - Deployment (or DaemonSet with nodeAffinity to ex-TrueNAS node)
+1. Create `manifests/openebs-zfs/` with:
+   - StorageClass `zfs-localpv`
+   - Static PVs + ZFSVolume CRs for existing datasets (lex, dump, timemachine, transmission)
+   - pool/transmission ZFSVolume with `shared: "yes"` for RWX
+2. Create `argocd/infra/openebs-zfs.yaml` (Helm chart + manifests)
+3. Create `manifests/samba/` with:
+   - Deployment (nodeAffinity to k8s-storage-01)
    - Service (LoadBalancer, Cilium L2 IPAM)
    - ConfigMap (smb.conf)
    - ExternalSecret (SMB password from OpenBao)
-2. Create `argocd/workloads/samba.yaml`
-3. Prepare Longhorn PVC manifests for migrated workloads
-4. Update Transmission manifests (hostPath instead of NFS PV)
-5. Remove/update CSI NFS driver configuration
+   - PVCs bound to static PVs (lex, dump, timemachine, transmission)
+4. Create `argocd/workloads/samba.yaml`
+5. Update Transmission manifests:
+   - Downloads PVC → bound to static PV `pool-transmission` (RWX shared with Samba)
+   - Config PVC → dynamic `zfs-localpv` PVC
+6. Prepare dynamic PVC manifests for migrated NFS workloads (etcd-backup, VMSingle)
 
 ### Phase 3: Install Ubuntu on TrueNAS Hardware
 
@@ -681,23 +790,31 @@ be installed with this constraint in mind.
 6. Install OpenEBS ZFS LocalPV CSI driver (see "Storage Strategy" section)
 7. Configure ZFS ARC memory limit (see "ZFS ARC Memory" section)
 
-### Phase 5: Deploy Samba
+### Phase 5: Deploy Samba + Import Existing Datasets
 
-1. Push Samba manifests to git
-2. ArgoCD syncs and deploys Samba pod on the storage node
-3. Samba pod mounts ZFS datasets via hostPath
-4. Verify SMB access from macOS
-5. Verify TimeMachine backup works
-6. Update internal-dns if needed (truenas.home.lex.la or new hostname)
+1. Set `mountpoint=legacy` on all datasets:
+   ```bash
+   for ds in lex dump timemachine transmission; do
+     zfs set mountpoint=legacy pool/$ds
+   done
+   ```
+2. Push OpenEBS ZFS LocalPV manifests (StorageClass, static PVs, ZFSVolume CRs)
+3. Verify PVs are `Available`: `kubectl get pv`
+4. Push Samba manifests (Deployment, Service, ConfigMap, PVCs)
+5. ArgoCD syncs → Samba pod mounts datasets via CSI PVCs
+6. Verify SMB access from macOS: `smb://samba.home.lex.la/Lex`
+7. Verify TimeMachine backup works: System Preferences > Time Machine
+8. Update DNS (samba.home.lex.la → LoadBalancer IP)
 
 ### Phase 6: Migrate NFS Workloads
 
 Migrate one at a time, verify after each:
 
-1. **etcd-backup**: change PVC to zfs-localpv or Longhorn
-2. **VMSingle**: change PVC to zfs-localpv (benefits from ZFS compression)
-3. **Transmission config**: change PVC to zfs-localpv or Longhorn
-4. **Transmission downloads**: hostPath on k8s-storage-01 (`/pool/transmission`)
+1. **Transmission downloads**: bind PVC to static PV `pool-transmission` (RWX, shared
+   with Samba). Transmission writes, Samba serves read-only via SMB.
+2. **Transmission config**: new dynamic `zfs-localpv` PVC
+3. **etcd-backup**: change PVC to `zfs-localpv` (dynamic)
+4. **VMSingle**: change PVC to `zfs-localpv` (dynamic, benefits from ZFS compression)
 5. **OpenBao**: already on longhorn-remote, verify no NFS dependency
 
 ### Phase 7: Decommission NFS
@@ -723,7 +840,7 @@ Migrate one at a time, verify after each:
 | ZFS DKMS breaks on kernel update | Pool unavailable until rebuild | Pin kernel version, test updates in staging, keep previous kernel in GRUB |
 | Samba container crash | SMB unavailable | k8s auto-restart, Deployment with liveness probe on port 445 |
 | TimeMachine instability in container | Backup corruption | Test thoroughly before go-live, keep TrueNAS config backup for rollback |
-| hostPath security | Pod access to host filesystem | nodeAffinity pins to storage node, RBAC restricts who can deploy hostPath |
+| ZFS LocalPV CSI driver failure | Pods can't mount storage | CSI driver is a DaemonSet with auto-restart, ZFS datasets survive driver restarts |
 | ZFS pool import fails | Data loss | Snapshot before migration, keep TrueNAS boot media as rollback |
 | **pool/Lex data loss** | **Irreplaceable (photo archive, personal files)** | **External backup BEFORE migration, ZFS snapshot, verify after every step** |
 | Correlated disk failure (4x same-model WD Red) | Pool loss, all data gone | RAIDZ1 survives only 1 disk -- set up off-site backup independently of migration |
@@ -750,7 +867,7 @@ At any point before Phase 7 (NFS decommission):
 - [x] **Storage strategy**: OpenEBS ZFS LocalPV (Longhorn incompatible with ZFS, see above)
 - [x] **ZFS ARC memory**: 8 GB (tunable at runtime)
 - [x] **Taint strategy**: no taint, first general-purpose worker node
-- [x] **Transmission downloads**: hostPath (`/pool/transmission`)
+- [x] **Transmission downloads**: ZFS LocalPV static PV (RWX shared with Samba)
 - [x] **Samba image**: built in this repo, pushed to `ghcr.io/lexfrei/samba`
 - [x] **SMART monitoring**: works directly via `smartctl /dev/sdX` (mpt3sas SAT passthrough), no special flags needed
 
@@ -770,6 +887,8 @@ At any point before Phase 7 (NFS decommission):
 ### Storage
 
 - [OpenEBS ZFS LocalPV](https://github.com/openebs/zfs-localpv) -- chosen CSI driver
+- [ZFS LocalPV: Import Existing Volume](https://github.com/openebs/zfs-localpv/blob/develop/docs/import-existing-volume.md) -- static provisioning for existing datasets
+- [ZFS LocalPV: Shared Volumes](https://github.com/openebs/zfs-localpv/issues/152) -- RWX support via `shared: "yes"`
 - [Longhorn ZFS incompatibility #5106](https://github.com/longhorn/longhorn/issues/5106) -- FIEMAP not supported
 - [Longhorn ZFS incompatibility #11125](https://github.com/longhorn/longhorn/issues/11125) -- confirmed by maintainer
 - [Kubernetes and Longhorn on ZFS (zvol workaround)](https://scvalex.net/posts/49/) -- anti-pattern documented
