@@ -29,6 +29,10 @@ spec:
               containerPort: 5140
               protocol: UDP
               name: syslog
+            - port: 5141
+              containerPort: 5141
+              protocol: UDP
+              name: syslog-truenas
 
           config:
             service: |
@@ -51,6 +55,14 @@ spec:
                   Parser syslog-rfc5424
                   Tag ilo
 
+              [INPUT]
+                  Name syslog
+                  Mode udp
+                  Listen 0.0.0.0
+                  Port 5141
+                  Parser syslog-rfc3164
+                  Tag truenas
+
             filters: |
               [FILTER]
                   Name grep
@@ -62,6 +74,11 @@ spec:
                   Match ilo
                   Add job ilo-syslog
 
+              [FILTER]
+                  Name modify
+                  Match truenas
+                  Add job truenas-syslog
+
             outputs: |
               [OUTPUT]
                   Name loki
@@ -69,6 +86,15 @@ spec:
                   host loki.monitoring.svc
                   port 3100
                   labels job=ilo-syslog
+                  line_format json
+                  auto_kubernetes_labels off
+
+              [OUTPUT]
+                  Name loki
+                  Match truenas
+                  host loki.monitoring.svc
+                  port 3100
+                  labels job=truenas-syslog
                   line_format json
                   auto_kubernetes_labels off
 
