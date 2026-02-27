@@ -41,7 +41,7 @@ cluster-wide cascade failure (see `postmortems/2025-11-14-nfs-dns-cilium-cascade
 | Boot | Kingston SA400S37 240 GB SSD (sdf, Intel AHCI ata-6) |
 | USB | DataTraveler 3.0 32 GB (sdb, USB 3.0 xHCI) |
 | Pool disks | 4x WDC WD40EFRX 4 TB (sda, sdc, sdd, sde) |
-| Network | 3x NIC (ens1 active at 172.16.10.19/16, eno1/eno2 unused) |
+| Network | Realtek RTL8125 2.5GbE PCIe (ens1, active at 172.16.10.19/16) + Broadcom BCM5720 2x 1GbE onboard (eno1/eno2, unused) |
 | iLO | 172.16.10.121 (IPMI exporter + syslog already monitored) |
 
 ### Storage Controllers
@@ -57,6 +57,22 @@ Two independent storage controllers — HDD and SSD are on **different buses**:
 **Key detail:** The SSD is connected to the Intel AHCI controller on ata-6, which is
 the ODD (Optical Disk Drive) port. The BIOS cannot boot directly from this port,
 hence the USB chainload boot mechanism (see below).
+
+### Network Controllers
+
+| Interface | Chip | PCI Address | Speed | State |
+| --- | --- | --- | --- | --- |
+| ens1 (enp13s0) | Realtek RTL8125 | 0000:0d:00.0 | 2.5 Gbps | UP (active) |
+| eno1 (enp3s0f0) | Broadcom BCM5720 | 0000:03:00.0 | 1 Gbps | DOWN (unused) |
+| eno2 (enp3s0f1) | Broadcom BCM5720 | 0000:03:00.1 | 1 Gbps | DOWN (unused) |
+
+Broadcom BCM5720 is the dual-port 1GbE onboard NIC (standard for ML310e Gen8 v2).
+Realtek RTL8125 is a PCIe add-in 2.5GbE card — all traffic currently runs through it.
+
+**Migration note:** The RTL8125 uses the `r8169` kernel driver (in-tree since Linux 5.9).
+No special driver installation needed for Ubuntu 24.04. The onboard BCM5720 (`tg3` driver)
+can serve as a fallback if the Realtek card has issues. RPi nodes use 1 Gbps, so
+the 2.5 Gbps link provides headroom for storage-heavy workloads on this node.
 
 ### Boot Chain
 
