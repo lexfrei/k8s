@@ -9,7 +9,7 @@ spec:
       rules:
         - alert: NodeRebooted
           expr: >-
-            (changes(node_boot_time_seconds[15m]) > 0)
+            ((time() - node_boot_time_seconds) < 900)
             * on(instance) group_left(nodename) node_uname_info
           for: 5m
           labels:
@@ -17,8 +17,8 @@ spec:
           annotations:
             summary: "Node {{ $labels.nodename }} rebooted"
             description: >-
-              Node {{ $labels.nodename }} ({{ $labels.instance }}) boot
-              time changed in the last 15 minutes, indicating a reboot.
+              Node {{ $labels.nodename }} ({{ $labels.instance }}) uptime
+              is less than 15 minutes, indicating a recent reboot.
         - alert: NodeNotReady
           expr: kube_node_status_condition{condition="Ready",status="true"} == 0
           for: 2m
