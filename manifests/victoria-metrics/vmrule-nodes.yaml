@@ -11,6 +11,7 @@ spec:
           expr: >-
             (changes(node_boot_time_seconds[15m]) > 0)
             * on(instance) group_left(nodename) node_uname_info
+          for: 5m
           labels:
             severity: warning
           annotations:
