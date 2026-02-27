@@ -5,7 +5,6 @@ metadata:
   namespace: kube-system
   annotations:
     cert-manager.io/cluster-issuer: "cloudflare-issuer"
-    internal-dns/target: "172.16.100.250"
 spec:
   gatewayClassName: cilium
   addresses:
