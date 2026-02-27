@@ -31,7 +31,16 @@ spec:
             name: ipmi-exporter
             key: config.yml
           scrapeConfig:
-            enabled: false
+            enabled: true
+            mode: remote
+            modules:
+              - default
+            scrapeInterval: 1m
+            scrapeTimeout: 30s
+            scheme: HTTP
+            staticConfigs:
+              - targets:
+                  - "172.16.10.121"
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/ipmi-exporter
