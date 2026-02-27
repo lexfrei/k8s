@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: descheduler
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: kube-system
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://kubernetes-sigs.github.io/descheduler/"
+      targetRevision: "0.35.0"
+      chart: descheduler
+      helm:
+        valuesObject:
+          kind: CronJob
+          schedule: "*/5 * * * *"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          serviceMonitor:
+            enabled: true
+          deschedulerPolicy:
+            profiles:
+              - name: default
+                pluginConfig:
+                  - name: DefaultEvictor
+                    args:
+                      podProtections:
+                        defaultDisabled:
+                          - "PodsWithLocalStorage"
+                        extraEnabled:
+                          - "PodsWithPVC"
+                  - name: LowNodeUtilization
+                    args:
+                      thresholds:
+                        cpu: 30
+                        memory: 30
+                      targetThresholds:
+                        cpu: 70
+                        memory: 75
+                  - name: RemoveDuplicates
+                  - name: RemovePodsHavingTooManyRestarts
+                    args:
+                      podRestartThreshold: 50
+                      includingInitContainers: true
+                  - name: RemovePodsViolatingNodeAffinity
+                    args:
+                      nodeAffinityType:
+                        - requiredDuringSchedulingIgnoredDuringExecution
+                plugins:
+                  balance:
+                    enabled:
+                      - LowNodeUtilization
+                      - RemoveDuplicates
+                  deschedule:
+                    enabled:
+                      - RemovePodsHavingTooManyRestarts
+                      - RemovePodsViolatingNodeAffinity
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
