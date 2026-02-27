@@ -13,8 +13,8 @@
     - system-upgrade
     - apt
 
-- name: Perform system upgrade
-  ansible.builtin.shell:
+- name: Perform system upgrade  # noqa: command-instead-of-module command-instead-of-shell
+  ansible.builtin.command:
     cmd: apt-get upgrade --with-new-pkgs --assume-yes --option Dpkg::Options::="--force-confdef" --option Dpkg::Options::="--force-confold"
   environment:
     DEBIAN_FRONTEND: noninteractive
@@ -55,10 +55,8 @@
   ansible.builtin.debug:
     msg: >-
       {%- if reboot_required_file.stat.exists -%}
-      ⚠️  Reboot is required on {{ inventory_hostname }}
-      {%- else -%}
-      ✓ No reboot required on {{ inventory_hostname }}
-      {%- endif -%}
+      ⚠️  Reboot is required on {{ inventory_hostname }}{%- else -%}
+      ✓ No reboot required on {{ inventory_hostname }}{%- endif -%}
   when: node_prep_system_upgrade_enabled | bool
   tags:
     - system-upgrade

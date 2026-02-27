@@ -18,7 +18,7 @@
 - name: Display installed packages count
   ansible.builtin.debug:
     msg: "Installed {{ node_prep_apt_packages | length }} APT packages on {{ inventory_hostname }}"
-  when: apt_install_result.changed
+  changed_when: false
   tags:
     - packages
     - apt-packages

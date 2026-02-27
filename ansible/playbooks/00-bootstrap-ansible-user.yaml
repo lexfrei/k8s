@@ -17,14 +17,14 @@
 
   tasks:
     - name: Check if ansible user already exists
-      getent:
+      ansible.builtin.getent:
         database: passwd
         key: ansible
       register: ansible_user_check
       failed_when: false
 
     - name: Create ansible user
-      user:
+      ansible.builtin.user:
         name: ansible
         comment: "Ansible automation user"
         shell: /bin/bash
@@ -34,7 +34,7 @@
       when: ansible_user_check.ansible_facts.getent_passwd is not defined
 
     - name: Ensure .ssh directory exists
-      file:
+      ansible.builtin.file:
         path: /home/ansible/.ssh
         state: directory
         owner: ansible
@@ -42,14 +42,14 @@
         mode: '0700'
 
     - name: Add ansible SSH public key
-      authorized_key:
+      ansible.posix.authorized_key:
         user: ansible
         key: "{{ ansible_public_key }}"
         state: present
         exclusive: false
 
     - name: Configure passwordless sudo for ansible user
-      copy:
+      ansible.builtin.copy:
         content: |
           # Ansible automation user - passwordless sudo
           ansible ALL=(ALL) NOPASSWD:ALL
@@ -60,18 +60,18 @@
         validate: 'visudo -cf %s'
 
     - name: Lock ansible user password
-      user:
+      ansible.builtin.user:
         name: ansible
         password_lock: true
 
     - name: Verify ansible user can sudo
       become: true
       become_user: ansible
-      command: sudo -n true
+      ansible.builtin.command: sudo -n true
       changed_when: false
 
     - name: Display success message
-      debug:
+      ansible.builtin.debug:
         msg: |
           ✓ Ansible user successfully bootstrapped on {{ inventory_hostname }}
           ✓ SSH key deployed

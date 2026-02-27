@@ -50,7 +50,7 @@
         name: cpufrequtils
         enabled: true
         state: started
-      ignore_errors: true
+      failed_when: false
 
     - name: Verify CPU governor applied
       ansible.builtin.slurp:
