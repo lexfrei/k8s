@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphite-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: graphite-exporter
+    app.kubernetes.io/instance: graphite-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: graphite-exporter
+      app.kubernetes.io/instance: graphite-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: graphite-exporter
+        app.kubernetes.io/instance: graphite-exporter
+    spec:
+      containers:
+        - name: graphite-exporter
+          image: prom/graphite-exporter:v0.16.0
+          args:
+            - --graphite.mapping-config=/config/graphite_mapping.conf
+            - --graphite.listen-address=:2003
+            - --web.listen-address=:9108
+          ports:
+            - name: metrics
+              containerPort: 9108
+              protocol: TCP
+            - name: graphite-tcp
+              containerPort: 2003
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: config
+          configMap:
+            name: graphite-exporter-mapping

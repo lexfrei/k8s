@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphite-exporter-metrics
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: graphite-exporter
+    app.kubernetes.io/instance: graphite-exporter
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 9108
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: graphite-exporter
+    app.kubernetes.io/instance: graphite-exporter
