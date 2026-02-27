@@ -291,7 +291,7 @@ exec "$@"
    valid users = lex
    writable = yes
    fruit:time machine = yes
-   fruit:time machine max size = 500G
+   fruit:time machine max size = 2T
    durable handles = yes
    kernel oplocks = no
    kernel share modes = no
@@ -401,14 +401,15 @@ pool                                          /mnt/pool                    4780 
 ### Target Layout
 
 ```text
-pool                                          /pool                        4780 GB
+pool                                          /pool                       ~4540 GB
 ├── dump                                      /pool/dump                    823 GB
 ├── lex                                       /pool/lex                     920 GB
-├── timemachine                               /pool/timemachine             240 GB
+├── pvc-<uuid>                                (legacy mountpoint)          2048 GB  ← new TimeMachine (dynamic PVC)
 └── transmission                              /pool/transmission           2793 GB
 ```
 
 Flat, lowercase, no wrappers. `pool/k8s` deleted (NFS goes away).
+`pool/TimeMachine` destroyed (old backup data discarded, fresh PVC created with 2 Ti quota).
 
 ### ZFS Rename Rules
 
@@ -441,9 +442,8 @@ zfs rename pool/Lex/lex pool/lex
 ls /pool/lex/  # must show photo archive and other files
 zfs destroy pool/Lex
 
-# Collapse TimeMachine/lex -> timemachine
-zfs rename pool/TimeMachine/lex pool/timemachine
-zfs destroy pool/TimeMachine
+# Destroy old TimeMachine data (will be recreated as fresh dynamic PVC)
+zfs destroy -r pool/TimeMachine
 
 # Lowercase remaining datasets
 zfs rename pool/Dump pool/dump
@@ -455,7 +455,7 @@ zfs rename pool/Transmission pool/transmission
 # Set clean mountpoints (optional, defaults to /pool/<name>)
 zfs set mountpoint=/pool/lex pool/lex
 zfs set mountpoint=/pool/dump pool/dump
-zfs set mountpoint=/pool/timemachine pool/timemachine
+# pool/timemachine no longer exists (destroyed above, recreated as dynamic PVC)
 zfs set mountpoint=/pool/transmission pool/transmission
 
 # Verify
@@ -471,12 +471,15 @@ datasets" section above). Pods mount PVCs, not hostPath.
 | --- | --- | --- | --- | --- |
 | pool/lex | pool-lex | samba-lex | Samba | RWO |
 | pool/dump | pool-dump | samba-dump | Samba | RWO |
-| pool/timemachine | pool-timemachine | samba-timemachine | Samba | RWO |
+| pool/timemachine | *(dynamic)* | samba-timemachine | Samba | RWO |
 | pool/transmission | pool-transmission | transmission-data | Samba + Transmission | **RWX** (shared) |
 
 **pool/transmission is shared** between Samba (read-only SMB access) and Transmission
 (write downloads). Requires `shared: "yes"` in the ZFSVolume CR and `ReadWriteMany`
 access mode on the PV. Both pods run on k8s-storage-01.
+
+**pool/timemachine is NOT imported** — old backup data is discarded. A fresh dynamic
+PVC (2 Ti quota) is created instead. TimeMachine will start a new full backup.
 
 In the Samba container, PVCs are mounted as `/data/*`:
 
@@ -645,7 +648,8 @@ spec:
 **IMPORTANT:** `persistentVolumeReclaimPolicy: Retain` and no finalizer on ZFSVolume
 ensure that deleting the PVC/PV will **never** destroy the underlying ZFS dataset.
 
-Same pattern for all 4 datasets: pool/lex, pool/dump, pool/timemachine, pool/transmission.
+Same pattern for the 3 imported datasets: pool/lex, pool/dump, pool/transmission.
+TimeMachine is a fresh dynamic PVC (old data discarded, new 2 Ti quota).
 
 **Limitations:**
 
