@@ -13,9 +13,28 @@ spec:
     - repoURL: "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"
       targetRevision: "4.13.1"
       chart: csi-driver-nfs
-    - path: manifests/csi-driver-nfs
-      repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
+      helm:
+        valuesObject:
+          storageClass:
+            create: true
+            name: truenas-nfs-csi
+            annotations:
+              storageclass.kubernetes.io/is-default-class: "true"
+            parameters:
+              server: 172.16.10.19
+              share: /mnt/pool/k8s
+            reclaimPolicy: Delete
+            volumeBindingMode: Immediate
+            mountOptions:
+              - nfsvers=4.1
+              - rsize=1048576
+              - wsize=1048576
+              - soft
+              - timeo=100
+              - retrans=2
+              - noresvport
+              - noatime
+              - tcp
   project: default
   syncPolicy:
     automated:
