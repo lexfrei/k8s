@@ -51,7 +51,6 @@ spec:
           txtOwnerId: unifi
           extraArgs:
             - --annotation-prefix=internal-dns/
-            - --annotation-filter=internal-dns/target
           logLevel: info
           logFormat: json
     - path: manifests/internal-dns
