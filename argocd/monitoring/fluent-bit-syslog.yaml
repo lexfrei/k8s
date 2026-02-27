@@ -20,7 +20,15 @@ spec:
           replicaCount: 1
 
           service:
-            type: ClusterIP
+            type: LoadBalancer
+            annotations:
+              io.cilium/lb-ipam-ips: "172.16.100.249"
+
+          extraPorts:
+            - port: 5140
+              containerPort: 5140
+              protocol: UDP
+              name: syslog
 
           config:
             service: |
@@ -71,9 +79,6 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
-    - repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
-      path: manifests/fluent-bit-syslog
   syncPolicy:
     automated:
       prune: true
