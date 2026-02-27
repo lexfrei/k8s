@@ -18,13 +18,16 @@ spec:
         valuesObject:
           extraArgs:
             - --collector.ethtool
-          serviceMonitor:
-            enabled: true
-            namespace: monitoring
-            interval: 60s
-            selector:
-              matchLabels:
-                app: node-exporter
+          prometheus:
+            monitor:
+              enabled: true
+              namespace: monitoring
+              interval: 60s
+              metricRelabelings:
+                - action: drop
+                  regex: /var/lib/kubelet/pods.+
+                  sourceLabels:
+                    - mountpoint
           service:
             type: ClusterIP
             port: 9100
@@ -50,9 +53,6 @@ spec:
             limits:
               cpu: 200m
               memory: 200Mi
-    - path: manifests/node-exporter
-      repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
   syncPolicy:
     automated:
       prune: true
