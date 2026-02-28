@@ -9,16 +9,23 @@ data:
        netbios name = NAS
        server role = standalone server
        security = user
-       passdb backend = smbpasswd
+       passdb backend = tdbsam:/var/lib/samba/private/passdb.tdb
        load printers = no
        log file = /dev/stdout
        log level = 1
+
+       # UID/GID mapping - stable automatic assignment
+       idmap config * : backend = autorid
+       idmap config * : range = 10000-99999
 
        # macOS compatibility (built-in fruit VFS)
        vfs objects = catia fruit streams_xattr
        fruit:aapl = yes
        fruit:model = TimeCapsule8,119
        fruit:metadata = stream
+
+       # Guest access for public shares
+       map to guest = Bad User
 
        # Hardening
        server min protocol = SMB2
@@ -42,10 +49,54 @@ data:
 
     [Dump]
        path = /data/dump
-       valid users = lex
+       guest ok = yes
        writable = yes
 
     [Transmission]
        path = /data/transmission
-       valid users = lex
+       guest ok = yes
        read only = yes
+
+  avahi-daemon.conf: |
+    [server]
+    host-name=NAS
+    use-ipv4=yes
+    use-ipv6=no
+    allow-interfaces=eth0
+    ratelimit-interval-usec=1000000
+    ratelimit-burst=1000
+
+    [wide-area]
+    enable-wide-area=no
+
+    [publish]
+    publish-hinfo=no
+    publish-workstation=no
+    publish-aaaa-on-ipv4=no
+
+    [reflector]
+    enable-reflector=no
+
+    [rlimits]
+
+  smb.service: |
+    <?xml version="1.0" standalone='no'?>
+    <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+    <service-group>
+      <name replace-wildcards="yes">%h</name>
+      <service>
+        <type>_smb._tcp</type>
+        <port>445</port>
+      </service>
+      <service>
+        <type>_device-info._tcp</type>
+        <port>9</port>
+        <txt-record>model=TimeCapsule8,119</txt-record>
+      </service>
+      <service>
+        <type>_adisk._tcp</type>
+        <port>9</port>
+        <txt-record>sys=waMa=0,adVF=0x100</txt-record>
+        <txt-record>dk0=adVN=TimeMachine,adVF=0x82</txt-record>
+      </service>
+    </service-group>

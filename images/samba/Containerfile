@@ -1,6 +1,7 @@
 FROM alpine:3.23
 
-RUN apk add --no-cache samba-server=4.22.8-r0 samba-common-tools=4.22.8-r0
+RUN apk add --no-cache samba-server=4.22.8-r0 samba-common-tools=4.22.8-r0 jq=1.8.1-r0 && \
+    mkdir -p /var/lib/samba/private
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
