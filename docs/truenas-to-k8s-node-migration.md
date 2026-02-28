@@ -240,106 +240,71 @@ modules. The entire TimeMachine "magic" is 5 lines in smb.conf using the built-i
 - runit supervises 4 processes: smbd, nmbd, avahi, wsdd2
 - wsdd2 for Windows Network discovery (unnecessary for macOS-only use)
 
-### Minimal Custom Image (Recommended)
+### Custom Images (**BUILT**)
 
-Neither image is needed. A custom image is simpler, auditable, and avoids
-tracking upstream Alpine rebuilds from random maintainers.
+Two custom images, built in this repo under `images/`:
 
-**Dockerfile** (~5 lines):
+**`ghcr.io/lexfrei/samba:latest`** (`images/samba/Containerfile`):
+- Alpine 3.23 + samba-server + samba-common-tools + jq (all pinned)
+- Entrypoint reads `/etc/samba/users.json` (sambacc format), creates system users
+  and samba passdb entries with explicit UID/GID
+- passdb backend: tdbsam (persistent across restarts via PV)
+- idmap backend: autorid (stable SID→UID mapping, range 10000-99999)
+- smb.conf externalized to ConfigMap (not baked in image)
+- Capabilities: NET_BIND_SERVICE, SETUID, SETGID (drop ALL others)
 
-```dockerfile
-FROM alpine:3.21
-RUN apk add --no-cache samba-server samba-common-tools
-COPY smb.conf /etc/samba/smb.conf
-COPY entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["smbd", "--foreground", "--no-process-group"]
+**`ghcr.io/lexfrei/avahi:latest`** (`images/avahi/Containerfile`):
+- Alpine 3.23 + avahi + dbus (all pinned)
+- Entrypoint starts dbus-daemon then avahi-daemon (--no-drop-root --no-rlimits)
+- avahi-daemon.conf and service files from ConfigMap
+- Capabilities: NET_BIND_SERVICE, NET_RAW, CHOWN, DAC_OVERRIDE, SETUID, SETGID
+
+**User management** uses sambacc JSON format in OpenBao (`secret/samba/users`):
+```json
+{
+  "users": {
+    "all_entries": [
+      {"name": "lex", "uid": 1000, "gid": 1000, "password": "..."},
+      {"name": "daria", "uid": 1001, "gid": 1001, "password": "..."}
+    ]
+  }
+}
 ```
+Synced to k8s Secret via ExternalSecret, mounted as file. Passwords never in env vars.
 
-**entrypoint.sh** (~5 lines):
+**smb.conf** (in `manifests/samba/configmap.yaml`): tdbsam + autorid, fruit VFS for
+macOS/TimeMachine, guest access on Dump and Transmission, SMB2 minimum protocol.
 
-```bash
-#!/bin/sh
-set -e
-adduser -D -H -s /bin/false "${SMB_USER:-lex}" 2>/dev/null || true
-echo -e "${SMB_PASSWORD}\n${SMB_PASSWORD}" | smbpasswd -a -s "${SMB_USER:-lex}"
-exec "$@"
-```
+### Avahi mDNS Discovery (**IMPLEMENTED**)
 
-**smb.conf** (~35 lines):
+Avahi runs as a sidecar container with `hostNetwork: true`, advertising:
 
-```ini
-[global]
-   server role = standalone server
-   security = user
-   passdb backend = smbpasswd
-   load printers = no
-   log file = /dev/stdout
+- `_smb._tcp` -- SMB server discovery in Finder
+- `_device-info._tcp` + model=TimeCapsule8,119 -- TimeCapsule icon in Finder
+- `_adisk._tcp` + `adVF=0x82` -- Time Machine volume discovery
 
-   # macOS compatibility (built-in fruit VFS)
-   vfs objects = catia fruit streams_xattr
-   fruit:aapl = yes
-   fruit:model = TimeCapsule8,119
-   fruit:metadata = stream
-
-   # Hardening
-   server min protocol = SMB2
-   ntlm auth = no
-
-[TimeMachine]
-   path = /data/timemachine
-   valid users = lex
-   writable = yes
-   fruit:time machine = yes
-   fruit:time machine max size = 2T
-   durable handles = yes
-   kernel oplocks = no
-   kernel share modes = no
-   posix locking = no
-
-[Lex]
-   path = /data/lex
-   valid users = lex
-   writable = yes
-
-[Dump]
-   path = /data/dump
-   valid users = lex
-   writable = yes
-
-[Transmission]
-   path = /data/transmission
-   valid users = lex
-   read only = yes
-```
-
-### What About Avahi (mDNS)?
-
-Avahi advertises 3 services over mDNS:
-
-- `_smb._tcp` -- SMB server discovery
-- `_device-info._tcp` + model -- TimeCapsule icon in Finder
-- `_adisk._tcp` + `adVF=0x82` -- "this server has Time Machine volumes"
-
-**Not needed in k8s.** Without Avahi, connect manually once:
-`smb://IP/TimeMachine` in Finder, then System Preferences > Time Machine > Select Disk.
-macOS remembers the target. In k8s the SMB service gets a stable LoadBalancer IP via
-Cilium L2 IPAM, so the address never changes.
-
-If auto-discovery is desired later, Avahi can be added as a sidecar or `hostNetwork`
-with dbus. But it's pure convenience for a single-user setup.
+**Requirements:**
+- `hostNetwork: true` on the pod (mDNS multicast needs LAN access)
+- Host avahi-daemon disabled on all nodes (conflicts on port 5353).
+  Handled by ansible role `node-prep/tasks/disable-avahi.yml`
+- avahi-daemon.conf restricted to `allow-interfaces=eth0` (no lxc/cilium interfaces)
+- Service files mounted from ConfigMap (overrides default ssh/sftp services)
 
 ### Privileges Required
 
-| Feature | Privileged? | Capability? |
-| --- | --- | --- |
-| Basic SMB file sharing | No | None |
-| TimeMachine (fruit VFS) | No | None |
-| xattr support | No | Depends on underlying FS (ZFS/ext4 support xattr natively) |
-| Samba AD DC | Yes | SYS_ADMIN |
-| Avahi (if added) | No | None (but needs hostNetwork for broadcast) |
+Both containers drop ALL capabilities and add only what's needed:
 
-For our use case: **no privileged mode, no special capabilities**.
+| Container | Capabilities | Why |
+| --- | --- | --- |
+| Samba | NET_BIND_SERVICE | Bind port 445 |
+| Samba | SETUID, SETGID | Impersonate SMB users for file access (samba core requirement) |
+| Avahi | NET_BIND_SERVICE | Bind port 5353 |
+| Avahi | NET_RAW | mDNS multicast |
+| Avahi | CHOWN, DAC_OVERRIDE | Runtime directory creation |
+| Avahi | SETUID, SETGID | dbus/avahi privilege management |
+
+**No privileged mode.** hostNetwork is required for mDNS but does not grant
+additional privileges beyond network namespace sharing.
 
 ### Performance
 
@@ -731,13 +696,27 @@ echo 8589934592 > /sys/module/zfs/parameters/zfs_arc_max
 6. Note all IP addresses (172.16.10.19 for TrueNAS, 172.16.10.121 for iLO)
 7. Verify all data is accounted for (datasets, SMB shares, NFS consumers)
 
-### Phase 1: Build Samba Container Image
+### Phase 1: Build Samba Container Image (**DONE**)
 
-1. Create repo `lexfrei/samba` (or add to existing charts/images repo)
-2. Build minimal image (Dockerfile above)
-3. Multi-arch build (amd64 at minimum, arm64 optional)
-4. Push to GHCR
-5. Test locally: `docker run` with bind-mount, connect from macOS, verify TimeMachine
+1. ~~Create repo `lexfrei/samba` (or add to existing charts/images repo)~~
+   Images built in this repo: `images/samba/` and `images/avahi/`
+2. ~~Build minimal image~~
+   - `ghcr.io/lexfrei/samba:latest` -- Alpine + samba-server + jq, sambacc-style
+     JSON user management with tdbsam + autorid UID/GID mapping
+   - `ghcr.io/lexfrei/avahi:latest` -- Alpine + avahi + dbus, mDNS discovery sidecar
+3. ~~Multi-arch build~~ ARM64 built via Colima, amd64 to be added for storage node
+4. ~~Push to GHCR~~
+5. ~~Test in cluster~~ PoC validated: discovery (Bonjour/Finder), login (lex + daria),
+   guest shares (Dump, Transmission). hostNetwork + minimal capabilities.
+
+**Samba architecture (validated in PoC):**
+- User definitions in sambacc JSON format, stored in OpenBao (`secret/samba/users`),
+  synced via ExternalSecret to k8s Secret, mounted as `/etc/samba/users.json`
+- Entrypoint parses JSON with jq, creates system users + samba passdb entries
+- Two users configured: lex (uid 1000) and daria (uid 1001)
+- Avahi sidecar for mDNS: `_smb._tcp`, `_device-info._tcp` (TimeCapsule icon),
+  `_adisk._tcp` (Time Machine discovery). Config from ConfigMap.
+- Host avahi-daemon disabled on all cluster nodes (ansible role `disable-avahi`)
 
 ### Phase 2: Prepare k8s Manifests
 
@@ -760,28 +739,37 @@ echo 8589934592 > /sys/module/zfs/parameters/zfs_arc_max
 
 ### Phase 3: Install Ubuntu on TrueNAS Hardware
 
-**Boot chain considerations:** The server uses Legacy BIOS and cannot boot from the
-SSD directly (ata-6 ODD port). The USB flash drive is the boot relay. Ubuntu must
-be installed with this constraint in mind.
+**Boot chain:** The server uses Legacy BIOS and cannot boot from the SSD directly
+(ata-6 ODD port). USB DataTraveler acts as boot relay with GRUB chainloading to SSD.
+All disks stay connected during installation -- disk order is stable (determined by
+PCI controller addresses, not cable order).
 
-1. **Disconnect data disks** (sda, sdc, sdd, sde on LSI SAS2008) -- leave only
-   boot SSD (sdf on Intel AHCI) and USB flash (sdb on xHCI)
-2. Install Ubuntu 25.10 LTS:
-   - Boot from Ubuntu USB installer (temporarily remove DataTraveler, use installer USB)
-   - Install root filesystem on SSD (sdf)
-   - Install GRUB to the DataTraveler USB (sdb) -- the BIOS boots from USB
-   - Alternative: partition SSD with BIOS boot partition + root, keep USB GRUB
-     chainloader pointing to SSD (same pattern as TrueNAS)
-   - **IMPORTANT:** After install, verify `grub.cfg` uses UUID-based root, not
-     positional `hd1` -- disk order will change when HDD are reconnected
-3. Verify boot works with only SSD + USB connected
+**Current USB GRUB** (`sdb1:/boot/grub/grub.cfg`):
+```text
+set root=(hd1)
+chainloader +1
+```
+This positional `hd1` reference works because disk order hasn't changed. After Ubuntu
+install, `hd1` still points to SSD (same controllers, same ports). UUID-based search
+can be added later as a safety improvement but is not required.
+
+**Installation steps:**
+
+1. Boot from Ubuntu installer USB via iLO virtual media (or swap DataTraveler
+   temporarily for installer USB)
+2. Install Ubuntu 25.10 on SSD (sdf):
+   - Root filesystem on SSD
+   - **Install GRUB bootloader to SSD (`/dev/sdf`)**, NOT to USB
+   - The existing USB GRUB chainloads to SSD MBR -- after install it will
+     chainload Ubuntu's GRUB instead of TrueNAS bootloader
+3. Restore DataTraveler if removed, reboot -- verify full boot chain:
+   BIOS → USB GRUB → `chainloader +1` → SSD GRUB → Ubuntu kernel
 4. Install ZFS: `apt install --assume-yes zfsutils-linux`
-5. Reconnect data disks (LSI SAS2008 controller)
-6. Verify disk order hasn't broken GRUB: reboot and confirm Ubuntu boots
-7. Import pool: `zpool import pool` (ZFS metadata is on the disks, no data loss)
-8. Verify: `zpool status`, `zfs list`
-9. Configure ZFS auto-import: `zpool set cachefile=/etc/zfs/zpool.cache pool`
-10. Set up basic monitoring: smartmontools, node-exporter
+5. Import pool: `zpool import pool` (ZFS metadata is on disks, no data loss)
+6. Verify: `zpool status`, `zfs list`
+7. Configure ZFS auto-import: `zpool set cachefile=/etc/zfs/zpool.cache pool`
+8. Set up basic monitoring: smartmontools, node-exporter
+9. Configure network: static IP 172.16.101.4/16, gateway, DNS
 
 ### Phase 4: Join Kubernetes Cluster
 
@@ -798,17 +786,26 @@ be installed with this constraint in mind.
 
 1. Set `mountpoint=legacy` on all datasets:
    ```bash
-   for ds in lex dump timemachine transmission; do
+   for ds in lex dump transmission; do
      zfs set mountpoint=legacy pool/$ds
    done
    ```
 2. Push OpenEBS ZFS LocalPV manifests (StorageClass, static PVs, ZFSVolume CRs)
 3. Verify PVs are `Available`: `kubectl get pv`
-4. Push Samba manifests (Deployment, Service, ConfigMap, PVCs)
-5. ArgoCD syncs → Samba pod mounts datasets via CSI PVCs
-6. Verify SMB access from macOS: `smb://samba.home.lex.la/Lex`
-7. Verify TimeMachine backup works: System Preferences > Time Machine
-8. Update DNS (samba.home.lex.la → LoadBalancer IP)
+4. Push Samba manifests:
+   - Deployment (hostNetwork, nodeAffinity to k8s-storage-01)
+   - ConfigMap (smb.conf + avahi-daemon.conf + smb.service)
+   - ExternalSecret (users.json from OpenBao `secret/samba/users`)
+   - PVCs bound to static PVs (lex, dump, transmission)
+   - Dynamic PVC for TimeMachine (2 Ti, fresh start)
+   - Samba container: `ghcr.io/lexfrei/samba:latest`
+   - Avahi sidecar: `ghcr.io/lexfrei/avahi:latest`
+5. Create `argocd/workloads/samba.yaml`
+6. ArgoCD syncs → Samba pod mounts datasets via CSI PVCs
+7. Verify mDNS discovery: NAS appears in Finder sidebar
+8. Verify SMB access from macOS: connect as lex and daria
+9. Verify TimeMachine backup works: System Preferences > Time Machine
+10. Verify guest access: Dump and Transmission shares accessible without login
 
 ### Phase 6: Migrate NFS Workloads
 
@@ -873,6 +870,13 @@ At any point before Phase 7 (NFS decommission):
 - [x] **Taint strategy**: no taint, first general-purpose worker node
 - [x] **Transmission downloads**: ZFS LocalPV static PV (RWX shared with Samba)
 - [x] **Samba image**: built in this repo, pushed to `ghcr.io/lexfrei/samba`
+- [x] **Avahi image**: sidecar for mDNS discovery, pushed to `ghcr.io/lexfrei/avahi`
+- [x] **User management**: sambacc JSON format, OpenBao → ExternalSecret → file mount
+- [x] **passdb backend**: tdbsam with autorid (stable UID mapping, multi-user ready)
+- [x] **Guest shares**: Dump and Transmission accessible without login
+- [x] **mDNS discovery**: Avahi sidecar with hostNetwork, host avahi disabled via ansible
+- [x] **Two users**: lex (uid 1000) and daria (uid 1001), passwords in OpenBao
+- [x] **Boot chain**: USB GRUB chainloads to SSD, positional `hd1` (works, UUID later)
 - [x] **SMART monitoring**: works directly via `smartctl /dev/sdX` (mpt3sas SAT passthrough), no special flags needed
 
 ## Open Questions
@@ -885,7 +889,8 @@ At any point before Phase 7 (NFS decommission):
 
 - [mbentley/docker-timemachine](https://github.com/mbentley/docker-timemachine) -- analyzed, trivially reproducible
 - [ServerContainers/samba](https://github.com/ServerContainers/samba) -- analyzed, over-engineered for our use
-- [samba-in-kubernetes/samba-operator](https://github.com/samba-in-kubernetes/samba-operator) -- CRD-based, overkill for 4 shares
+- [samba-in-kubernetes/samba-operator](https://github.com/samba-in-kubernetes/samba-operator) -- CRD-based, amd64-only, v0.8 alpha, minimal maintenance
+- [samba-in-kubernetes/sambacc](https://github.com/samba-in-kubernetes/sambacc) -- JSON user format borrowed for our entrypoint
 - [Samba vfs_fruit docs](https://www.samba.org/samba/docs/current/man-html/vfs_fruit.8.html) -- official fruit VFS documentation
 
 ### Storage
