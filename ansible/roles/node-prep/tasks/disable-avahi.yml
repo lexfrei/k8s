@@ -1,0 +1,18 @@
+---
+# Disable Avahi mDNS daemon on cluster nodes
+# Avahi conflicts with containerized mDNS services (e.g. Samba discovery)
+# that use hostNetwork and need exclusive access to port 5353
+
+- name: Disable and stop avahi-daemon socket
+  ansible.builtin.systemd:
+    name: avahi-daemon.socket
+    state: stopped
+    enabled: false
+  failed_when: false
+
+- name: Disable and stop avahi-daemon service
+  ansible.builtin.systemd:
+    name: avahi-daemon.service
+    state: stopped
+    enabled: false
+  failed_when: false
