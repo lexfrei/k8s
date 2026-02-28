@@ -25,7 +25,7 @@ spec:
           image:
             repository: lexfrei/papermc
             # renovate: datasource=docker depName=lexfrei/papermc versioning=regex:^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(-(?<build>\d+))?$
-            tag: "1.21.11-117"
+            tag: "1.21.11-123"
             pullPolicy: IfNotPresent
 
           ports:
