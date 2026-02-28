@@ -95,6 +95,11 @@
         - zfs
         - storage
 
+    - name: Disable Avahi mDNS daemon
+      ansible.builtin.include_tasks: disable-avahi.yml
+      tags:
+        - avahi
+
     - name: Disable firewall services
       ansible.builtin.include_tasks: firewall.yml
       tags:
@@ -129,6 +134,7 @@
           - ZFS ARC configured (zfs_arc_max)
           {% endif -%}
           - k3s IO priority configured (best-effort/0, nice -10)
+          - Avahi mDNS daemon disabled
           - Firewall services disabled
           {% if node_prep_system_upgrade_enabled | bool -%}
           - System upgrade completed
