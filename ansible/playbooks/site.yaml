@@ -1,0 +1,28 @@
+---
+# Site-wide playbook: full cluster configuration
+#
+# Applies all standard configuration to all nodes.
+# Safe to run repeatedly — all tasks are idempotent.
+#
+# Includes:
+#   - Node preparation (all nodes in k3s_cluster)
+#   - ZFS dataset properties (storage nodes)
+#   - Samba file server (storage nodes)
+#
+# Excludes (run manually when needed):
+#   - upgrade-nodes.yaml (apt upgrade + potential reboot)
+#   - setup-network-diagnostics.yaml (debug tooling)
+#   - 00-bootstrap-ansible-user.yaml (one-time bootstrap)
+#
+# Usage:
+#   ansible-playbook playbooks/site.yaml
+#   ansible-playbook playbooks/site.yaml --limit k8s-storage-01
+
+- name: Prepare all cluster nodes
+  ansible.builtin.import_playbook: setup-nodes.yaml
+
+- name: Configure ZFS dataset properties
+  ansible.builtin.import_playbook: zfs.yaml
+
+- name: Deploy Samba file server
+  ansible.builtin.import_playbook: samba.yaml
