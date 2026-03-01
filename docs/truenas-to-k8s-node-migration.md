@@ -1,6 +1,6 @@
 # TrueNAS to Kubernetes Node Migration Plan
 
-Status: **DRAFT / RESEARCH COMPLETE**
+Status: **COMPLETE** (Phases 0-7 done, Phase 8 partially done)
 
 ## CRITICAL: Irreplaceable Data Warning
 
@@ -136,15 +136,17 @@ menuentry "TrueNAS Boot" {
 | Snapshots | **None configured** |
 | Replication | **None configured** |
 
-### Datasets
+### Datasets (post-migration)
 
 | Dataset | Used | Purpose |
 | --- | --- | --- |
-| pool/Transmission | 2793.3 GB | Torrent downloads |
-| pool/Lex/lex | 919.8 GB | Personal files (SMB, per-user) |
-| pool/Dump | 822.7 GB | General dump (SMB) |
-| pool/TimeMachine/lex | 239.6 GB | macOS Time Machine backup |
-| pool/k8s | 0.7 GB | NFS share for k8s PVCs |
+| pool/transmission | 2.54 TB | Torrent downloads (static PV, shared RWX) |
+| pool/lex | 857 GB | Personal files (static PV, Samba) |
+| pool/dump | 766 GB | General dump (static PV, Samba) |
+| pool/papermc-data | 6.91 GB | Minecraft server (static PV) |
+| pool/pvc-* | dynamic | OpenBao, Transmission config, Loki, Samba passdb |
+
+Old datasets destroyed: pool/k8s (NFS remnants), pool/TimeMachine (fresh dynamic PVC instead).
 
 ### Active Services
 
@@ -737,7 +739,7 @@ echo 8589934592 > /sys/module/zfs/parameters/zfs_arc_max
    - Config PVC → dynamic `zfs-localpv` PVC
 6. Prepare dynamic PVC manifests for migrated NFS workloads (etcd-backup, VMSingle)
 
-### Phase 3: Install Ubuntu on TrueNAS Hardware
+### Phase 3: Install Ubuntu on TrueNAS Hardware (**DONE**)
 
 **Boot chain:** The server uses Legacy BIOS and cannot boot from the SSD directly
 (ata-6 ODD port). USB DataTraveler acts as boot relay with GRUB chainloading to SSD.
@@ -771,68 +773,90 @@ can be added later as a safety improvement but is not required.
 8. Set up basic monitoring: smartmontools, node-exporter
 9. Configure network: static IP 172.16.101.4/16, gateway, DNS
 
-### Phase 4: Join Kubernetes Cluster
+**Learnings:**
+
+- `intel_iommu=off` kernel parameter required -- without it, SATA link errors appear
+  on the Intel AHCI controller (ata-6). With it: 0 errors, stable 3.0 Gbps link
+- ZFS `zfs_experimental_recv` module parameter appeared but is harmless (TrueNAS
+  leftover in pool metadata, does not affect operation)
+- ZFS ARC configured to 8 GB via `/etc/modprobe.d/zfs.conf`, verified working
+
+### Phase 4: Join Kubernetes Cluster (**DONE**)
 
 1. Add node `k8s-storage-01` to ansible inventory (`ansible/inventory/production.yaml`)
    as agent (first worker node), assign new IP from cluster range
-2. Run k3s agent installation via ansible
-3. Verify node joins: `kubectl get nodes`
+2. Run k3s agent installation via ansible: `ansible-playbook k3s.orchestration.site --limit k8s-storage-01`
+3. Verify node joins: `kubectl get nodes` -- k8s-storage-01 Ready
 4. Label node: `kubectl label node k8s-storage-01 node.kubernetes.io/role=storage`
 5. No taint -- this is a general-purpose worker node
-6. Install OpenEBS ZFS LocalPV CSI driver (see "Storage Strategy" section)
+6. Install OpenEBS ZFS LocalPV CSI driver via ArgoCD (`argocd/infra/openebs-zfs.yaml`)
 7. Configure ZFS ARC memory limit (see "ZFS ARC Memory" section)
 
-### Phase 5: Deploy Samba + Import Existing Datasets
+**Learnings:**
 
-1. Set `mountpoint=legacy` on all datasets:
-   ```bash
-   for ds in lex dump transmission; do
-     zfs set mountpoint=legacy pool/$ds
-   done
-   ```
+- Ansible `--limit k8s-storage-01` safely runs only prep + agent install, server nodes untouched
+- Node joined as k3s agent (v1.35.0+k3s3) with kernel 6.17.0-14-generic (x86_64)
+
+### Phase 5: Deploy Samba + Import Existing Datasets (**DONE**)
+
+1. Set `mountpoint=legacy` on all datasets
 2. Push OpenEBS ZFS LocalPV manifests (StorageClass, static PVs, ZFSVolume CRs)
-3. Verify PVs are `Available`: `kubectl get pv`
-4. Push Samba manifests:
-   - Deployment (hostNetwork, nodeAffinity to k8s-storage-01)
-   - ConfigMap (smb.conf + avahi-daemon.conf + smb.service)
-   - ExternalSecret (users.json from OpenBao `secret/samba/users`)
-   - PVCs bound to static PVs (lex, dump, transmission)
-   - Dynamic PVC for TimeMachine (2 Ti, fresh start)
-   - Samba container: `ghcr.io/lexfrei/samba:latest`
-   - Avahi sidecar: `ghcr.io/lexfrei/avahi:latest`
-5. Create `argocd/workloads/samba.yaml`
-6. ArgoCD syncs → Samba pod mounts datasets via CSI PVCs
-7. Verify mDNS discovery: NAS appears in Finder sidebar
-8. Verify SMB access from macOS: connect as lex and daria
-9. Verify TimeMachine backup works: System Preferences > Time Machine
-10. Verify guest access: Dump and Transmission shares accessible without login
+3. PVs bound correctly to PVCs
+4. Samba deployed with Avahi sidecar via ArgoCD (`argocd/workloads/samba.yaml`)
+5. mDNS discovery working -- NAS appears in Finder sidebar
+6. SMB access verified from macOS (lex + daria users)
+7. Guest shares (Dump, Transmission) accessible
 
-### Phase 6: Migrate NFS Workloads
+**Samba architecture (production):**
+- `hostNetwork: true` -- no LoadBalancer Service needed, SMB on port 445 at node IP
+- Avahi sidecar for mDNS discovery
+- PVCs: samba-lex (static), samba-dump (static), samba-transmission (static, read-only),
+  samba-timemachine (dynamic zfs-localpv, 2Ti), samba-passdb (dynamic, 1Gi)
 
-Migrate one at a time, verify after each:
+### Phase 6: Migrate NFS Workloads (**DONE**)
 
-1. **Transmission downloads**: bind PVC to static PV `pool-transmission` (RWX, shared
-   with Samba). Transmission writes, Samba serves read-only via SMB.
-2. **Transmission config**: new dynamic `zfs-localpv` PVC
-3. **etcd-backup**: change PVC to `zfs-localpv` (dynamic)
-4. **VMSingle**: change PVC to `zfs-localpv` (dynamic, benefits from ZFS compression)
-5. **OpenBao**: already on longhorn-remote, verify no NFS dependency
+All NFS workloads migrated:
 
-### Phase 7: Decommission NFS
+1. **Transmission downloads**: static PV `zfs-transmission` (RWX, shared with Samba)
+2. **Transmission config**: dynamic `zfs-localpv` PVC on k8s-storage-01
+3. **etcd-backup**: migrated to `longhorn-remote` (runs on cp nodes, zfs-localpv not available there)
+4. **VMSingle**: migrated to `zfs-localpv` on k8s-storage-01
+5. **Loki**: migrated to `zfs-localpv` on k8s-storage-01
+6. **PaperMC**: migrated to `zfs-localpv` static PV `zfs-papermc-data` on k8s-storage-01 (9.7GB data copied without loss)
+7. **OpenBao**: migrated to `zfs-localpv` on k8s-storage-01
 
-1. Remove truenas-nfs-csi StorageClass
-2. Remove CSI NFS driver ArgoCD application
-3. Remove old NFS PVs
-4. Disable NFS on the node (no longer needed)
-5. Remove NFS-related mount options from CLAUDE.md and docs
+**Additional migrations beyond original plan:**
 
-### Phase 8: Cleanup
+- Loki and VMSingle moved from longhorn to zfs-localpv (data loss accepted, fresh start)
+- PaperMC moved from longhorn on k8s-cp-02 to zfs-localpv on k8s-storage-01 (data preserved via tar pipe copy)
+- OpenBao moved from longhorn-remote to zfs-localpv
 
-1. Remove graphite-exporter (node-exporter replaces it)
-2. Update monitoring dashboards
-3. Update blackbox-exporter probe (if hostname/IP changes)
-4. Update CLAUDE.md with new architecture
-5. Remove TrueNAS-specific alerting rules
+**Learnings:**
+
+- StatefulSet `volumeClaimTemplates` are immutable -- must delete StatefulSet before changing storageClass
+- ArgoCD sync must be disabled on BOTH meta and target app before destructive operations, re-enable ONLY meta at the end
+- Static PV with `claimRef` must exist BEFORE StatefulSet creates PVC, otherwise PVC binds to dynamic provisioner
+- Cilium L2 announcement `nodeSelector` must match the node where pod runs -- after moving PaperMC, the old `minecraft=true` label had to be replaced with `kubernetes.io/hostname: k8s-storage-01` in L2 policy
+- `externalTrafficPolicy: Local` means traffic only reaches the node where pod is scheduled
+- Busybox tar is unreliable for pipe operations (EOF errors), use alpine for data copy jobs
+
+### Phase 7: Decommission NFS (**DONE**)
+
+1. `csi-driver-nfs` ArgoCD application moved to `argocd-disabled/`
+2. `longhorn` set as default StorageClass
+3. `pool/k8s` ZFS dataset destroyed (660MB of old NFS PVC data, all already migrated)
+4. TrueNAS (172.16.10.19) no longer exists -- server is now k8s-storage-01 (172.16.101.4)
+
+### Phase 8: Cleanup (PARTIAL)
+
+Remaining:
+
+1. [ ] Remove graphite-exporter (node-exporter replaces it)
+2. [ ] Update monitoring dashboards
+3. [ ] Update blackbox-exporter probe (if hostname/IP changes)
+4. [ ] Update CLAUDE.md with new architecture (remove NFS references, add storage-01)
+5. [ ] Remove TrueNAS-specific alerting rules
+6. [ ] Fix extractedprism chart appVersion `v` prefix (GHCR tags lack `v` prefix)
 
 ## Risks and Mitigations
 
