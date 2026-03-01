@@ -11,6 +11,8 @@
   hosts: storage
   become: true
   serial: 1
+  tags:
+    - samba
 
   handlers:
     - name: Restart smbd
