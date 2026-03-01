@@ -9,7 +9,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: truenas-nfs-csi
+  storageClassName: longhorn-remote
   resources:
     requests:
       storage: 10Gi
