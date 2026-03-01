@@ -27,6 +27,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: zfs-localpv
+  claimRef:
+    namespace: samba
+    name: samba-lex
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
@@ -70,6 +73,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: zfs-localpv
+  claimRef:
+    namespace: samba
+    name: samba-dump
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
@@ -114,6 +120,9 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: zfs-localpv
+  claimRef:
+    namespace: transmission-system
+    name: transmission-downloads
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
@@ -141,6 +150,9 @@ spec:
     - ReadOnlyMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: zfs-localpv
+  claimRef:
+    namespace: samba
+    name: samba-transmission
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
