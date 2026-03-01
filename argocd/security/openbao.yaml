@@ -61,7 +61,7 @@ spec:
             dataStorage:
               enabled: true
               size: 5Gi
-              storageClass: truenas-nfs-csi
+              storageClass: zfs-localpv
               accessMode: ReadWriteOnce
 
             volumes:
