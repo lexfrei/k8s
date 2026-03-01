@@ -138,6 +138,52 @@ spec:
               values:
                 - k8s-storage-01
 ---
+# === pool/papermc-data (Minecraft server, ~7 GB) ===
+apiVersion: zfs.openebs.io/v1
+kind: ZFSVolume
+metadata:
+  name: papermc-data
+  namespace: openebs
+  finalizers: []
+spec:
+  capacity: "42949672960"
+  fsType: zfs
+  ownerNodeID: k8s-storage-01
+  poolName: pool
+  volumeType: DATASET
+  shared: "no"
+status:
+  state: Ready
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zfs-papermc-data
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-localpv
+  claimRef:
+    namespace: paper
+    name: data-papermc-0
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeHandle: papermc-data
+    volumeAttributes:
+      openebs.io/poolname: pool
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-storage-01
+---
 # PV for Samba pod (read-only access to transmission downloads)
 apiVersion: v1
 kind: PersistentVolume

@@ -62,7 +62,7 @@ spec:
 
           persistence:
             enabled: true
-            storageClassName: longhorn
+            storageClassName: zfs-localpv
             size: 40Gi
 
           resources:
@@ -73,21 +73,8 @@ spec:
               memory: "6Gi"
               cpu: "4000m"
 
-          tolerations:
-            - key: minecraft
-              operator: Equal
-              value: "true"
-              effect: NoExecute
-
-          affinity:
-            nodeAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                  - matchExpressions:
-                      - key: minecraft
-                        operator: In
-                        values:
-                          - "true"
+          nodeSelector:
+            kubernetes.io/hostname: k8s-storage-01
 
           livenessProbe:
             enabled: true
