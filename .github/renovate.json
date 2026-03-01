@@ -19,31 +19,31 @@
     "dependencyDashboard": true,
     "timezone": "Asia/Tbilisi",
     "argocd": {
-        "fileMatch": [
-            "argocd/.+\\.yaml$"
+        "managerFilePatterns": [
+            "/argocd/.+\\.yaml$/"
         ],
         "labels": [
             "argocd"
         ]
     },
     "github-actions": {
-        "fileMatch": [
-            "^\\.github/workflows/[^/]+\\.ya?ml$"
+        "managerFilePatterns": [
+            "/^\\.github/workflows/[^/]+\\.ya?ml$/"
         ],
         "labels": [
             "github-actions"
         ]
     },
     "kubernetes": {
-        "fileMatch": [
-            "\\.yaml$"
+        "managerFilePatterns": [
+            "/\\.yaml$/"
         ]
     },
     "customManagers": [
         {
             "customType": "regex",
-            "fileMatch": [
-                "ansible/requirements\\.yaml$"
+            "managerFilePatterns": [
+                "/ansible/requirements\\.yaml$/"
             ],
             "matchStrings": [
                 "name:\\s*(?<depName>https://github\\.com/[^\\s]+?\\.git)\\s*type:\\s*git\\s*version:\\s*(?<currentDigest>[a-f0-9]+)"
@@ -54,8 +54,8 @@
         },
         {
             "customType": "regex",
-            "fileMatch": [
-                "argocd/.+\\.yaml$"
+            "managerFilePatterns": [
+                "/argocd/.+\\.yaml$/"
             ],
             "matchStrings": [
                 "#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\n\\s*tag:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
