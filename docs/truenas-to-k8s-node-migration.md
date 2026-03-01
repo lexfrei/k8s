@@ -859,12 +859,13 @@ All NFS workloads migrated:
 
 Remaining:
 
-1. [ ] Remove graphite-exporter (node-exporter replaces it)
-2. [ ] Update monitoring dashboards
-3. [ ] Update blackbox-exporter probe (if hostname/IP changes)
-4. [ ] Update CLAUDE.md with new architecture (remove NFS references, add storage-01)
-5. [ ] Remove TrueNAS-specific alerting rules
-6. [ ] Fix extractedprism chart appVersion `v` prefix (GHCR tags lack `v` prefix)
+1. [ ] Remove graphite-exporter ArgoCD application (monitored TrueNAS via Graphite protocol, no longer needed -- node-exporter replaces it)
+2. [ ] Remove graphite-exporter manifests (`manifests/graphite-exporter/`, Cilium LB pool, L2 policy if dedicated)
+3. [ ] Remove/update blackbox-exporter probes targeting 172.16.10.19 (TrueNAS IP no longer exists)
+4. [ ] Remove TrueNAS-specific alerting rules (VMRule/PrometheusRule if any)
+5. [ ] Update monitoring dashboards (remove TrueNAS panels, add k8s-storage-01 if needed)
+6. [ ] Update CLAUDE.md with new architecture (remove NFS references, add storage-01 as 4th node)
+7. [ ] Fix extractedprism chart appVersion `v` prefix (GHCR tags lack `v` prefix)
 
 ## Risks and Mitigations
 
