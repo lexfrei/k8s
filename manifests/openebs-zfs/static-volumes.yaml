@@ -1,0 +1,157 @@
+---
+# === pool/lex (personal photo archive, ~920 GB) ===
+apiVersion: zfs.openebs.io/v1
+kind: ZFSVolume
+metadata:
+  name: pool-lex
+  namespace: openebs
+  finalizers: []
+spec:
+  capacity: "1099511627776"
+  fsType: zfs
+  ownerNodeID: k8s-storage-01
+  poolName: pool
+  volumeType: DATASET
+  shared: "no"
+status:
+  state: Ready
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pool-lex
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-localpv
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeHandle: pool-lex
+    volumeAttributes:
+      openebs.io/poolname: pool
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-storage-01
+---
+# === pool/dump (general dump, ~823 GB) ===
+apiVersion: zfs.openebs.io/v1
+kind: ZFSVolume
+metadata:
+  name: pool-dump
+  namespace: openebs
+  finalizers: []
+spec:
+  capacity: "1099511627776"
+  fsType: zfs
+  ownerNodeID: k8s-storage-01
+  poolName: pool
+  volumeType: DATASET
+  shared: "no"
+status:
+  state: Ready
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pool-dump
+spec:
+  capacity:
+    storage: 1Ti
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-localpv
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeHandle: pool-dump
+    volumeAttributes:
+      openebs.io/poolname: pool
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-storage-01
+---
+# === pool/transmission (torrent downloads, ~2.8 TB, shared between Samba and Transmission) ===
+apiVersion: zfs.openebs.io/v1
+kind: ZFSVolume
+metadata:
+  name: pool-transmission
+  namespace: openebs
+  finalizers: []
+spec:
+  capacity: "10995116277760"
+  fsType: zfs
+  ownerNodeID: k8s-storage-01
+  poolName: pool
+  volumeType: DATASET
+  shared: "yes"
+status:
+  state: Ready
+---
+# PV for Transmission pod (read-write)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pool-transmission
+spec:
+  capacity:
+    storage: 10Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-localpv
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeHandle: pool-transmission
+    volumeAttributes:
+      openebs.io/poolname: pool
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-storage-01
+---
+# PV for Samba pod (read-only access to transmission downloads)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pool-transmission-samba
+spec:
+  capacity:
+    storage: 10Ti
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: zfs-localpv
+  csi:
+    driver: zfs.csi.openebs.io
+    fsType: zfs
+    volumeHandle: pool-transmission
+    volumeAttributes:
+      openebs.io/poolname: pool
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-storage-01
