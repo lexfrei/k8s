@@ -797,17 +797,25 @@ can be added later as a safety improvement but is not required.
 - Ansible `--limit k8s-storage-01` safely runs only prep + agent install, server nodes untouched
 - Node joined as k3s agent (v1.35.0+k3s3) with kernel 6.17.0-14-generic (x86_64)
 
-### Phase 5: Deploy Samba + Import Existing Datasets (**DONE**)
+### Phase 5: Deploy Samba + Import Existing Datasets (PARTIAL)
 
-1. Set `mountpoint=legacy` on all datasets
-2. Push OpenEBS ZFS LocalPV manifests (StorageClass, static PVs, ZFSVolume CRs)
-3. PVs bound correctly to PVCs
-4. Samba deployed with Avahi sidecar via ArgoCD (`argocd/workloads/samba.yaml`)
-5. mDNS discovery working -- NAS appears in Finder sidebar
-6. SMB access verified from macOS (lex + daria users)
-7. Guest shares (Dump, Transmission) accessible
+**Done:**
 
-**Samba architecture (production):**
+1. Set `mountpoint=legacy` on datasets (lex, dump, transmission)
+2. OpenEBS ZFS LocalPV deployed (StorageClass, static PVs, ZFSVolume CRs)
+3. Static PVs bound correctly (lex, dump, transmission, papermc-data)
+4. Custom images built: `ghcr.io/lexfrei/samba`, `ghcr.io/lexfrei/avahi`
+5. ConfigMap (`manifests/samba/configmap.yaml`) and ExternalSecret (`manifests/samba/external-secret.yaml`) created
+6. PoC validated: mDNS discovery, SMB login, guest shares
+
+**Remaining:**
+
+- [ ] Create `manifests/samba/deployment.yaml` (hostNetwork, Avahi sidecar, volume mounts)
+- [ ] Create `manifests/samba/pvcs.yaml` (samba-lex, samba-dump, samba-timemachine, samba-transmission, samba-passdb)
+- [ ] Create `argocd/workloads/samba.yaml` (ArgoCD Application)
+- [ ] Verify production deployment (mDNS, SMB access, TimeMachine)
+
+**Samba architecture (planned):**
 - `hostNetwork: true` -- no LoadBalancer Service needed, SMB on port 445 at node IP
 - Avahi sidecar for mDNS discovery
 - PVCs: samba-lex (static), samba-dump (static), samba-transmission (static, read-only),
