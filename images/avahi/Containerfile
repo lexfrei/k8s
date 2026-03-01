@@ -1,9 +1,0 @@
-FROM alpine:3.23
-
-RUN apk add --no-cache avahi=0.8-r23 dbus=1.16.2-r1 && \
-    mkdir -p /run/dbus /run/avahi-daemon
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-CMD ["/entrypoint.sh"]
