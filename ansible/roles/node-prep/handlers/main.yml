@@ -43,3 +43,8 @@
     name: systemd-journald
     state: restarted
   listen: Restart journald
+
+- name: Reboot node when required
+  ansible.builtin.reboot:
+    reboot_timeout: 300
+  listen: reboot required
