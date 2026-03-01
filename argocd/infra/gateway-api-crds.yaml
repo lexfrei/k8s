@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: "https://github.com/kubernetes-sigs/gateway-api.git"
     # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
-    targetRevision: "v1.5.0"
+    targetRevision: "v1.4.1"
     path: "config/crd/standard"
   syncPolicy:
     automated:
