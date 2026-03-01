@@ -7,7 +7,14 @@
     name: "{{ node_prep_timezone }}"
   notify: Restart systemd-timesyncd
 
-- name: Ensure NTP synchronization is enabled
+- name: Check NTP synchronization status
+  ansible.builtin.command:
+    cmd: timedatectl show --property=NTP --value
+  register: ntp_status
+  changed_when: false
+
+- name: Enable NTP synchronization
   ansible.builtin.command:
     cmd: timedatectl set-ntp true
-  changed_when: false
+  when: ntp_status.stdout != "yes"
+  changed_when: true
