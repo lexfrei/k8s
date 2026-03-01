@@ -15,22 +15,19 @@
   tags:
     - cpu-governor
   block:
-    - name: Get current CPU governor
-      ansible.builtin.slurp:
-        src: /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-      register: current_governor
-
-    - name: Display current governor
-      ansible.builtin.debug:
-        msg: "Current CPU governor: {{ current_governor.content | b64decode | trim }}"
-
-    - name: Set CPU governor to {{ node_prep_cpu_governor }}
+    - name: Set CPU governor to {{ node_prep_cpu_governor }} on all CPUs
       ansible.builtin.shell: |
+        changed=false
         for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-          echo "{{ node_prep_cpu_governor }}" > "$cpu"
+          current=$(cat "$cpu")
+          if [ "$current" != "{{ node_prep_cpu_governor }}" ]; then
+            echo "{{ node_prep_cpu_governor }}" > "$cpu"
+            changed=true
+          fi
         done
-      when: (current_governor.content | b64decode | trim) != node_prep_cpu_governor
-      changed_when: true
+        echo "$changed"
+      register: governor_result
+      changed_when: "'true' in governor_result.stdout"
 
     - name: Make CPU governor persistent via cpufrequtils
       ansible.builtin.copy:
@@ -52,12 +49,12 @@
         state: started
       failed_when: false
 
-    - name: Verify CPU governor applied
+    - name: Verify CPU governor applied on cpu0
       ansible.builtin.slurp:
         src: /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
       register: new_governor
 
-    - name: Display new governor
+    - name: Display CPU governor status
       ansible.builtin.debug:
         msg: "CPU governor now set to: {{ new_governor.content | b64decode | trim }}"
 
