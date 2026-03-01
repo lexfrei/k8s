@@ -55,7 +55,7 @@ spec:
               - transmission.home.lex.la
           persistence:
             config:
-              storageClass: "zfs-localpv"
+              storageClassName: "zfs-localpv"
             downloads:
               type: pvc
               existingClaim: "transmission-downloads"
