@@ -69,10 +69,12 @@ spec:
                     max_size_mb: 100
           singleBinary:
             replicas: 1
+            nodeSelector:
+              kubernetes.io/hostname: k8s-storage-01
             persistence:
               enabled: true
               size: 10Gi
-              storageClass: longhorn
+              storageClass: zfs-localpv
               whenScaled: Retain
               whenDeleted: Retain
             podSecurityContext:
