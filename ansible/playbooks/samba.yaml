@@ -24,15 +24,14 @@
         state: restarted
 
   tasks:
-    - name: Set ZFS aclinherit=passthrough on timemachine dataset
-      ansible.builtin.command:
-        cmd: zfs set aclinherit=passthrough pool/timemachine
-      changed_when: false
-
-    - name: Set ZFS atime=off on timemachine dataset
-      ansible.builtin.command:
-        cmd: zfs set atime=off pool/timemachine
-      changed_when: false
+    - name: Configure ZFS properties for TimeMachine dataset
+      community.general.zfs:
+        name: pool/timemachine
+        state: present
+        extra_zfs_properties:
+          aclinherit: passthrough
+          atime: "off"
+          sync: disabled
 
     - name: Add Ubuntu Resolute (26.04) repository for Samba 4.23
       ansible.builtin.copy:
