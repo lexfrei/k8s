@@ -6,7 +6,7 @@ spec:
   loadBalancerIPs: true
   interfaces:
     - ^eth[0-9]+
-    - ^en[ospx][0-9]+
+    - ^en[dospx][0-9]+
   serviceSelector:
     matchLabels:
       app.kubernetes.io/name: papermc

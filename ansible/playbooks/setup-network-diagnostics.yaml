@@ -26,7 +26,7 @@
           fi
 
           echo "=== $TIMESTAMP ===" >> "$LOGFILE"
-          ethtool -S eth0 2>&1 >> "$LOGFILE"
+          ethtool -S {{ ansible_default_ipv4.interface }} 2>&1 >> "$LOGFILE"
           echo "" >> "$LOGFILE"
 
     - name: Create systemd timer for ethtool collection
@@ -125,13 +125,13 @@
           echo "=== $TIMESTAMP ===" >> "$LOGFILE"
 
           # Link state
-          ip link show eth0 >> "$LOGFILE" 2>&1
+          ip link show {{ ansible_default_ipv4.interface }} >> "$LOGFILE" 2>&1
 
           # Carrier state
-          cat /sys/class/net/eth0/carrier >> "$LOGFILE" 2>&1 || echo "carrier: unavailable" >> "$LOGFILE"
+          cat /sys/class/net/{{ ansible_default_ipv4.interface }}/carrier >> "$LOGFILE" 2>&1 || echo "carrier: unavailable" >> "$LOGFILE"
 
           # Operstate
-          cat /sys/class/net/eth0/operstate >> "$LOGFILE" 2>&1
+          cat /sys/class/net/{{ ansible_default_ipv4.interface }}/operstate >> "$LOGFILE" 2>&1
 
           # Routing table
           ip route >> "$LOGFILE" 2>&1

@@ -1,0 +1,29 @@
+---
+# Enable predictable network interface naming on Raspberry Pi
+# Removes the Ubuntu RPi override that forces eth0
+# After this, macb Ethernet becomes "end0" (onboard, devicetree index 0)
+
+- name: Check if RPi eth0 link override exists
+  ansible.builtin.stat:
+    path: /usr/lib/systemd/network/10-raspi-eth0.link
+  register: raspi_link_file
+
+- name: Remove RPi eth0 link override
+  ansible.builtin.file:
+    path: /usr/lib/systemd/network/10-raspi-eth0.link
+    state: absent
+  when: raspi_link_file.stat.exists
+  notify: reboot required
+
+- name: Update netplan interface name (eth0 to end0)
+  ansible.builtin.replace:
+    path: /etc/netplan/50-cloud-init.yaml
+    regexp: 'eth0'
+    replace: 'end0'
+  notify: reboot required
+
+- name: Disable cloud-init network config regeneration
+  ansible.builtin.copy:
+    dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    content: "network: {config: disabled}\n"
+    mode: "0644"
