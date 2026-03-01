@@ -31,7 +31,7 @@ kubectl config use-context homelab
 
 ## Repository Purpose
 
-This is a Kubernetes cluster configuration for ARM64 systems (Raspberry Pi compatible) managed via GitOps with ArgoCD. The repository contains all Kubernetes manifests, Helm values, and ArgoCD application definitions for a production home cluster.
+This is a Kubernetes cluster configuration for a mixed-architecture home cluster (3x ARM64 Raspberry Pi + 1x x86_64 storage node) managed via GitOps with ArgoCD. The repository contains all Kubernetes manifests, Helm values, and ArgoCD application definitions for a production home cluster.
 
 ## Architecture Overview
 
@@ -464,17 +464,17 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
   - EventSources define event triggers (calendar, resource, webhook, GitHub, etc.)
   - Sensors watch EventBus and submit Workflows when events match
   - Current setup: Calendar EventSource triggers weekly system-plan.yaml application
-- **NFS Storage**: TrueNAS NFS server (truenas.home.lex.la) for persistent storage
-  - **CRITICAL**: Uses soft mount (not hard) to prevent kernel freeze on NFS unavailability
-  - Timeout: timeo=100 (10 seconds) for fast failure detection
-  - Hard mount can cause D state hangs and complete node freeze (see Error 14)
+- **ZFS Storage**: k8s-storage-01 (172.16.101.4) provides local ZFS storage via OpenEBS ZFS LocalPV
+  - StorageClass `zfs-localpv`: native ZFS datasets, compression, thin provisioning
+  - Static PVs for existing datasets: pool/lex, pool/dump, pool/transmission, pool/papermc-data
+  - Dynamic PVs for workloads: OpenBao, Loki, VMSingle, Transmission config
+  - Node-local only — pods using zfs-localpv are pinned to k8s-storage-01 via nodeAffinity
 - **Hubble configuration constraints**:
   - `hubble.peerService.clusterDomain` MUST match cluster domain (k8s.home.lex.la) - Relay DNS resolution fails otherwise
   - Hubble Relay IP pinning: Helm chart doesn't support service annotations, use `kubectl annotate svc hubble-relay --namespace kube-system io.cilium/lb-ipam-ips=IP` (ArgoCD won't overwrite since Helm doesn't set annotations)
 - **OpenBao**: Deployed in `security` namespace with static auto-unseal
   - Seal key stored in `secrets/openbao-seal-key.yaml.asc` (must exist before OpenBao starts)
-  - Uses `longhorn-remote` StorageClass (dataLocality: disabled) due to worker-02 disk issues
-  - nodeAffinity excludes k8s-worker-02
+  - Uses `zfs-localpv` StorageClass on k8s-storage-01
 - **External Secrets Operator**: Deployed in `external-secrets` namespace
   - ClusterSecretStore `openbao` authenticates via Kubernetes auth method
   - All application secrets synced from OpenBao KV v2 (`secret/` path)
