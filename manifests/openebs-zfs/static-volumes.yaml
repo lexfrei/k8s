@@ -3,7 +3,7 @@
 apiVersion: zfs.openebs.io/v1
 kind: ZFSVolume
 metadata:
-  name: pool-lex
+  name: lex
   namespace: openebs
   finalizers: []
 spec:
@@ -19,7 +19,7 @@ status:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pool-lex
+  name: zfs-lex
 spec:
   capacity:
     storage: 1Ti
@@ -33,7 +33,7 @@ spec:
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
-    volumeHandle: pool-lex
+    volumeHandle: lex
     volumeAttributes:
       openebs.io/poolname: pool
   nodeAffinity:
@@ -49,7 +49,7 @@ spec:
 apiVersion: zfs.openebs.io/v1
 kind: ZFSVolume
 metadata:
-  name: pool-dump
+  name: dump
   namespace: openebs
   finalizers: []
 spec:
@@ -65,7 +65,7 @@ status:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pool-dump
+  name: zfs-dump
 spec:
   capacity:
     storage: 1Ti
@@ -79,7 +79,7 @@ spec:
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
-    volumeHandle: pool-dump
+    volumeHandle: dump
     volumeAttributes:
       openebs.io/poolname: pool
   nodeAffinity:
@@ -95,7 +95,7 @@ spec:
 apiVersion: zfs.openebs.io/v1
 kind: ZFSVolume
 metadata:
-  name: pool-transmission
+  name: transmission
   namespace: openebs
   finalizers: []
 spec:
@@ -112,7 +112,7 @@ status:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pool-transmission
+  name: zfs-transmission
 spec:
   capacity:
     storage: 10Ti
@@ -126,7 +126,7 @@ spec:
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
-    volumeHandle: pool-transmission
+    volumeHandle: transmission
     volumeAttributes:
       openebs.io/poolname: pool
   nodeAffinity:
@@ -142,7 +142,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pool-transmission-samba
+  name: zfs-transmission-samba
 spec:
   capacity:
     storage: 10Ti
@@ -156,7 +156,7 @@ spec:
   csi:
     driver: zfs.csi.openebs.io
     fsType: zfs
-    volumeHandle: pool-transmission
+    volumeHandle: transmission
     volumeAttributes:
       openebs.io/poolname: pool
   nodeAffinity:
