@@ -1,0 +1,49 @@
+================================================================================
+                         OpenBao Recovery Information
+                              homelab cluster
+                            2026-03-01 (NFS→ZFS migration reinit)
+================================================================================
+
+INITIAL ROOT TOKEN
+------------------
+s.AbW7bI7iFrZKo5HpjP34mXIk
+
+
+RECOVERY KEYS (threshold: 3 of 5)
+---------------------------------
+Key 1: eVRHMVlN2wn9ujiwx+K1mM1f2Yy62wjFZpT4zVO9G/aA
+Key 2: L0yqV/rPYanWKo1BhXBQeTYGg6RDf5wm6muIa2WJ0jns
+Key 3: AAtZh+VTe0/ZwMRpm7ny7XdxDnkfWwByTx4CI/YW9tgq
+Key 4: uitOrIBipeQPII+Gzw5jVxQ0eWUHthdyiP7aZFyka3Ep
+Key 5: +2PtroUDo6IKn2qFZKe7USzmix+Wc+7+Hlqv2xdBdTIW
+
+
+SEAL CONFIGURATION
+------------------
+Seal Type:           static
+Storage:             ZFS LocalPV (zfs-localpv) → file (/openbao/data)
+Unseal Key Secret:   openbao-seal-key (namespace: security)
+Unseal Key ID:       openbao-homelab-v1
+
+
+ACCESS
+------
+UI:        https://openbao.home.lex.la
+Namespace: security
+Pod:       openbao-0
+
+
+SECRETS BACKUP
+--------------
+Pre-reinit backup:  secrets-backup-2026-03-01/
+Previous backup:    secrets-backup-2026-02-19/
+
+
+NOTES
+-----
+- Recovery keys are needed for: rekey, seal migration, generating root token
+- Root token should be revoked after creating admin policies
+- Keep this document secure - treat as highly confidential
+- Storage migrated from truenas-nfs-csi to zfs-localpv on k8s-storage-01
+
+================================================================================
