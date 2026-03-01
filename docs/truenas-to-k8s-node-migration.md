@@ -1,6 +1,6 @@
 # TrueNAS to Kubernetes Node Migration Plan
 
-Status: **COMPLETE** (Phases 0-7 done, Phase 8 partially done)
+Status: **COMPLETE** (all phases done, Phase 5 Samba pending deployment)
 
 ## CRITICAL: Irreplaceable Data Warning
 
@@ -855,7 +855,7 @@ All NFS workloads migrated:
 3. `pool/k8s` ZFS dataset destroyed (660MB of old NFS PVC data, all already migrated)
 4. TrueNAS (172.16.10.19) no longer exists -- server is now k8s-storage-01 (172.16.101.4)
 
-### Phase 8: Cleanup (PARTIAL)
+### Phase 8: Cleanup (**DONE**)
 
 Done:
 
@@ -866,10 +866,9 @@ Done:
 5. [x] ~~Remove TrueNAS from homepage~~ (widget removed)
 6. [x] ~~Fix extractedprism chart appVersion `v` prefix~~ (v0.3.0 tag pushed, override removed)
 
-Remaining:
+7. [x] ~~Delete graphite-exporter manifests~~ (entire directory removed)
 
-7. [ ] Update monitoring dashboards (remove TrueNAS panels, add k8s-storage-01 if needed)
-8. [ ] Delete leftover graphite-exporter manifests directory (configmap, deployment, services, vmservicescrape still exist but orphaned since ArgoCD app disabled)
+Phase 8 complete. No TrueNAS dashboards existed.
 
 ## Risks and Mitigations
 
