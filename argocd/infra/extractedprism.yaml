@@ -16,8 +16,6 @@ spec:
     targetRevision: 0.2.0
     helm:
       valuesObject:
-        image:
-          tag: "0.2.0"
         endpoints: "172.16.101.1:6443,172.16.101.2:6443,172.16.101.3:6443"
   syncPolicy:
     automated:
