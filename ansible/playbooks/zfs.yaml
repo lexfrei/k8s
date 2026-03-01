@@ -1,0 +1,48 @@
+---
+# Configure ZFS dataset properties on storage nodes
+# Manages properties for all non-CSI datasets
+#
+# Usage:
+#   ansible-playbook playbooks/zfs.yaml
+
+- name: Configure ZFS dataset properties
+  hosts: k8s-storage-01
+  become: true
+
+  tasks:
+    - name: Configure pool/timemachine properties
+      community.general.zfs:
+        name: pool/timemachine
+        state: present
+        extra_zfs_properties:
+          aclinherit: passthrough
+          atime: "off"
+          sync: disabled
+
+    - name: Configure pool/transmission properties
+      community.general.zfs:
+        name: pool/transmission
+        state: present
+        extra_zfs_properties:
+          sync: disabled
+
+    - name: Configure pool/dump properties
+      community.general.zfs:
+        name: pool/dump
+        state: present
+        extra_zfs_properties:
+          atime: "off"
+
+    - name: Configure pool/music properties
+      community.general.zfs:
+        name: pool/music
+        state: present
+        extra_zfs_properties:
+          atime: "off"
+
+    - name: Configure pool/lex properties
+      community.general.zfs:
+        name: pool/lex
+        state: present
+        extra_zfs_properties:
+          atime: "off"
