@@ -1,0 +1,103 @@
+---
+# Deploy Samba file server with Avahi mDNS on storage nodes
+# Shares: TimeMachine, Lex, Dump, Transmission (per-user)
+#
+# After deployment, set passwords imperatively:
+#   ssh ansible@172.16.101.4
+#   sudo smbpasswd -a lex
+#   sudo smbpasswd -a daria
+
+- name: Deploy Samba file server
+  hosts: storage
+  become: true
+  serial: 1
+
+  handlers:
+    - name: Restart smbd
+      ansible.builtin.systemd:
+        name: smbd
+        state: restarted
+
+    - name: Restart Avahi
+      ansible.builtin.systemd:
+        name: avahi-daemon
+        state: restarted
+
+  tasks:
+    - name: Install Samba packages
+      ansible.builtin.apt:
+        name:
+          - samba
+          - samba-common-bin
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Deploy smb.conf
+      ansible.builtin.copy:
+        src: ../files/smb.conf
+        dest: /etc/samba/smb.conf
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart smbd
+
+    - name: Ensure passdb directory exists
+      ansible.builtin.file:
+        path: /var/lib/samba/private
+        state: directory
+        mode: "0700"
+        owner: root
+        group: root
+
+    - name: Enable and start Samba
+      ansible.builtin.systemd:
+        name: smbd
+        enabled: true
+        state: started
+
+    - name: Install Avahi daemon
+      ansible.builtin.apt:
+        name: avahi-daemon
+        state: present
+
+    - name: Deploy Avahi daemon configuration
+      ansible.builtin.copy:
+        src: ../files/avahi-daemon.conf
+        dest: /etc/avahi/avahi-daemon.conf
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart Avahi
+
+    - name: Deploy Avahi SMB service advertisement
+      ansible.builtin.copy:
+        src: ../files/smb.service
+        dest: /etc/avahi/services/smb.service
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart Avahi
+
+    - name: Enable and start Avahi
+      ansible.builtin.systemd:
+        name: avahi-daemon
+        enabled: true
+        state: started
+
+    - name: Display post-deployment instructions
+      ansible.builtin.debug:
+        msg: |
+          Samba deployed successfully on {{ inventory_hostname }}.
+
+          Next steps (manual):
+          1. Set SMB passwords:
+             sudo smbpasswd -a lex
+             sudo smbpasswd -a daria
+
+          2. Verify from macOS:
+             - NAS should appear in Finder sidebar (mDNS)
+             - smb://{{ ansible_host }}/Lex
+             - smb://{{ ansible_host }}/Dump
+             - smb://{{ ansible_host }}/TimeMachine
+             - smb://{{ ansible_host }}/Transmission
