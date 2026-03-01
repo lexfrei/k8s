@@ -857,15 +857,19 @@ All NFS workloads migrated:
 
 ### Phase 8: Cleanup (PARTIAL)
 
+Done:
+
+1. [x] ~~Remove graphite-exporter~~ (moved to argocd-disabled/, TrueNAS VMRule deleted)
+2. [x] ~~Remove blackbox-exporter TrueNAS probes~~ (VMProbe deleted, https\_truenas module removed)
+3. [x] ~~Remove TrueNAS alerting rules~~ (VMRule with 7 alerts deleted)
+4. [x] ~~Update CLAUDE.md~~ (NFS → ZFS LocalPV, OpenBao storage, mixed-arch description)
+5. [x] ~~Remove TrueNAS from homepage~~ (widget removed)
+6. [x] ~~Fix extractedprism chart appVersion `v` prefix~~ (v0.3.0 tag pushed, override removed)
+
 Remaining:
 
-1. [ ] Remove graphite-exporter ArgoCD application (monitored TrueNAS via Graphite protocol, no longer needed -- node-exporter replaces it)
-2. [ ] Remove graphite-exporter manifests (`manifests/graphite-exporter/`, Cilium LB pool, L2 policy if dedicated)
-3. [ ] Remove/update blackbox-exporter probes targeting 172.16.10.19 (TrueNAS IP no longer exists)
-4. [ ] Remove TrueNAS-specific alerting rules (VMRule/PrometheusRule if any)
-5. [ ] Update monitoring dashboards (remove TrueNAS panels, add k8s-storage-01 if needed)
-6. [ ] Update CLAUDE.md with new architecture (remove NFS references, add storage-01 as 4th node)
-7. [ ] Fix extractedprism chart appVersion `v` prefix (GHCR tags lack `v` prefix)
+7. [ ] Update monitoring dashboards (remove TrueNAS panels, add k8s-storage-01 if needed)
+8. [ ] Delete leftover graphite-exporter manifests directory (configmap, deployment, services, vmservicescrape still exist but orphaned since ArgoCD app disabled)
 
 ## Risks and Mitigations
 
