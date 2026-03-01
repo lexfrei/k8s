@@ -24,15 +24,6 @@
         state: restarted
 
   tasks:
-    - name: Configure ZFS properties for TimeMachine dataset
-      community.general.zfs:
-        name: pool/timemachine
-        state: present
-        extra_zfs_properties:
-          aclinherit: passthrough
-          atime: "off"
-          sync: disabled
-
     - name: Add Ubuntu Resolute (26.04) repository for Samba 4.23
       ansible.builtin.copy:
         dest: /etc/apt/sources.list.d/resolute-samba.sources
