@@ -4,7 +4,7 @@ metadata:
   name: eve-thermo
   namespace: wish-operator
 spec:
-  quantity: 2
+  quantity: 3
   title: "Eve Thermo (5th Gen, 2025, 20ECD1701)"
   imageURL: "https://www.evehome.com/sites/default/files/2025-12/eve-thermo-2025-pdp-device-hero-mit-badge-en_0.png"
   officialURL: "https://www.evehome.com/en/eve-thermo"
