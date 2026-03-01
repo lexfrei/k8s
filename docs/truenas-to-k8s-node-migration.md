@@ -1,6 +1,6 @@
 # TrueNAS to Kubernetes Node Migration Plan
 
-Status: **COMPLETE** (all phases done, Phase 5 Samba pending deployment)
+Status: **COMPLETE**
 
 ## CRITICAL: Irreplaceable Data Warning
 
@@ -797,29 +797,37 @@ can be added later as a safety improvement but is not required.
 - Ansible `--limit k8s-storage-01` safely runs only prep + agent install, server nodes untouched
 - Node joined as k3s agent (v1.35.0+k3s3) with kernel 6.17.0-14-generic (x86_64)
 
-### Phase 5: Deploy Samba + Import Existing Datasets (PARTIAL)
+### Phase 5: Deploy Samba + Import Existing Datasets (**DONE**)
 
-**Done:**
+**Approach changed:** Originally planned as k8s Deployment with hostNetwork + Avahi sidecar.
+Decided that a hostNetwork pod pinned to a single node is effectively a host service
+pretending to be a container. Deployed via Ansible instead (KISS).
 
-1. Set `mountpoint=legacy` on datasets (lex, dump, transmission)
+**What was done:**
+
+1. Set `mountpoint=legacy` on datasets (lex, dump, transmission) for CSI
 2. OpenEBS ZFS LocalPV deployed (StorageClass, static PVs, ZFSVolume CRs)
-3. Static PVs bound correctly (lex, dump, transmission, papermc-data)
-4. Custom images built: `ghcr.io/lexfrei/samba`, `ghcr.io/lexfrei/avahi`
-5. ConfigMap (`manifests/samba/configmap.yaml`) and ExternalSecret (`manifests/samba/external-secret.yaml`) created
-6. PoC validated: mDNS discovery, SMB login, guest shares
+3. PoC validated: mDNS discovery, SMB login, guest shares
+4. **Architecture pivot**: k8s pod → Ansible playbook (`ansible/playbooks/samba.yaml`)
+5. Samba config (`ansible/files/smb.conf`) with per-user Transmission subdirectories
+6. Avahi daemon + SMB service advertisement on host
+7. k8s samba manifests cleaned up (configmap, external-secret, container images)
+8. Static PVs for lex/dump removed (Samba accesses ZFS datasets directly)
+9. pool/lex and pool/dump mountpoints changed from legacy to /pool/{lex,dump}
+10. pool/timemachine created with 2T quota
 
-**Remaining:**
+**Samba architecture (final):**
 
-- [ ] Create `manifests/samba/deployment.yaml` (hostNetwork, Avahi sidecar, volume mounts)
-- [ ] Create `manifests/samba/pvcs.yaml` (samba-lex, samba-dump, samba-timemachine, samba-transmission, samba-passdb)
-- [ ] Create `argocd/workloads/samba.yaml` (ArgoCD Application)
-- [ ] Verify production deployment (mDNS, SMB access, TimeMachine)
+- Native Samba daemon on k8s-storage-01 (not containerized)
+- Avahi daemon for mDNS discovery (NAS visible in Finder)
+- SMB passwords set imperatively via `smbpasswd` (not in git/vault)
+- Shares: TimeMachine, Lex, Dump, Transmission (per-user private subdirectories)
 
-**Samba architecture (planned):**
-- `hostNetwork: true` -- no LoadBalancer Service needed, SMB on port 445 at node IP
-- Avahi sidecar for mDNS discovery
-- PVCs: samba-lex (static), samba-dump (static), samba-transmission (static, read-only),
-  samba-timemachine (dynamic zfs-localpv, 2Ti), samba-passdb (dynamic, 1Gi)
+**Learnings:**
+
+- vladgh.samba Ansible collection doesn't support per-share extras (fruit:time machine, durable handles) without include files -- simpler to deploy our own smb.conf
+- hostNetwork k8s pods are an antipattern for services that belong on the host
+- Per-user SMB subdirectories via `%U` substitution with `root preexec` for auto-creation
 
 ### Phase 6: Migrate NFS Workloads (**DONE**)
 
@@ -875,13 +883,13 @@ Phase 8 complete. No TrueNAS dashboards existed.
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | ZFS module breaks on kernel update | Pool unavailable until rebuild | Ubuntu ships ZFS as native package (not DKMS), keep previous kernel in GRUB as fallback. Plan: migrate all nodes to 26.04 LTS when available |
-| Samba container crash | SMB unavailable | k8s auto-restart, Deployment with liveness probe on port 445 |
-| TimeMachine instability in container | Backup corruption | Test thoroughly before go-live, keep TrueNAS config backup for rollback |
+| Samba daemon crash | SMB unavailable | systemd auto-restart |
+| TimeMachine instability | Backup corruption | Test thoroughly before go-live |
 | ZFS LocalPV CSI driver failure | Pods can't mount storage | CSI driver is a DaemonSet with auto-restart, ZFS datasets survive driver restarts |
 | ZFS pool import fails | Data loss | Snapshot before migration, keep TrueNAS boot media as rollback |
 | **pool/Lex data loss** | **Irreplaceable (photo archive, personal files)** | **External backup BEFORE migration, ZFS snapshot, verify after every step** |
 | Correlated disk failure (4x same-model WD Red) | Pool loss, all data gone | RAIDZ1 survives only 1 disk -- set up off-site backup independently of migration |
-| Node resource contention | Samba I/O affects k8s workloads | Resource limits on Samba pod, ZFS ARC limit (`zfs_arc_max`) |
+| Node resource contention | Samba I/O affects k8s workloads | ZFS ARC limit (`zfs_arc_max`), Samba runs as native service with systemd resource controls if needed |
 | USB flash failure | Node won't boot (GRUB on USB) | Keep spare USB with GRUB installed, document reinstall procedure |
 | Disk order change after reconnecting HDD | GRUB `hd1` chainloader points to wrong disk | Use UUID-based root in grub.cfg, not positional device names |
 
@@ -889,7 +897,7 @@ Phase 8 complete. No TrueNAS dashboards existed.
 
 At any point before Phase 7 (NFS decommission):
 
-1. Stop Samba pod
+1. Stop Samba service (`systemctl stop smbd`)
 2. Disconnect data disks
 3. Reinstall TrueNAS SCALE on boot SSD
 4. Import pool (same `zpool import pool` -- works both ways)
@@ -905,13 +913,13 @@ At any point before Phase 7 (NFS decommission):
 - [x] **ZFS ARC memory**: 8 GB (tunable at runtime)
 - [x] **Taint strategy**: no taint, first general-purpose worker node
 - [x] **Transmission downloads**: ZFS LocalPV static PV (RWX shared with Samba)
-- [x] **Samba image**: built in this repo, pushed to `ghcr.io/lexfrei/samba`
-- [x] **Avahi image**: sidecar for mDNS discovery, pushed to `ghcr.io/lexfrei/avahi`
-- [x] **User management**: sambacc JSON format, OpenBao → ExternalSecret → file mount
+- [x] **Samba deployment**: Ansible playbook on host (not k8s pod) -- simpler, no hostNetwork antipattern
+- [x] **User management**: smbpasswd imperative (not in git/vault)
 - [x] **passdb backend**: tdbsam with autorid (stable UID mapping, multi-user ready)
-- [x] **Guest shares**: Dump and Transmission accessible without login
-- [x] **mDNS discovery**: Avahi sidecar with hostNetwork, host avahi disabled via ansible
-- [x] **Two users**: lex (uid 1000) and daria (uid 1001), passwords in OpenBao
+- [x] **Guest shares**: Dump accessible without login
+- [x] **Transmission share**: per-user private subdirectories via `%U` substitution
+- [x] **mDNS discovery**: Avahi daemon on host, host avahi enabled on storage nodes via ansible
+- [x] **Two users**: lex and daria, passwords set via smbpasswd
 - [x] **Boot chain**: USB GRUB chainloads to SSD, positional `hd1` (works, UUID later)
 - [x] **SMART monitoring**: works directly via `smartctl /dev/sdX` (mpt3sas SAT passthrough), no special flags needed
 
