@@ -8,6 +8,8 @@
 - name: Configure ZFS dataset properties
   hosts: k8s-storage-01
   become: true
+  tags:
+    - zfs
 
   tasks:
     - name: Configure pool/timemachine properties
