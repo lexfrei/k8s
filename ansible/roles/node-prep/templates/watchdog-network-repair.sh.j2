@@ -28,8 +28,8 @@ log() {
 log "Network repair started (error code: ${ERROR_CODE})"
 
 # Bring interface down before unloading to release module
-log "Bringing eth0 down..."
-ip link set dev eth0 down 2>/dev/null || true
+log "Bringing {{ node_prep_primary_interface | default('end0') }} down..."
+ip link set dev {{ node_prep_primary_interface | default('end0') }} down 2>/dev/null || true
 sleep 1
 
 # Reload macb kernel module (Raspberry Pi 5 GEM/macb ethernet driver)

@@ -12,9 +12,10 @@ kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 mtu: 1500
 
 # Devices for BPF attachment and direct routing detection
-# eth+: RPi nodes (eth0)
+# end+: RPi nodes (end0, predictable naming)
+# eth+: RPi nodes legacy name (kept during transition, remove after all nodes renamed)
 # ens+: k8s-storage-01 (ens1, Realtek RTL8125 PCIe)
-devices: "eth+ ens+"
+devices: "end+ eth+ ens+"
 
 # Routing configuration
 # Native routing for better performance on same L2 network

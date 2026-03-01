@@ -82,6 +82,13 @@
         - pcie
         - rpi5
 
+    - name: Enable predictable network interface naming (RPi only)
+      ansible.builtin.include_tasks: predictable-ifnames.yml
+      when: inventory_hostname in groups.get('rpi', [])
+      tags:
+        - network
+        - ifnames
+
     - name: Configure journald volatile storage (RPi only - SD card wear)
       ansible.builtin.include_tasks: journald.yml
       when: inventory_hostname in groups.get('rpi', [])
