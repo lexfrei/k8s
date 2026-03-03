@@ -1,0 +1,20 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: sigma-24mm-f18-ex-dg-macro
+  namespace: wish-operator
+spec:
+  title: "Sigma 24mm f/1.8 EX DG Aspherical Macro (Minolta A)"
+  imageURL: "https://www.sigma-global.com/lenses/24_18_product_img01.png"
+  officialURL: "https://www.sigma-global.com/en/lenses/24_18/"
+  tags:
+    - photography
+    - lens
+    - wide-angle
+    - macro
+    - sigma
+    - minolta-a
+  contextTags:
+    - any-occasion
+  description: "Discontinued wide-angle prime with f/1.8 and 1:2.7 macro for Minolta/Sony A-mount. Aspherical element, 77mm filter thread. Used market only."
+  priority: 4
