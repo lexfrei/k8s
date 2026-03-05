@@ -29,7 +29,7 @@ all:
       vars:
         # K3s version for upgrades
         # Note: k3s-ansible requires explicit version, cannot use "stable" or "latest"
-        k3s_version: v1.35.1+k3s1
+        k3s_version: v1.35.2+k3s1
 
     # Cross-cutting groups for platform-specific configuration
     # These overlap with server/agent groups intentionally
