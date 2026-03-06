@@ -72,7 +72,6 @@ RUN mkdir --parents /home/dev/.local/bin \
     && mkdir --parents /home/dev/workspace \
     && mkdir --parents /home/dev/.claude \
     && mkdir --parents /home/dev/.vscode-server \
-    && mkdir --parents /var/log/supervisor \
     && chown --recursive dev:dev /home/dev
 
 # Supervisor config
