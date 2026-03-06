@@ -51,6 +51,7 @@ spec:
           txtOwnerId: unifi
           extraArgs:
             - --annotation-prefix=internal-dns/
+            - --gateway-namespace=kube-system
           logLevel: info
           logFormat: json
     - path: manifests/internal-dns

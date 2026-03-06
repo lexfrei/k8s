@@ -26,6 +26,7 @@ spec:
           txtOwnerId: cloudflare
           extraArgs:
             - --annotation-filter=external-dns.alpha.kubernetes.io/cloudflare-proxied
+            - --gateway-namespace=cloudflare-tunnel-system
           env:
             - name: CF_API_TOKEN
               valueFrom:
