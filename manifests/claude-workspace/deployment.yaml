@@ -42,13 +42,13 @@ spec:
                 - SYS_ADMIN
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 30
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10

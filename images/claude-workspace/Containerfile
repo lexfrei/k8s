@@ -80,7 +80,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/workspace.conf
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD curl --fail http://localhost:8080/healthz || exit 1
+    CMD curl --fail http://localhost:8080/ || exit 1
 
 USER dev
 WORKDIR /home/dev/workspace
