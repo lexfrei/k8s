@@ -6,6 +6,14 @@
         "VM_INSTANCE_ENTRYPOINT": "https://vm.home.lex.la",
         "VM_INSTANCE_TYPE": "single"
       }
+    },
+    "loki": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "--interactive",
+        "--env", "LOKI_URL=https://loki.home.lex.la",
+        "ghcr.io/lexfrei/mcp-loki:latest"
+      ]
     }
   }
 }
