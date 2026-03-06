@@ -22,6 +22,12 @@ spec:
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/openebs-zfs
+  ignoreDifferences:
+    - group: zfs.openebs.io
+      kind: ZFSVolume
+      jsonPointers:
+        - /status
+        - /metadata/finalizers
   syncPolicy:
     automated:
       prune: true
