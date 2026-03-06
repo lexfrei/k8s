@@ -30,7 +30,8 @@ spec:
                 memory: 256Mi
 
           secret:
-            additionalSecrets: {}
+            additionalSecrets:
+              authelia-secrets: {}
 
           persistence:
             enabled: true
