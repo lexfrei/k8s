@@ -21,6 +21,19 @@ spec:
         - name: ghcr-pull-secret
       nodeSelector:
         kubernetes.io/hostname: k8s-storage-01
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: fix-permissions
+          image: ghcr.io/lexfrei/claude-workspace:latest
+          command: ["sh", "-c", "chown --recursive 1000:1000 /home/dev"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: home
+              mountPath: /home/dev
       containers:
         - name: workspace
           image: ghcr.io/lexfrei/claude-workspace:latest
