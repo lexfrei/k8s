@@ -4,6 +4,7 @@ metadata:
   name: vmagent
   namespace: monitoring
 spec:
+  updateStrategy: Recreate
   selectAllByDefault: true
   scrapeInterval: 20s
   remoteWrite:
