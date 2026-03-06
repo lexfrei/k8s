@@ -85,6 +85,17 @@
         owner: root
         group: root
 
+    - name: Set permissions on guest-writable share directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: nobody
+        group: nogroup
+        mode: "0775"
+      loop:
+        - /pool/dump
+        - /pool/music
+
     - name: Enable and start Samba
       ansible.builtin.systemd:
         name: smbd
