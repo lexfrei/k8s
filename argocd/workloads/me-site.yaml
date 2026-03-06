@@ -17,6 +17,8 @@ spec:
         valuesObject:
           image:
             pullPolicy: IfNotPresent
+          vpa:
+            enabled: false
           onionService:
             enabled: false
           httpRoute:
