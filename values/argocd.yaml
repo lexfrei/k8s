@@ -80,12 +80,12 @@ repoServer:
   resources:
     requests:
       cpu: 50m
-      memory: 64Mi
+      memory: 128Mi
     limits:
-      memory: 256Mi
+      memory: 512Mi
   env:
     - name: GOMEMLIMIT
-      value: "200MiB"
+      value: "400MiB"
 server:
   replicas: 1
   pdb:
