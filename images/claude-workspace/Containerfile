@@ -1,5 +1,5 @@
 # renovate: datasource=docker depName=ubuntu
-FROM docker.io/library/ubuntu:25.10
+FROM docker.io/library/ubuntu:questing-20251217
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
