@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claude-workspace
+  namespace: claude-workspace
+  labels:
+    app: claude-workspace
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: claude-workspace
+  template:
+    metadata:
+      labels:
+        app: claude-workspace
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-storage-01
+      containers:
+        - name: workspace
+          image: ghcr.io/lexfrei/claude-workspace:latest
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: home
+              mountPath: /home/dev
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 8Gi
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: home
+          persistentVolumeClaim:
+            claimName: claude-workspace-home

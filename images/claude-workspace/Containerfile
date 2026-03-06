@@ -1,0 +1,97 @@
+# renovate: datasource=docker depName=ubuntu
+FROM docker.io/library/ubuntu:25.10
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# renovate: datasource=github-releases depName=microsoft/vscode
+ARG VSCODE_VERSION=1.110
+# renovate: datasource=npm depName=@anthropic-ai/claude-code
+ARG CLAUDE_CODE_VERSION=2.1.70
+ARG NODE_MAJOR=22
+
+# Prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install --assume-yes --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        gnupg \
+        openssh-client \
+        sudo \
+        supervisor \
+        uidmap \
+        fuse-overlayfs \
+        slirp4netns \
+        iproute2 \
+        iptables \
+        wget \
+        jq \
+        unzip \
+        build-essential \
+        python3 \
+    && rm --recursive --force /var/lib/apt/lists/*
+
+# Install Node.js
+# hadolint ignore=DL3008
+RUN curl --fail --silent --show-error --location "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
+    && apt-get install --assume-yes --no-install-recommends nodejs \
+    && rm --recursive --force /var/lib/apt/lists/*
+
+# Install Docker (rootless)
+# hadolint ignore=DL3008
+RUN curl --fail --silent --show-error --location https://get.docker.com | sh \
+    && rm --recursive --force /var/lib/apt/lists/*
+
+# Install VS Code CLI (official Microsoft build)
+RUN ARCH="$(dpkg --print-architecture)" \
+    && if [ "${ARCH}" = "arm64" ]; then VSCODE_ARCH="arm64"; else VSCODE_ARCH="x64"; fi \
+    && curl --fail --silent --show-error --location \
+        "https://update.code.visualstudio.com/${VSCODE_VERSION}.0/cli-linux-${VSCODE_ARCH}/stable" \
+        --output /tmp/vscode-cli.tar.gz \
+    && tar --extract --gzip --file /tmp/vscode-cli.tar.gz --directory /usr/local/bin \
+    && rm --force /tmp/vscode-cli.tar.gz
+
+# Install Claude Code
+RUN npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+# Rename existing ubuntu user (UID 1000) to dev
+RUN usermod --login dev --home /home/dev --move-home ubuntu \
+    && groupmod --new-name dev ubuntu \
+    && echo "dev ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/dev \
+    && chmod 0440 /etc/sudoers.d/dev
+
+# Configure subuid/subgid for rootless Docker
+RUN echo "dev:100000:65536" >> /etc/subuid \
+    && echo "dev:100000:65536" >> /etc/subgid
+
+# Create directories
+RUN mkdir --parents /home/dev/.local/bin \
+    && mkdir --parents /home/dev/.local/share/docker \
+    && mkdir --parents /home/dev/workspace \
+    && mkdir --parents /home/dev/.claude \
+    && mkdir --parents /home/dev/.vscode-server \
+    && mkdir --parents /var/log/supervisor \
+    && chown --recursive dev:dev /home/dev
+
+# Supervisor config
+COPY supervisord.conf /etc/supervisor/conf.d/workspace.conf
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD curl --fail http://localhost:8080/healthz || exit 1
+
+USER dev
+WORKDIR /home/dev/workspace
+
+# Initialize rootless Docker setup
+RUN dockerd-rootless-setuptool.sh install 2>/dev/null || true
+
+ENV XDG_RUNTIME_DIR=/home/dev/.docker/run
+ENV DOCKER_HOST=unix:///home/dev/.docker/run/docker.sock
+ENV PATH=/home/dev/.local/bin:/home/dev/bin:${PATH}
+
+EXPOSE 8080
+
+CMD ["/usr/bin/supervisord", "--configuration", "/etc/supervisor/conf.d/workspace.conf"]
