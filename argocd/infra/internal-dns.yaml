@@ -51,7 +51,6 @@ spec:
           txtOwnerId: unifi
           extraArgs:
             - --annotation-prefix=internal-dns/
-            - --annotation-filter=external-dns.alpha.kubernetes.io/cloudflare-proxied notin (true)
           logLevel: info
           logFormat: json
     - path: manifests/internal-dns
