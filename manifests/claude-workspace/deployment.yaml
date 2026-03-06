@@ -17,6 +17,8 @@ spec:
       labels:
         app: claude-workspace
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       nodeSelector:
         kubernetes.io/hostname: k8s-storage-01
       containers:
