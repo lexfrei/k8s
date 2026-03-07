@@ -40,6 +40,7 @@ extra_server_args: >-
   --etcd-arg=snapshot-count=10000
   --etcd-snapshot-retention=3
   --etcd-snapshot-schedule-cron="0 */6 * * *"
+  --node-taint=node-role.kubernetes.io/control-plane=true:NoSchedule
 
 # Cluster context name for kubeconfig
 cluster_context: k3s-home
