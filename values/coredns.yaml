@@ -1,4 +1,8 @@
 replicaCount: 2
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
 podDisruptionBudget:
   minAvailable: 1
 rbac:

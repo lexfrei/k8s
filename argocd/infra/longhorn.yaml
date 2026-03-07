@@ -39,7 +39,7 @@ spec:
           defaultSettings:
             defaultReplicaCount: 1
             concurrentAutomaticEngineUpgradePerNodeLimit: 1
-            taintToleration: "minecraft=true:NoExecute"
+            taintToleration: "node-role.kubernetes.io/control-plane=true:NoSchedule;minecraft=true:NoExecute"
           longhornUI:
             replicas: 1
           longhornConversionWebhook:
