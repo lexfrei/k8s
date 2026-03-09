@@ -24,12 +24,34 @@ spec:
       initContainers:
         - name: fix-permissions
           image: ghcr.io/openclaw/openclaw:latest
-          command: ["sh", "-c", "chown --recursive 1000:1000 /home/node/.openclaw"]
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              # PVC legacy layout (root == old ~/.openclaw) -> new layout (root/home/...)
+              if [ ! -f /data/.home-layout-migrated ]; then
+                mkdir -p /data/home/.openclaw
+
+                # Move old root content into new $HOME/.openclaw, excluding new dirs/marker
+                for item in /data/* /data/.[!.]* /data/..?*; do
+                  [ -e "$item" ] || continue
+                  base="$(basename "$item")"
+                  if [ "$base" = "home" ] || [ "$base" = ".home-layout-migrated" ]; then
+                    continue
+                  fi
+                  mv "$item" /data/home/.openclaw/
+                done
+
+                touch /data/.home-layout-migrated
+              fi
+
+              chown --recursive 1000:1000 /data/home
           securityContext:
             runAsUser: 0
           volumeMounts:
             - name: openclaw-data
-              mountPath: /home/node/.openclaw
+              mountPath: /data
       containers:
         - name: amneziawg
           image: ghcr.io/zeozeozeo/amneziawg-client:latest
@@ -245,8 +267,10 @@ spec:
             - name: OPENCLAW_GATEWAY_BIND
               value: lan
           volumeMounts:
+            # Persist entire ~
             - name: openclaw-data
-              mountPath: /home/node/.openclaw
+              mountPath: /home/node
+              subPath: home
           resources:
             requests:
               cpu: "1"
