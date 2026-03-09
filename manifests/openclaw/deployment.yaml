@@ -164,6 +164,11 @@ spec:
                   ip route add "$WG_ENDPOINT" via "$ORIG_GW" 2>/dev/null || true
 
                   if [ "$FULL_TUNNEL" = "yes" ]; then
+                    # Preserve cluster networking: Cilium eBPF hooks only work on eth0,
+                    # so service/pod CIDR traffic must stay on eth0, not go through AWG
+                    ip route add 10.42.0.0/16 via "$ORIG_GW" dev eth0 2>/dev/null || true
+                    ip route add 10.43.0.0/16 via "$ORIG_GW" dev eth0 2>/dev/null || true
+                    ip route add 172.16.0.0/16 via "$ORIG_GW" dev eth0 2>/dev/null || true
                     ip route replace default dev "$iface"
                     echo "Default route via $iface, endpoint $WG_ENDPOINT via $ORIG_GW"
                   else
