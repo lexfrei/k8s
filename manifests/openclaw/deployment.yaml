@@ -231,11 +231,6 @@ spec:
             runAsUser: 1000
             runAsGroup: 1000
           env:
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: openclaw-secrets
-                  key: openai_api_key
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
