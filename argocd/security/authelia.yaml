@@ -190,6 +190,19 @@ spec:
                       - profile
                       - email
                       - groups
+                  - client_id: openclaw
+                    client_name: OpenClaw
+                    client_secret:
+                      path: /secrets/authelia-secrets/OPENCLAW_CLIENT_SECRET
+                    authorization_policy: two_factor
+                    claims_policy: full_claims
+                    redirect_uris:
+                      - https://oc.lex.la/oauth2/callback
+                    scopes:
+                      - openid
+                      - profile
+                      - email
+                      - groups
 
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
