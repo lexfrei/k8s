@@ -17,6 +17,7 @@ spec:
       labels:
         app: openclaw
     spec:
+      serviceAccountName: openclaw
       nodeSelector:
         kubernetes.io/hostname: k8s-storage-01
       dnsPolicy: ClusterFirst
