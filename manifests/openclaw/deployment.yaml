@@ -21,37 +21,6 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: k8s-storage-01
       dnsPolicy: ClusterFirst
-      initContainers:
-        - name: fix-permissions
-          image: ghcr.io/openclaw/openclaw:latest
-          command:
-            - sh
-            - -c
-            - |
-              set -e
-              # PVC legacy layout (root == old ~/.openclaw) -> new layout (root/home/...)
-              if [ ! -f /data/.home-layout-migrated ]; then
-                mkdir -p /data/home/.openclaw
-
-                # Move old root content into new $HOME/.openclaw, excluding new dirs/marker
-                for item in /data/* /data/.[!.]* /data/..?*; do
-                  [ -e "$item" ] || continue
-                  base="$(basename "$item")"
-                  if [ "$base" = "home" ] || [ "$base" = ".home-layout-migrated" ]; then
-                    continue
-                  fi
-                  mv "$item" /data/home/.openclaw/
-                done
-
-                touch /data/.home-layout-migrated
-              fi
-
-              chown --recursive 1000:1000 /data/home
-          securityContext:
-            runAsUser: 0
-          volumeMounts:
-            - name: openclaw-data
-              mountPath: /data
       containers:
         - name: amneziawg
           image: ghcr.io/zeozeozeo/amneziawg-client:latest
@@ -274,10 +243,10 @@ spec:
           resources:
             requests:
               cpu: "1"
-              memory: 2Gi
+              memory: 3Gi
             limits:
               cpu: "2"
-              memory: 4Gi
+              memory: 8Gi
 
         - name: oauth2-proxy
           # renovate: datasource=docker depName=quay.io/oauth2-proxy/oauth2-proxy
