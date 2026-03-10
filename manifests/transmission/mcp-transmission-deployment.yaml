@@ -17,6 +17,7 @@ spec:
     spec:
       containers:
         - name: mcp-transmission
+          # renovate: datasource=docker depName=ghcr.io/lexfrei/mcp-transmission
           image: ghcr.io/lexfrei/mcp-transmission:0.1.0
           imagePullPolicy: IfNotPresent
           env:
