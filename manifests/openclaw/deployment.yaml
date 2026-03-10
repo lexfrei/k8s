@@ -254,6 +254,10 @@ spec:
           args:
             - --http-address=0.0.0.0:4180
             - --upstream=http://localhost:18789
+            - --reverse-proxy=true
+            - --proxy-websockets=true
+            - --upstream-timeout=24h
+            - --flush-interval=100ms
             - --provider=oidc
             - --oidc-issuer-url=https://authelia.lex.la
             - --client-id=openclaw
