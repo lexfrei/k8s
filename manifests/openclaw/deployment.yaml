@@ -140,7 +140,12 @@ spec:
                   fi
                 fi
 
-                ORIG_GW=$(ip route | grep '^default via' | awk '{print $3}' | head -1)
+                # Robust gateway detection: handles both "default via X" and Cilium's device-only default
+              ORIG_GW=$(ip route show default 2>/dev/null | awk '/via/{print $3; exit}')
+              if [ -z "$ORIG_GW" ]; then
+                # Cilium native routing: no "default via", extract gateway from pod CIDR route
+                ORIG_GW=$(ip route show 10.42.0.0/16 2>/dev/null | awk '/via/{print $3; exit}')
+              fi
 
                 if grep -qi "^AllowedIPs.*0\.0\.0\.0/0" "$conf_file" 2>/dev/null; then
                   FULL_TUNNEL="yes"
