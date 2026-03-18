@@ -13,7 +13,7 @@ spec:
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/wish-operator
     - chart: wish-operator
       repoURL: ghcr.io/lexfrei/charts
-      targetRevision: 0.4.0
+      targetRevision: 0.4.1
       helm:
         valuesObject:
           httpRoute:
