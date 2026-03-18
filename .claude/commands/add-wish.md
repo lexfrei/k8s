@@ -16,7 +16,39 @@ The argument is the product name to add (e.g. "Logitech MX Brio 4K").
    - Find a purchase URL on ozon.ru (search web, do NOT fetch ozon.ru directly — it hangs)
    - Find the current price in Russian rubles. If price cannot be found, ask the user.
 
-3. **Verify the image URL** works by checking HTTP headers with `curl --silent --head --location`. Confirm it returns HTTP 200 and a valid image content-type.
+3. **Verify the image URL** works and check transparency:
+   - Check HTTP headers with `curl --silent --head --location`. Confirm HTTP 200 and valid image content-type.
+   - Download the image and verify transparency with ImageMagick + Python:
+     ```bash
+     curl --silent --location "IMAGE_URL" | python3 -c "
+     from PIL import Image
+     import sys, io
+     img = Image.open(io.BytesIO(sys.stdin.buffer.read())).convert('RGBA')
+     alpha = img.getchannel('A')
+     w, h = img.size
+     # Check multiple points for real transparency (not just edge pixels)
+     opaque_bg = 0
+     for y in [0, h//4, h//2, 3*h//4, h-1]:
+         for x in [0, w//4, w//2, 3*w//4, w-1]:
+             a = alpha.getpixel((x, y))
+             r, g, b = img.getpixel((x, y))[:3]
+             if a == 255 and r > 240 and g > 240 and b > 240:
+                 opaque_bg += 1
+     transparent = sum(1 for p in alpha.getdata() if p < 255)
+     total = w * h
+     print(f'Size: {w}x{h}, Mode: {img.mode}')
+     print(f'Transparent pixels: {transparent}/{total} ({transparent*100/total:.1f}%)')
+     print(f'White opaque sample points: {opaque_bg}/25')
+     if transparent == 0:
+         print('VERDICT: No transparency (solid background)')
+     elif opaque_bg > 10:
+         print('VERDICT: Fake transparency (alpha exists but background is white opaque)')
+     else:
+         print('VERDICT: Real transparency')
+     "
+     ```
+   - Report the verdict to the user. Prefer images with real transparency.
+   - JPEG images never have transparency — this is expected, not an error.
 
 4. **Ask the user to confirm** all details before creating the file:
    - Title

@@ -1,0 +1,23 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: sony-fe-16-35mm-f28-gm-ii
+  namespace: wish-operator
+spec:
+  title: "Sony FE 16-35mm f/2.8 GM II (SEL1635GM2)"
+  imageURL: "https://sony.scene7.com/is/image/sonyglobalsolutions/SEL1635GM2?fmt=png-alpha&wid=800"
+  officialURL: "https://electronics.sony.com/imaging/lenses/full-frame-e-mount/p/sel1635gm2"
+  purchaseURLs:
+    - "https://www.bhphotovideo.com/c/product/1784822-REG/sony_fe_16_35mm_f_2_8_gm.html"
+  msrp: "$ 2298.00"
+  tags:
+    - photography
+    - lens
+    - wide-angle
+    - zoom
+    - sony
+    - g-master
+  contextTags:
+    - any-occasion
+  description: "G Master wide-angle zoom for Sony E-mount. 2nd generation — smaller and lighter than original. XD linear motors, nano AR II coating, 11-blade aperture. Completes the f/2.8 zoom trinity."
+  priority: 2

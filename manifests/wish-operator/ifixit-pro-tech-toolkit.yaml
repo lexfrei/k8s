@@ -1,0 +1,20 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: ifixit-pro-tech-toolkit
+  namespace: wish-operator
+spec:
+  title: "iFixit Pro Tech Toolkit (IF145-307-4)"
+  imageURL: "https://cdn.shopify.com/s/files/1/0045/4092/4007/files/ckpuwVFwUFVCivaY.jpg?v=1747851460"
+  officialURL: "https://www.ifixit.com/Store/Tools/Pro-Tech-Toolkit/IF145-307"
+  purchaseURLs:
+    - "https://www.ozon.ru/product/nabor-instrumentov-ifixit-pro-tech-toolkit-if145-307-4-172300150/"
+  msrp: "$ 74.99"
+  tags:
+    - electronics
+    - tools
+    - repair
+  contextTags:
+    - any-occasion
+  description: "Professional electronics repair toolkit. 64 precision bits, spudgers, tweezers, suction cups, opening tools. Covers phones, laptops, game consoles, and general electronics."
+  priority: 4

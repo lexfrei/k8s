@@ -1,0 +1,20 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: snapmaker-u1
+  namespace: wish-operator
+spec:
+  title: "Snapmaker U1"
+  imageURL: "https://us.snapmaker.com/cdn/shop/files/U1_c9534a17-eea4-4937-b1d6-13b45ccc7ca0.webp?v=1763646848"
+  officialURL: "https://www.snapmaker.com/en-US/snapmaker-u1"
+  purchaseURLs:
+    - "https://us.snapmaker.com/products/snapmaker-u1-3d-printer"
+  msrp: "$ 849"
+  tags:
+    - electronics
+    - 3d-printing
+    - maker
+  contextTags:
+    - any-occasion
+  description: "Multi-color/multi-material 3D printer with 4 independent toolheads and SnapSwap system. 270x270x270mm build volume, up to 500mm/s print speed. Auto toolhead alignment under 0.04mm."
+  priority: 3
