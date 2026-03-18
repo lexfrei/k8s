@@ -1,0 +1,20 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: logitech-mx-brio-4k
+  namespace: wish-operator
+spec:
+  title: "Logitech MX Brio 4K Webcam (Graphite)"
+  imageURL: "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/webcams/mx-brio/buy/migration-assets-for-delorean-2025/gallery/mx-brio-3qtr-front-right-graphite.png"
+  officialURL: "https://www.logitech.com/en-us/products/webcams/mx-brio.html"
+  purchaseURLs:
+    - "https://www.ozon.ru/product/logitech-mx-brio-4k-veb-kamera-s-mikrofonom-seraya-1667224764/"
+  msrp: "₽ 13500"
+  tags:
+    - electronics
+    - webcam
+    - logitech
+  contextTags:
+    - any-occasion
+  description: "Ultra HD 4K webcam with dual noise-reducing microphones, auto light correction, Show Mode, and USB-C. Works with Microsoft Teams, Zoom, and Google Meet."
+  priority: 3
