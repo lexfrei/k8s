@@ -5,7 +5,7 @@ metadata:
   namespace: wish-operator
 spec:
   title: "Eve Room"
-  imageURL: "https://m.media-amazon.com/images/I/51HKXlNjHBL._AC_UF1000,1000_QL80_.jpg"
+  imageURL: "https://www.evehome.com/sites/default/files/2021-11/Eve_Room_Device_EU_celsius_shadow.png"
   officialURL: "https://www.evehome.com/en/eve-room"
   purchaseURLs:
     - "https://www.evehome.com/en/eve-room"

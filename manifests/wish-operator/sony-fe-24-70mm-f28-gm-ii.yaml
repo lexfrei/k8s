@@ -5,7 +5,7 @@ metadata:
   namespace: wish-operator
 spec:
   title: "Sony FE 24-70mm f/2.8 GM II (SEL2470GM2)"
-  imageURL: "https://upload.wikimedia.org/wikipedia/commons/a/a8/Sony_FE_24-70mm_F2.8_GM_II_-_by_Henry_S%C3%B6derlund_%2852131834285%29.jpg"
+  imageURL: "https://sony.scene7.com/is/image/sonyglobalsolutions/SEL2470GM2?fmt=png-alpha&wid=800"
   officialURL: "https://electronics.sony.com/imaging/lenses/full-frame-e-mount/p/sel2470gm2"
   purchaseURLs:
     - "https://electronics.sony.com/imaging/lenses/full-frame-e-mount/p/sel2470gm2"

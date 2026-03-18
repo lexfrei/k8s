@@ -4,8 +4,8 @@ metadata:
   name: sony-fe-100mm-f28-macro-gm
   namespace: wish-operator
 spec:
-  title: "Sony FE 100mm F2.8 Macro GM OSS"
-  imageURL: "https://image.ceneostatic.pl/data/products/188897963/i-sony-fe-macro-g-oss-f-2-8-100mm-sel100m28gm.jpg"
+  title: "Sony FE 100mm F2.8 Macro GM OSS (SEL100M28GM)"
+  imageURL: "https://sony.scene7.com/is/image/sonyglobalsolutions/SEL100M28GM?fmt=png-alpha&wid=800"
   officialURL: "https://electronics.sony.com/imaging/lenses/full-frame-e-mount/p/sel100m28gm"
   purchaseURLs:
     - "https://electronics.sony.com/imaging/lenses/full-frame-e-mount/p/sel100m28gm"

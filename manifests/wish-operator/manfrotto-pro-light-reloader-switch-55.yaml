@@ -5,7 +5,7 @@ metadata:
   namespace: wish-operator
 spec:
   title: "Manfrotto Pro Light Reloader Switch-55"
-  imageURL: "https://cdn.manfrotto.com/media/catalog/product/c/a/camera-roller-manfrotto-pro-light-reloader-switch-55-mb-pl-rl-h55-45degrees.jpg"
+  imageURL: "https://cdn.manfrotto.com/media/catalog/product/c/a/camera-roller-manfrotto-pro-light-reloader-switch-55-mb-pl-rl-h55.jpg"
   officialURL: "https://www.manfrotto.com/global-en/pro-light-reloader-switch-55-carry-on-camera-roller-bag-mb-pl-rl-h55/"
   purchaseURLs:
     - "https://www.manfrotto.com/global-en/pro-light-reloader-switch-55-carry-on-camera-roller-bag-mb-pl-rl-h55/"
