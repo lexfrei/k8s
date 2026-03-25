@@ -1,0 +1,22 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: smallrig-np-fz100-battery
+  namespace: wish-operator
+spec:
+  title: "SmallRig NP-FZ100 USB-C Rechargeable Battery (4265B)"
+  imageURL: "https://static.smallrig.com/mall/img/public/1727344246782_.JPG"
+  officialURL: "https://www.smallrig.com/de/NP-FZ100-USB-C-Rechargeable-Camera-Battery.html"
+  purchaseURLs:
+    - "https://www.ozon.ru/product/akkumulyator-smallrig-4265-np-fz100-type-c-siniy-2665978365/"
+    - "https://www.bhphotovideo.com/c/product/1804667-REG/smallrig_4265b_np_fz100_usb_c_rechargeable.html"
+  msrp: "$ 31.99"
+  tags:
+    - photography
+    - battery
+    - sony
+    - smallrig
+  contextTags:
+    - any-occasion
+  description: "2400mAh NP-FZ100 replacement battery with USB-C fast charging (2.5h). Fully decoded chip — no camera warnings. Compatible with Sony A7R V, A7 IV, A7S III, FX3, and others."
+  priority: 3
