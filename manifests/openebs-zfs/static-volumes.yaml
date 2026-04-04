@@ -12,7 +12,7 @@ spec:
   ownerNodeID: k8s-storage-01
   poolName: pool
   volumeType: DATASET
-  shared: "yes"
+  shared: "no"
 status:
   state: Ready
 ---
@@ -25,7 +25,7 @@ spec:
   capacity:
     storage: 10Ti
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: zfs-localpv
   claimRef:

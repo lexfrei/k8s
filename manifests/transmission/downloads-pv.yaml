@@ -5,7 +5,7 @@ metadata:
   namespace: transmission-system
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   storageClassName: zfs-localpv
   resources:
     requests:
