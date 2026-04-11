@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   sources:
     - repoURL: "https://charts.authelia.com"
-      targetRevision: "0.10.50"
+      targetRevision: "0.10.54"
       chart: authelia
       helm:
         valuesObject:
