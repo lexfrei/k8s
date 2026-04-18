@@ -24,14 +24,16 @@ kubectl config use-context homelab
 ```
 
 - Context name: `homelab`
-- API server: https://172.16.101.1:6443 (k8s-cp-01)
+- API server: https://172.16.101.4:6443 (k8s-storage-01)
 - Credentials: admin via client certificate
 
 **Never run kubectl commands without specifying context** — this prevents accidental operations on wrong clusters.
 
 ## Repository Purpose
 
-This is a Kubernetes cluster configuration for a mixed-architecture home cluster (3x ARM64 Raspberry Pi + 1x x86_64 storage node) managed via GitOps with ArgoCD. The repository contains all Kubernetes manifests, Helm values, and ArgoCD application definitions for a production home cluster.
+This is a Kubernetes cluster configuration for a single-node home cluster (1x x86_64 storage node) managed via GitOps with ArgoCD. The repository contains all Kubernetes manifests, Helm values, and ArgoCD application definitions for a production home cluster.
+
+Previously the cluster ran 3 ARM64 Raspberry Pi nodes as HA control plane, but these were retired on 2026-04-18 due to recurring macb silent NIC death (LP #2133877). The amd64 storage node now serves as the sole control-plane and workload node.
 
 ## Architecture Overview
 
@@ -76,9 +78,9 @@ The cluster runs on K3s with these core components (in deployment order):
 
 1. **DNS**: CoreDNS with custom cluster domain k8s.home.lex.la
 2. **Networking**: Cilium CNI with native routing on 10.42.0.0/16
-3. **Control Plane HA**: extractedprism per-node TCP LB (127.0.0.1:7445 → all control plane endpoints)
+3. **Control Plane**: Single-node k3s server on storage-01 (no HA). extractedprism per-node TCP LB (127.0.0.1:7445) still deployed as thin abstraction for CNI/kubelet
 4. **GitOps**: ArgoCD (self-managed via the meta application)
-5. **Storage**: Longhorn for distributed block storage
+5. **Storage**: OpenEBS ZFS LocalPV on pool/* datasets (primary); Longhorn still installed but with ZFS data locality (mostly unused after CP migration)
 6. **Load Balancing**: Cilium L2 Announcements (LB IPAM) with dedicated IP pools
 7. **Gateway API**: Cilium Gateway API for internal routing + Cloudflare Tunnel for public routing
 8. **Certificate Management**: cert-manager with automatic Gateway API integration
@@ -92,11 +94,10 @@ The cluster runs on K3s with these core components (in deployment order):
 
 ### Network Configuration
 
-- **extractedprism**: Per-node TCP load balancer on 127.0.0.1:7445 for API server HA
-  - DaemonSet with hostNetwork, static bootstrap endpoints + dynamic EndpointSlice discovery
-  - Cilium k8sServiceHost points to extractedprism (127.0.0.1:7445) instead of VIP
-  - Resilient to macb silent NIC death — each node has independent API server path
-  - No CNI dependency at boot (hostNetwork + static endpoints)
+- **extractedprism**: Per-node TCP load balancer on 127.0.0.1:7445, retained for single-CP architecture
+  - DaemonSet with hostNetwork, static bootstrap endpoint (172.16.101.4:6443) + dynamic EndpointSlice discovery
+  - Cilium k8sServiceHost points to extractedprism (127.0.0.1:7445) instead of direct apiserver IP
+  - Reduced value for single CP (no failover to balance) — kept as a thin stable abstraction should CP ever grow again
 - **Pod network**: 10.42.0.0/16 (Cilium tunnel mode with VXLAN)
 - **Cilium kube-proxy replacement** for service load balancing and NodePort
 - **Cilium L2 Announcements** for LoadBalancer IP allocation:

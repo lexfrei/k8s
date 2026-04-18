@@ -9,22 +9,16 @@ all:
         # K3s server nodes (control plane)
         server:
           hosts:
-            k8s-cp-01:
-              ansible_host: 172.16.101.1
-            k8s-cp-02:
-              ansible_host: 172.16.101.2
-            k8s-cp-03:
-              ansible_host: 172.16.101.3
-
-        # K3s agent nodes (workers)
-        agent:
-          hosts:
             k8s-storage-01:
               ansible_host: 172.16.101.4
               # ZFS ARC is capped at 8 GiB — reserve from kubelet scheduling
-              agent_config_yaml: |
+              server_config_yaml: |
                 kubelet-arg:
                   - "system-reserved=memory=8Gi"
+
+        # K3s agent nodes (workers) — none currently
+        agent:
+          hosts: {}
 
       vars:
         # K3s version for upgrades
@@ -32,14 +26,6 @@ all:
         k3s_version: v1.35.2+k3s1
 
     # Cross-cutting groups for platform-specific configuration
-    # These overlap with server/agent groups intentionally
-
-    # Raspberry Pi 5 nodes (ARM64, macb NIC, bcm2835_wdt, SD/NVMe boot)
-    rpi:
-      hosts:
-        k8s-cp-01:
-        k8s-cp-02:
-        k8s-cp-03:
 
     # ZFS storage nodes (x86_64, LSI SAS HBA, Intel AHCI, USB boot chain)
     storage:
