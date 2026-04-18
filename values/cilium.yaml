@@ -12,9 +12,8 @@ kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 mtu: 1500
 
 # Devices for BPF attachment and direct routing detection
-# end+: RPi nodes (end0, predictable naming)
 # ens+: k8s-storage-01 (ens1, Realtek RTL8125 PCIe)
-devices: "end+ ens+"
+devices: "ens+"
 
 # Routing configuration
 # Native routing for better performance on same L2 network
@@ -70,40 +69,16 @@ operator:
 envoy:
   enabled: false
 
-# Hubble network observability
+# Hubble network observability — single-node, use CLI only (hubble observe
+# on the node); Relay + UI are distributed-cluster luxuries.
 hubble:
   enabled: true
   peerService:
     clusterDomain: k8s.home.lex.la
   relay:
-    enabled: true
-    service:
-      type: LoadBalancer
-    resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        cpu: 200m
-        memory: 256Mi
+    enabled: false
   ui:
-    enabled: true
-    backend:
-      resources:
-        requests:
-          cpu: 25m
-          memory: 32Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
-    frontend:
-      resources:
-        requests:
-          cpu: 25m
-          memory: 32Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
+    enabled: false
 
 # Gateway API support
 gatewayAPI:
