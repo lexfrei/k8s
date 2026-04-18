@@ -3,6 +3,8 @@ extends: relaxed
 ignore:
   - secrets/
   - ansible/
+  # Vendored Helm charts contain Go template syntax that is not valid YAML
+  - charts/
 
 rules:
   line-length: disable
