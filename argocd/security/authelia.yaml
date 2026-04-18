@@ -11,9 +11,11 @@ spec:
     namespace: security
     server: "https://kubernetes.default.svc"
   sources:
-    - repoURL: "https://charts.authelia.com"
-      targetRevision: "0.10.58"
-      chart: authelia
+    # charts.authelia.com is slow (~300 B/s from our egress, ArgoCD Helm
+    # render times out). Pull chart directly from its upstream git repo.
+    - repoURL: "https://github.com/authelia/chartrepo"
+      targetRevision: "authelia-0.10.58"
+      path: charts/authelia
       helm:
         valuesObject:
           pod:
