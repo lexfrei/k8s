@@ -39,7 +39,7 @@ spec:
 
           persistence:
             enabled: true
-            storageClass: longhorn
+            storageClass: zfs-localpv
             size: 1Gi
 
           configMap:
