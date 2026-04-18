@@ -11,10 +11,11 @@ spec:
     namespace: security
     server: "https://kubernetes.default.svc"
   sources:
-    # charts.authelia.com is slow (~300 B/s from our egress, ArgoCD Helm
-    # render times out). Pull chart directly from its upstream git repo.
-    - repoURL: "https://github.com/authelia/chartrepo"
-      targetRevision: "authelia-0.10.58"
+    # Chart vendored in-tree at charts/authelia/ — upstream lives at
+    # github.com/authelia/chartrepo. charts.authelia.com is too slow
+    # (~300 B/s from our egress) and helm-dep-update hits Bitnami (403).
+    - repoURL: "https://github.com/lexfrei/k8s.git"
+      targetRevision: HEAD
       path: charts/authelia
       helm:
         valuesObject:

@@ -1,0 +1,21 @@
+{{ if not .Values.configMap.disabled }}
+
+{{ range $override := .Values.ingress.rulesOverride }}
+{{ if and (not $override.path) (not (eq $override.path "/")) (not (eq $override.path (printf "/%s" $.Values.configMap.server.path))) }}
+{{ fail "The value 'path' for the 'configMap.ingress.rulesOverride' must either not be configured, be configured as '/', or be the same value as the 'configMap.server.path' with the '/' prefix." }}
+{{ end }}
+{{ end }}
+
+{{- end }}
+
+{{ if and .Values.ingress.gatewayAPI.enabled .Values.ingress.traefikCRD.enabled }}
+{{ fail "The GatewayAPI and TraefikCRD can't be enabled at the same time" }}
+{{- end }}
+
+{{- if and .Values.ingress.enabled (eq (len .Values.configMap.session.cookies) 0) }}
+{{ fail "An Ingress can't be configured without configured session cookies" }}
+{{- end }}
+
+{{- if and .Values.versionOverride (semverCompare "<4.38.0" .Values.versionOverride) }}
+{{ fail "The versionOverride value must be at least 4.38.0 if defined" }}
+{{- end }}

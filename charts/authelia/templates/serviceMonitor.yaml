@@ -1,0 +1,22 @@
+{{- if and .Values.configMap.telemetry.metrics.enabled .Values.configMap.telemetry.metrics.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "authelia.name" . }}
+  namespace: {{ template "authelia.namespace" . }}
+  labels: {{ include "authelia.labels" (merge (dict "Labels" .Values.configMap.telemetry.metrics.serviceMonitor.labels) .) | nindent 4 }}
+  {{- with $annotations := include "authelia.annotations" (merge (dict "Annotations" .Values.configMap.telemetry.metrics.serviceMonitor.annotations) .) }}
+  annotations: {{ $annotations | nindent 4 }}
+  {{- end }}
+spec:
+  endpoints:
+    - path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - {{ template "authelia.namespace" . }}
+  selector:
+    matchLabels: {{ include "authelia.labels" (merge (dict "Labels" .Values.service.labels) .) | nindent 6 }}
+...
+{{- end }}

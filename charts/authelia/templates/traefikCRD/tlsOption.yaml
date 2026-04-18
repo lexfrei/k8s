@@ -1,0 +1,30 @@
+{{ if (include "authelia.enabled.ingress.traefik.tlsOption" .) -}}
+---
+apiVersion: {{ template "capabilities.apiVersion.traefik.TLSOption" . }}
+kind: TLSOption
+metadata:
+  name: {{ .Values.ingress.traefikCRD.tls.options.nameOverride | default (include "authelia.name" .) }}
+  namespace: {{ template "authelia.namespace" . }}
+  labels: {{ include "authelia.labels" (merge (dict "Labels" .Values.ingress.labels) .) | nindent 4 }}
+  {{- with $annotations := include "authelia.annotations" (merge (dict "Annotations" .Values.ingress.annotations) .) }}
+  annotations: {{ $annotations | nindent 4 }}
+  {{- end }}
+spec:
+  minVersion: {{ .Values.ingress.traefikCRD.tls.options.minVersion |  default "VersionTLS12" }}
+  maxVersion: {{ .Values.ingress.traefikCRD.tls.options.maxVersion | default "VersionTLS13" }}
+{{- with $preferences := .Values.ingress.traefikCRD.tls.options.curvePreferences }}
+  curvePreferences:
+  {{- range $preferences }}
+  - {{ . }}
+  {{- end }}
+{{- end }}
+{{- with $suites := .Values.ingress.traefikCRD.tls.options.cipherSuites | default (list "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256" "TLS_RSA_WITH_AES_256_GCM_SHA384") }}
+  cipherSuites:
+  {{- range $suites }}
+  - {{ . }}
+  {{- end }}
+{{- end }}
+{{ with $strict := .Values.ingress.traefikCRD.tls.options.sniStrict }}
+  sniStrict: {{ $strict }}
+{{- end }}
+{{- end -}}
