@@ -9,7 +9,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: longhorn-remote
+  storageClassName: zfs-localpv
   resources:
     requests:
       storage: 10Gi
