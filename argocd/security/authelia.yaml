@@ -84,6 +84,7 @@ spec:
                 path: SESSION_SECRET
               cookies:
                 - domain: lex.la
+                  subdomain: authelia
                   default_redirection_url: https://grafana.home.lex.la
 
             regulation:
