@@ -33,6 +33,14 @@ servers:
       # Serves a /metrics endpoint on :9153, required for serviceMonitor
       - name: prometheus
         parameters: 0.0.0.0:9153
+      # Suppress AAAA responses cluster-wide: node has IPv6 ULA but no
+      # default v6 route, so any pod getting AAAA will Happy-Eyeballs-
+      # timeout before falling back to IPv4 (broke ArgoCD Helm render
+      # for charts.authelia.com). Return NODATA for every AAAA query.
+      - name: template
+        parameters: IN AAAA .
+        configBlock: |-
+          rcode NOERROR
       # Forward to router for split-horizon DNS, fallback to Cloudflare
       - name: forward
         parameters: . 172.16.0.1 1.1.1.1 1.0.0.1
