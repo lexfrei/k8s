@@ -64,8 +64,10 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
 
 - **`values/`** - Helm chart values files for infrastructure components
   - `argocd.yaml` - ArgoCD configuration including Crossplane health checks, server.insecure for Gateway TLS termination, and HTTPRoute configuration
-  - `coredns.yaml` - CoreDNS configuration with custom cluster domain k8s.home.lex.la
+  - `coredns.yaml` - CoreDNS configuration with custom cluster domain k8s.home.lex.la (also contains `template IN AAAA . rcode NOERROR` to suppress AAAA since the node has IPv6 ULA but no default v6 route — Happy Eyeballs would time out otherwise)
   - `cilium.yaml` - Cilium CNI configuration (native routing, kube-proxy replacement, L2 announcements, Gateway API, Hubble enabled)
+
+- **`charts/`** - Vendored upstream Helm charts used when upstream repo is unreliable or requires gated deps. Currently: `authelia/` (0.10.58 with Bitnami subchart deps removed — those were conditional and unused, but `helm dep update` would otherwise hit 403 on `charts.bitnami.com`). Update procedure: re-download upstream tag tarball, drop bitnami deps from Chart.yaml, diff-review before committing.
 
 - **`secrets/`** - Bootstrap secrets (GPG encrypted)
   - `openbao-seal-key.yaml.asc` - OpenBao auto-unseal key (required before OpenBao starts)
@@ -431,6 +433,7 @@ Move ArgoCD Application manifest from `argocd/CATEGORY/` to `argocd-disabled/`
 
 ## Important Constraints
 
+- ZFS pool on storage-01 is scrubbed monthly via `zfs-scrub-monthly@pool.timer` (ansible-managed in `playbooks/zfs.yaml`); `zfs-zed` runs and emails alerts on pool/disk errors
 - K3s cluster with specific components disabled (local-storage, servicelb, metrics-server, coredns, kube-proxy, flannel, traefik)
 - Custom CoreDNS and Cilium replace default K3s networking
 - Designed for ARM64 architecture (Raspberry Pi)
