@@ -48,3 +48,9 @@
         state: present
         extra_zfs_properties:
           atime: "off"
+
+    - name: Enable monthly ZFS scrub via systemd timer
+      ansible.builtin.systemd:
+        name: zfs-scrub-monthly@pool.timer
+        enabled: true
+        state: started
