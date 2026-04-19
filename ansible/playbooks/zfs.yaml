@@ -12,6 +12,16 @@
     - zfs
 
   tasks:
+    - name: Configure pool root properties (inherited by all child datasets)
+      community.general.zfs:
+        name: pool
+        state: present
+        extra_zfs_properties:
+          # System-attribute xattrs are stored in the inode header instead
+          # of a hidden directory — much faster for Samba/fruit workloads
+          # that store every attribute as an xattr.
+          xattr: sa
+
     - name: Configure pool/timemachine properties
       community.general.zfs:
         name: pool/timemachine
@@ -20,6 +30,10 @@
           aclinherit: passthrough
           atime: "off"
           sync: disabled
+          xattr: sa
+          # TimeMachine sparsebundle bands are 8–128 MiB blocks of random I/O;
+          # 1 MiB recordsize matches better than the 128 KiB default.
+          recordsize: 1M
 
     - name: Configure pool/transmission properties
       community.general.zfs:
@@ -27,6 +41,10 @@
         state: present
         extra_zfs_properties:
           sync: disabled
+          xattr: sa
+          # Large media files — already set to 1 MiB at create time, but
+          # asserted here for reproducibility.
+          recordsize: 1M
 
     - name: Configure pool/dump properties
       community.general.zfs:
@@ -41,6 +59,8 @@
         state: present
         extra_zfs_properties:
           atime: "off"
+          # Music files are 5–50 MiB — matches 1 MiB recordsize.
+          recordsize: 1M
 
     - name: Configure pool/lex properties
       community.general.zfs:
