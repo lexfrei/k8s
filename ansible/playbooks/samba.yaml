@@ -15,10 +15,10 @@
     - samba
 
   handlers:
-    - name: Restart smbd
+    - name: Reload smbd
       ansible.builtin.systemd:
         name: smbd
-        state: restarted
+        state: reloaded
 
     - name: Restart Avahi
       ansible.builtin.systemd:
@@ -56,7 +56,7 @@
         mode: "0644"
         owner: root
         group: root
-      notify: Restart smbd
+      notify: Reload smbd
 
     - name: Ensure passdb directory exists
       ansible.builtin.file:
