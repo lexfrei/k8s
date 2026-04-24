@@ -26,40 +26,21 @@
         state: restarted
 
   tasks:
-    - name: Add Ubuntu Resolute (26.04) repository for Samba 4.23
-      ansible.builtin.copy:
-        dest: /etc/apt/sources.list.d/resolute-samba.sources
-        content: |
-          Types: deb
-          URIs: http://ru.archive.ubuntu.com/ubuntu/
-          Suites: resolute resolute-updates resolute-security
-          Components: main
-          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
-        mode: "0644"
-      register: resolute_repo
+    - name: Remove obsolete resolute Samba pin (resolute is now the running suite on 26.04)
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/apt/sources.list.d/resolute-samba.sources
+        - /etc/apt/preferences.d/resolute-samba.pref
+      register: resolute_pin_cleanup
 
-    - name: Pin resolute packages to low priority (do not auto-upgrade)
-      ansible.builtin.copy:
-        dest: /etc/apt/preferences.d/resolute-samba.pref
-        content: |
-          # Default: never install from resolute unless explicitly requested
-          Package: *
-          Pin: release n=resolute*
-          Pin-Priority: 100
-
-          # Samba stack: prefer resolute over questing (fixes TimeMachine bug #15926)
-          Package: samba samba-libs samba-common samba-common-bin python3-samba python3-ldb libldb2 libtevent0t64
-          Pin: release n=resolute*
-          Pin-Priority: 900
-        mode: "0644"
-      register: resolute_pin
-
-    - name: Update apt cache after adding resolute repo
+    - name: Update apt cache after removing resolute pin
       ansible.builtin.apt:
         update_cache: true
-      when: resolute_repo.changed or resolute_pin.changed
+      when: resolute_pin_cleanup.changed
 
-    - name: Install Samba packages (4.23.x from resolute)
+    - name: Install Samba packages
       ansible.builtin.apt:
         name:
           - samba
