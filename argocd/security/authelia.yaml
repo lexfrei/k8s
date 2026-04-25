@@ -11,9 +11,10 @@ spec:
     namespace: security
     server: "https://kubernetes.default.svc"
   sources:
-    # Chart vendored in-tree at charts/authelia/ — upstream lives at
-    # github.com/authelia/chartrepo. charts.authelia.com is too slow
-    # (~300 B/s from our egress) and helm-dep-update hits Bitnami (403).
+    # Chart vendored in-tree at charts/authelia/ from
+    # github.com/lexfrei/authelia-chartrepo (fork of authelia/chartrepo
+    # carrying the schema fix from authelia/chartrepo#410). Switch to
+    # oci://ghcr.io/authelia/chartrepo once #410 is merged upstream.
     - repoURL: "https://github.com/lexfrei/k8s.git"
       targetRevision: HEAD
       path: charts/authelia
