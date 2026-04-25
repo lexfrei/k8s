@@ -80,7 +80,6 @@ spec:
             capabilities:
               drop:
                 - ALL
-            readOnlyRootFilesystem: true
             seccompProfile:
               type: RuntimeDefault
       volumes:
