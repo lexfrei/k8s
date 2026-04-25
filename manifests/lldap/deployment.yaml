@@ -18,9 +18,6 @@ spec:
         app.kubernetes.io/name: lldap
     spec:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
         fsGroup: 1000
       containers:
         - name: lldap
@@ -77,9 +74,6 @@ spec:
               memory: 256Mi
           securityContext:
             allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
             seccompProfile:
               type: RuntimeDefault
       volumes:
