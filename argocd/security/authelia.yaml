@@ -40,6 +40,7 @@ spec:
           secret:
             additionalSecrets:
               authelia-secrets: {}
+              authelia-app: {}  # CNPG-generated for postgres backend
 
           persistence:
             enabled: true
@@ -98,8 +99,17 @@ spec:
                 secret_name: authelia-secrets
                 path: STORAGE_ENCRYPTION_KEY
               local:
-                enabled: true
+                enabled: false
                 path: /config/db.sqlite3
+              postgres:
+                enabled: true
+                address: tcp://authelia-rw:5432
+                database: authelia
+                schema: public
+                username: authelia
+                password:
+                  secret_name: authelia-app
+                  path: password
 
             notifier:
               disable_startup_check: true
