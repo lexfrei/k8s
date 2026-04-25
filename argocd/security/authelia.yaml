@@ -41,6 +41,7 @@ spec:
             additionalSecrets:
               authelia-secrets: {}
               authelia-app: {}  # CNPG-generated for postgres backend
+              lldap-secrets: {}  # ESO-synced from OpenBao for LDAP bind
 
           persistence:
             enabled: true
@@ -69,11 +70,17 @@ spec:
             authentication_backend:
               password_reset:
                 disable: true
-              file:
+              ldap:
                 enabled: true
-                path: /config/users.yml
+                implementation: lldap
+                address: ldap://lldap.security.svc:3890
+                base_dn: dc=lex,dc=la
+                additional_users_dn: ou=people
+                additional_groups_dn: ou=groups
+                user: uid=admin,ou=people,dc=lex,dc=la
                 password:
-                  algorithm: argon2
+                  secret_name: lldap-secrets
+                  path: LLDAP_LDAP_USER_PASS
 
             session:
               name: authelia_session
