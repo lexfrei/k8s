@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lldap
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: security
+  destination:
+    namespace: security
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://github.com/lexfrei/k8s.git"
+    targetRevision: HEAD
+    path: manifests/lldap
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
