@@ -1,0 +1,27 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: authelia
+  namespace: security
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.5-bookworm
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 2Gi
+    storageClass: zfs-localpv
+  bootstrap:
+    initdb:
+      database: authelia
+      owner: authelia
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  postgresql:
+    parameters:
+      max_connections: "50"
+      shared_buffers: 128MB
