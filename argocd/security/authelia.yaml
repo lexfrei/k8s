@@ -11,13 +11,9 @@ spec:
     namespace: security
     server: "https://kubernetes.default.svc"
   sources:
-    # Chart vendored in-tree at charts/authelia/ from
-    # github.com/lexfrei/authelia-chartrepo (fork of authelia/chartrepo
-    # carrying the schema fix from authelia/chartrepo#410). Switch to
-    # oci://ghcr.io/authelia/chartrepo once #410 is merged upstream.
-    - repoURL: "https://github.com/lexfrei/k8s.git"
-      targetRevision: HEAD
-      path: charts/authelia
+    - repoURL: "ghcr.io/authelia/chartrepo"
+      targetRevision: "0.11.4"
+      chart: authelia
       helm:
         valuesObject:
           pod:

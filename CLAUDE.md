@@ -67,7 +67,7 @@ The repository uses **ArgoCD's App-of-Apps pattern**:
   - `coredns.yaml` - CoreDNS configuration with custom cluster domain k8s.home.lex.la (also contains `template IN AAAA . rcode NOERROR` to suppress AAAA since the node has IPv6 ULA but no default v6 route — Happy Eyeballs would time out otherwise)
   - `cilium.yaml` - Cilium CNI configuration (native routing, kube-proxy replacement, L2 announcements, Gateway API, Hubble enabled)
 
-- **`charts/`** - Vendored upstream Helm charts used when upstream repo is unreliable or requires gated deps. Currently: `authelia/` (0.11.3, vendored from `lexfrei/authelia-chartrepo` master — fork carries fix for upstream PR #410, where `secret_name` schema was over-tightened to `type: null` only, breaking external-Secret usage). Update procedure: `rsync --archive --delete ~/git/github.com/lexfrei/authelia-chartrepo/charts/authelia/ charts/authelia/`, diff-review before committing. Once #410 is merged upstream and tagged, switch the ArgoCD source to `oci://ghcr.io/authelia/chartrepo` and drop the local vendor.
+- **`charts/`** - Reserved for vendored upstream Helm charts when needed. Currently empty: Authelia consumes the upstream chart from `oci://ghcr.io/authelia/chartrepo` (0.11.4+) directly via ArgoCD; the previous vendor (`charts/authelia/` 0.11.3 + local `secret_name` schema fix) was retired on 2026-04-25 once the upstream maintainer landed an equivalent fix in 0.11.4. Vendor again only if upstream regresses or adds gated deps that break ArgoCD render.
 
 - **`secrets/`** - Bootstrap secrets (GPG encrypted)
   - `openbao-seal-key.yaml.asc` - OpenBao auto-unseal key (required before OpenBao starts)

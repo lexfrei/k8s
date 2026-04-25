@@ -1,4 +1,0 @@
-configMap:
-  session:
-    cookies:
-      - domain: example.com
