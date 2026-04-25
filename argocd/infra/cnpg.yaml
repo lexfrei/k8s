@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cnpg
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: cnpg-system
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://cloudnative-pg.github.io/charts"
+    targetRevision: "0.28.0"
+    chart: cloudnative-pg
+    helm:
+      valuesObject:
+        crds:
+          create: true
+        monitoring:
+          podMonitorEnabled: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
