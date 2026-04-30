@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ouroboros
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: ouroboros
+    server: "https://kubernetes.default.svc"
+  source:
+    chart: ouroboros
+    repoURL: ghcr.io/lexfrei/charts
+    targetRevision: 0.4.0
+    helm:
+      valuesObject:
+        controller:
+          mode: external-dns
+          gatewayApi:
+            enabled: true
+          # Filter to cilium-gateway-internal routes only — *.home.lex.la
+          # hostnames. Excludes the cloudflare-tunnel Gateway (no in-cluster
+          # backend exists for *.lex.la, and the user explicitly asked to
+          # avoid the CF path for this smoke).
+          gatewayClass: cilium
+        externalDns:
+          output: service
+          # Synthetic prefix that no external-dns instance reads. The internal-dns
+          # external-dns watches `internal-dns/`, the public one watches the
+          # standard `external-dns.alpha.kubernetes.io/` — `ouroboros-smoke/`
+          # is inert. Producer-side smoke only; zero DNS impact.
+          annotationPrefix: ouroboros-smoke/
+          # RFC 5737 documentation address — explicitly synthetic. In a real
+          # deployment this would be the proxy ClusterIP (auto-discovered) or
+          # an operator-supplied target.
+          proxyIP: 192.0.2.1
+          recordTTL: 60
+        proxy:
+          # Producer-only smoke; no real backend is wired. The chart's
+          # haproxy Deployment is unnecessary here — proxyIP overrides
+          # auto-discovery, so no Service is needed either.
+          enabled: false
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
