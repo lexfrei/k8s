@@ -21,7 +21,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: lldap
-          image: lldap/lldap:v0.6.2
+          image: lldap/lldap:v0.6.3
           imagePullPolicy: IfNotPresent
           args: ["run", "--config-file", "/data/lldap_config.toml"]
           ports:
