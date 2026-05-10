@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: openclaw-ingress
+  namespace: openclaw
+spec:
+  podSelector:
+    matchLabels:
+      app: openclaw
+  policyTypes:
+    - Ingress
+  ingress:
+    # Keep existing public/UI path behavior via oauth2-proxy service on port 4180.
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 4180
+    # Restrict direct Gateway API ingress (hooks bridge) to Alertmanager pods only.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmalertmanager
+              app.kubernetes.io/instance: vmalertmanager
+      ports:
+        - protocol: TCP
+          port: 18789
