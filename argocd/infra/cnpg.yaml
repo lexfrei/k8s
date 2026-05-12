@@ -12,7 +12,7 @@ spec:
     server: "https://kubernetes.default.svc"
   source:
     repoURL: "https://cloudnative-pg.github.io/charts"
-    targetRevision: "0.28.1"
+    targetRevision: "0.28.2"
     chart: cloudnative-pg
     helm:
       valuesObject:
