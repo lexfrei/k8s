@@ -85,8 +85,21 @@ gatewayAPI:
   enabled: true
   enableAlpn: true
   # cilium-secrets Namespace is owned by the `namespaces` ArgoCD app
-  # (PSS labels). Letting the chart also create it triggers ArgoCD
-  # SharedResourceWarning and OutOfSync on both apps.
+  # (PSS labels). Three chart sections (gatewayAPI, envoyConfig,
+  # ingressController) each declare a `cilium-secrets` Namespace with
+  # create=true by default — the template renders it if ANY of them
+  # is true. All three must be set to create=false to avoid the
+  # SharedResourceWarning between cilium and namespaces ArgoCD apps.
+  secretsNamespace:
+    create: false
+    name: cilium-secrets
+
+envoyConfig:
+  secretsNamespace:
+    create: false
+    name: cilium-secrets
+
+ingressController:
   secretsNamespace:
     create: false
     name: cilium-secrets
