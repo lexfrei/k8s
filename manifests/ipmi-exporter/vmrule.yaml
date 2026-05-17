@@ -1,0 +1,133 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: ipmi-exporter
+  namespace: monitoring
+spec:
+  groups:
+    - name: ipmi-collector
+      rules:
+        - alert: IPMICollectorDown
+          expr: ipmi_up == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "IPMI collector {{ $labels.collector }} is not returning data"
+            description: |
+              Collector {{ $labels.collector }} on {{ $labels.instance }} has been
+              failing for 5+ minutes. Local KCS via /dev/ipmi0 should be near-zero
+              latency; sustained failure means the BMC is not responding or the
+              pod lost device access (privileges / nodeSelector drifted, host
+              upgrade in progress).
+
+    - name: ipmi-chassis-faults
+      rules:
+        - alert: IPMICoolingFault
+          expr: ipmi_chassis_cooling_fault_state == 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "BMC reports cooling fault on {{ $labels.instance }}"
+            description: |
+              Hardware-level cooling fault asserted by the BMC. Check fans
+              (ipmi_fan_speed_rpm), CPU/PSU temperatures, ambient inlet. If
+              the rack is hotter than usual, address airflow before reboot.
+
+        - alert: IPMIDriveFault
+          expr: ipmi_chassis_drive_fault_state == 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "BMC reports drive fault on {{ $labels.instance }}"
+            description: |
+              Hardware-level drive fault asserted by the BMC. This is a
+              chassis-level signal (LED), independent of ZFS view — ZFS may
+              still report ONLINE while the BMC sees a SAS/SATA controller
+              error. Cross-check with `zpool status` and `smartctl --all`
+              on each disk.
+
+        - alert: IPMIPowerOffUnexpected
+          expr: ipmi_chassis_power_state == 0
+          for: 2m
+          labels:
+            severity: info
+          annotations:
+            summary: "Chassis {{ $labels.instance }} reports power off"
+            description: |
+              BMC says the chassis is powered down. If a planned shutdown
+              is happening this is expected; otherwise the host is dead
+              (and node-exporter / kubelet alerts will fire alongside).
+
+    - name: ipmi-sensors
+      rules:
+        # Filter out 0-valued sensors that mean "not present / disabled" on
+        # this HP ProLiant Gen8 (e.g. PCI 1-4, P1 DIMM 5-8, LOM if no module).
+        - alert: IPMITemperatureWarning
+          expr: ipmi_temperature_celsius > 70 and ipmi_temperature_celsius < 200
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Sensor {{ $labels.name }} at {{ $value }}°C"
+            description: |
+              {{ $labels.name }} on {{ $labels.instance }} crossed 70°C for
+              5 minutes. CPU and inlet thresholds are tighter than PSU; if
+              this is a PSU sensor (P/S #) consider 70°C as borderline normal.
+
+        - alert: IPMITemperatureCritical
+          expr: ipmi_temperature_celsius > 85 and ipmi_temperature_celsius < 200
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Sensor {{ $labels.name }} at {{ $value }}°C — thermal"
+            description: |
+              {{ $labels.name }} on {{ $labels.instance }} crossed 85°C for
+              1 minute. Investigate before the BMC starts throttling or
+              triggers an emergency shutdown.
+
+        - alert: IPMIFanStopped
+          expr: ipmi_fan_speed_rpm == 0 and ipmi_fan_speed_state == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Fan {{ $labels.name }} reads 0 RPM"
+            description: |
+              {{ $labels.name }} on {{ $labels.instance }} reports 0 RPM
+              with state OK (state=0 means present-but-stopped, not absent).
+              Investigate physically — fan failure on a Gen8 cascades fast.
+
+    - name: ipmi-sel
+      rules:
+        # iLO Gen8 SEL capacity is 64 entries (1024 bytes). The BMC does
+        # NOT overwrite — once full, new events are silently dropped.
+        # Cleared on 2026-05-17; alert with headroom so we can save+clear
+        # before losing future events.
+        - alert: IPMISELFillingUp
+          expr: ipmi_sel_logs_count > 48
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "iLO SEL has {{ $value }} entries (cap 64, no overwrite)"
+            description: |
+              SEL on {{ $labels.instance }} reached {{ $value }}/64 entries.
+              HP iLO Gen8 SEL does not overwrite; at 64 entries the BMC
+              silently drops new events. Save & clear: `ipmitool sel save
+              backup.hex && ipmitool sel clear`.
+
+        - alert: IPMISELFull
+          expr: ipmi_sel_free_space_bytes < 64
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "iLO SEL on {{ $labels.instance }} is full"
+            description: |
+              SEL free space < 64 bytes; any new BMC event will be lost.
+              Save the SEL to disk and clear before any operational change
+              that might generate events (reboot, hardware swap).
