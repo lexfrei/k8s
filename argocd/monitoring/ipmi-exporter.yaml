@@ -44,6 +44,12 @@ spec:
             scrapeInterval: 1m
             scrapeTimeout: 30s
             scheme: HTTP
+            # Chart template requires staticConfigs or fileSDConfigs
+            # even when mode=local, where targets are irrelevant. Point
+            # at the exporter's own Service so the template renders.
+            staticConfigs:
+              - targets:
+                  - "ipmi-exporter-prometheus-ipmi-exporter.monitoring.svc:9290"
           # Pin to the storage node because /dev/ipmi0 is only on that
           # host. If a second BMC-bearing node ever joins, convert to a
           # DaemonSet (chart does not support that out of the box; would
