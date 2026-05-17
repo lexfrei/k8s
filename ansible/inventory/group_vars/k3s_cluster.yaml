@@ -38,8 +38,6 @@ extra_server_args: >-
   --etcd-arg=auto-compaction-mode=periodic
   --etcd-arg=auto-compaction-retention=1h
   --etcd-arg=snapshot-count=10000
-  --etcd-snapshot-retention=3
-  --etcd-snapshot-schedule-cron="0 */6 * * *"
 
 # Cluster-wide entries merged into /etc/rancher/k3s/config.yaml on every
 # server node. Host-specific additions live in inventory/production.yaml
@@ -47,6 +45,15 @@ extra_server_args: >-
 # roles both read `server_config_yaml | from_yaml`, so we compose it here.
 server_config_cluster:
   secrets-encryption: true
+  # etcd snapshot scheduler. MUST live in config.yaml (YAML-parsed), NOT
+  # in extra_server_args — the k3s install script escapes asterisks when
+  # serializing INSTALL_K3S_EXEC into the systemd ExecStart line, turning
+  # "0 */6 * * *" into literal "0 \*/6 \* \* \*", which k3s sees as an
+  # invalid cron expression and silently disables the scheduler. Caught
+  # 2026-05-17: 23 days without automatic snapshots, only manual saves
+  # surviving on disk.
+  etcd-snapshot-schedule-cron: "0 */6 * * *"
+  etcd-snapshot-retention: 3
 
 server_config_yaml: "{{ (server_config_cluster | default({}) | combine(server_config_extra | default({}))) | to_nice_yaml }}"
 
