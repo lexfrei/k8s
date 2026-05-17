@@ -30,7 +30,8 @@ data:
               severity: info
               source: ilo
             annotations:
-              summary: 'iLO: {{ $value }} syslog event(s) in last 5m — Loki {job="ilo-syslog"}'
+              summary: 'iLO: {{ $value }} syslog event(s) in the last 5 minutes'
               description: |
-                {{ $value }} iLO syslog event(s) in the last 5 minutes.
-                Inspect in Loki: {job="ilo-syslog"}
+                {{ $value }} event(s) from iLO BMC in the last 5 minutes.
+                Inspect in Loki:
+                  {job="ilo-syslog"}
