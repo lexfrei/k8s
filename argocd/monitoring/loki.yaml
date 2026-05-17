@@ -48,6 +48,23 @@ spec:
               retention_delete_delay: 1h
               delete_request_cancel_period: 10m
               delete_request_store: filesystem
+            # Ruler evaluates LogQL alerting rules and forwards firing
+            # alerts to vmalertmanager — same delivery as VMRule alerts,
+            # so log-based alerts land in the same Telegram channel.
+            # Rules come from a ConfigMap mounted at /etc/loki/rules/fake
+            # (tenant id is "fake" with auth_enabled=false).
+            rulerConfig:
+              alertmanager_url: "http://vmalertmanager-vmalertmanager.monitoring.svc:9093"
+              enable_alertmanager_v2: true
+              evaluation_interval: 30s
+              poll_interval: 1m
+              storage:
+                type: local
+                local:
+                  directory: /etc/loki/rules
+              rule_path: /tmp/loki/scratch
+              wal:
+                dir: /var/loki/ruler-wal
             structuredConfig:
               ingester:
                 chunk_idle_period: 2h
@@ -90,6 +107,15 @@ spec:
               limits:
                 cpu: 500m
                 memory: 768Mi
+            # Mount the loki-rules ConfigMap so the ruler can load
+            # LogQL-based alerts (see manifests/loki/rules-configmap.yaml).
+            extraVolumes:
+              - name: loki-rules
+                configMap:
+                  name: loki-rules
+            extraVolumeMounts:
+              - name: loki-rules
+                mountPath: /etc/loki/rules/fake
           # Disable components not needed in SingleBinary mode
           read:
             replicas: 0
