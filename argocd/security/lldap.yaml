@@ -21,3 +21,10 @@ spec:
     syncOptions:
       - CreateNamespace=false
       - ServerSideApply=true
+      # ServerSideApply alone fixes write-path (field ownership) but
+      # ArgoCD still computes diff client-side, so controller- and
+      # apiserver-defaulted fields (ESO data[*].remoteRef.*Strategy,
+      # HTTPRoute parentRefs.group/kind, etc.) re-trigger OutOfSync
+      # on every reconcile. ServerSideDiff routes diff through the
+      # apiserver dry-run and respects field ownership.
+      - ServerSideDiff=true
