@@ -133,6 +133,18 @@ dex:
       memory: 32Mi
     limits:
       memory: 64Mi
+  # Init container `copyutil` copies the 219 MB argocd binary (v3.4.2)
+  # into the dex pod's shared volume. Under cgroup v2 the page cache
+  # of that copy counts against memory.max — chart default 64Mi OOMs
+  # mid-copy, `cp -n` then skips the partial file on retry, dex execs
+  # the corrupt binary and SIGSEGVs forever. 256Mi gives safe headroom.
+  initImage:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
 notifications:
   enabled: false
 applicationSet:
