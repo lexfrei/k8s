@@ -84,6 +84,12 @@ hubble:
 gatewayAPI:
   enabled: true
   enableAlpn: true
+  # cilium-secrets Namespace is owned by the `namespaces` ArgoCD app
+  # (PSS labels). Letting the chart also create it triggers ArgoCD
+  # SharedResourceWarning and OutOfSync on both apps.
+  secretsNamespace:
+    create: false
+    name: cilium-secrets
 
 # Tolerations for Cilium agent DaemonSet
 tolerations:
