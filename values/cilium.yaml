@@ -104,6 +104,12 @@ ingressController:
     create: false
     name: cilium-secrets
 
+# Fifth (separate-branch) source in templates/cilium-secrets-namespace.yaml
+tls:
+  secretsNamespace:
+    create: false
+    name: cilium-secrets
+
 # Tolerations for Cilium agent DaemonSet
 tolerations:
   - operator: Exists
