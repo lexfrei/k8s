@@ -17,8 +17,11 @@ spec:
       helm:
         valuesObject:
           clusterDomain: k8s.home.lex.la
+          # FreeIPMI native interface so the exporter does not shell out
+          # to ipmitool; combined with driver=OPEN in the config Secret
+          # this hits the on-board iLO via the kernel KCS device.
           nativeIPMI:
-            enabled: false
+            enabled: true
           resources:
             requests:
               cpu: 50m
@@ -32,15 +35,39 @@ spec:
             key: config.yml
           scrapeConfig:
             enabled: true
-            mode: remote
+            # local mode: VictoriaMetrics scrapes the exporter's /metrics
+            # directly (the exporter does its own IPMI query against the
+            # local BMC); no remote target list, no /ipmi?target= relabel.
+            mode: local
             modules:
               - default
             scrapeInterval: 1m
             scrapeTimeout: 30s
             scheme: HTTP
-            staticConfigs:
-              - targets:
-                  - "172.16.10.121"
+          # Pin to the storage node because /dev/ipmi0 is only on that
+          # host. If a second BMC-bearing node ever joins, convert to a
+          # DaemonSet (chart does not support that out of the box; would
+          # require a separate Deployment per host or a custom kustomize).
+          nodeSelector:
+            kubernetes.io/hostname: k8s-storage-01
+          # IPMI driver chardev is root:root 0600 with no group; running
+          # as root in this single-purpose pod is acceptable. SYS_RAWIO
+          # is required for the OpenIPMI ioctl path.
+          containerSecurityContext:
+            runAsUser: 0
+            runAsNonRoot: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [SYS_RAWIO]
+          extraVolumes:
+            - name: ipmi-device
+              hostPath:
+                path: /dev/ipmi0
+                type: CharDevice
+          extraVolumeMounts:
+            - name: ipmi-device
+              mountPath: /dev/ipmi0
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/ipmi-exporter
