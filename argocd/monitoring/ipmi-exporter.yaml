@@ -56,16 +56,18 @@ spec:
           # require a separate Deployment per host or a custom kustomize).
           nodeSelector:
             kubernetes.io/hostname: k8s-storage-01
-          # IPMI driver chardev is root:root 0600 with no group; running
-          # as root in this single-purpose pod is acceptable. SYS_RAWIO
-          # is required for the OpenIPMI ioctl path.
+          # /dev/ipmi0 is a chardev whose IOCTLs go through the OpenIPMI
+          # kernel driver. go-ipmi's native KCS implementation actually
+          # bypasses /dev/ipmi0 and talks to the BMC via raw port I/O
+          # (in/out instructions at I/O ports 0xCA2/0xCA3 on this board),
+          # which requires CAP_SYS_RAWIO plus the kernel `iopl()`/`ioperm()`
+          # facility — that only resolves cleanly with privileged: true
+          # under the standard runtime. monitoring namespace is already on
+          # PSS privileged, so this does not regress isolation.
           containerSecurityContext:
+            privileged: true
             runAsUser: 0
             runAsNonRoot: false
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-              add: [SYS_RAWIO]
           extraVolumes:
             - name: ipmi-device
               hostPath:
