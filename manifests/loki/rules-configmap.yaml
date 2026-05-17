@@ -21,14 +21,16 @@ data:
           - alert: iLOSyslogEvent
             # iLO Gen8 emits ~11 events/month on this host (verified from
             # 172-day SEL backup pre-cleanup). Firing on ANY event is not
-            # noisy — Alertmanager group_interval will dedupe bursts.
+            # noisy — Alertmanager group_interval will dedupe bursts. The
+            # alertmanager Telegram template only renders .Annotations.summary,
+            # so the count is folded into the summary itself.
             expr: sum(count_over_time({job="ilo-syslog"}[5m])) > 0
             for: 0m
             labels:
               severity: info
               source: ilo
             annotations:
-              summary: "iLO syslog event"
+              summary: 'iLO: {{ $value }} syslog event(s) in last 5m — Loki {job="ilo-syslog"}'
               description: |
                 {{ $value }} iLO syslog event(s) in the last 5 minutes.
                 Inspect in Loki: {job="ilo-syslog"}
