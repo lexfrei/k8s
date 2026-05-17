@@ -41,14 +41,14 @@ extra_server_args: >-
   --etcd-snapshot-retention=3
   --etcd-snapshot-schedule-cron="0 */6 * * *"
 
-# Extra entries merged into /etc/rancher/k3s/config.yaml by k3s.orchestration.
-# Auto-generated keys (token, tls-san from api_endpoint) are added by the role
-# on top of this. Anything that needs to persist across `site` and `upgrade`
-# runs MUST live here, not be edited on disk directly.
-server_config_yaml: |
-  kubelet-arg:
-    - system-reserved=memory=8Gi
+# Cluster-wide entries merged into /etc/rancher/k3s/config.yaml on every
+# server node. Host-specific additions live in inventory/production.yaml
+# as `server_config_extra` on the host. The k3s_server and k3s_upgrade
+# roles both read `server_config_yaml | from_yaml`, so we compose it here.
+server_config_cluster:
   secrets-encryption: true
+
+server_config_yaml: "{{ (server_config_cluster | default({}) | combine(server_config_extra | default({}))) | to_nice_yaml }}"
 
 # Cluster context name for kubeconfig
 cluster_context: k3s-home

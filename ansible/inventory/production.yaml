@@ -11,8 +11,11 @@ all:
           hosts:
             k8s-storage-01:
               ansible_host: 172.16.101.4
-              # ZFS ARC is capped at 8 GiB — reserve from kubelet scheduling
-              server_config_yaml: |
+              # Host-specific entries merged into server_config_yaml via
+              # combine() in group_vars/k3s_cluster.yaml. Cluster-wide
+              # entries (e.g. secrets-encryption) live there.
+              server_config_extra:
+                # ZFS ARC is capped at 8 GiB — reserve from kubelet scheduling
                 kubelet-arg:
                   - "system-reserved=memory=8Gi"
 
