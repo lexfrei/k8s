@@ -27,8 +27,6 @@ spec:
             cloudflared:
               enabled: true
               replicas: 1
-              awg:
-                secretName: "awg-config"
     - path: manifests/cloudflare-tunnel-gateway-controller
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
