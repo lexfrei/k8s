@@ -1,0 +1,12 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: linux-psi
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  url: https://raw.githubusercontent.com/lexfrei/k8s/master/dashboards/psi/psi.json
+  datasources:
+    - inputName: "DS_VICTORIAMETRICS"
+      datasourceName: "VictoriaMetrics"
