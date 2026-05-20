@@ -14,7 +14,7 @@ spec:
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
       repoURL: ghcr.io/lexfrei/charts
-      targetRevision: 2.0.2
+      targetRevision: 2.0.4
       helm:
         valuesObject:
           gatewayClassConfig:
@@ -25,8 +25,11 @@ spec:
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
             cloudflared:
-              enabled: true
-              replicas: 1
+              enabled: false
+          proxy:
+            enabled: true
+            tunnelTokenSecretRef:
+              name: "cloudflare-tunnel-token"
     - path: manifests/cloudflare-tunnel-gateway-controller
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
