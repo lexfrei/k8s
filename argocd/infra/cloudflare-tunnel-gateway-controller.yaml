@@ -17,6 +17,8 @@ spec:
       targetRevision: 2.0.4
       helm:
         valuesObject:
+          controller:
+            clusterDomain: "k8s.home.lex.la"
           gatewayClassConfig:
             create: true
             tunnelID: "59db961d-3851-468a-bf80-4d39f942b9e0"
