@@ -17,12 +17,6 @@ spec:
       targetRevision: 2.0.4
       helm:
         valuesObject:
-          # TEMPORARY: H2C feature-branch images for the upstream conformance
-          # run. Revert these two image overrides as soon as the v2.0.5 chart
-          # release lands with H2C backend protocol support.
-          image:
-            repository: ttl.sh/cf-tunnel-h2c-ctrl
-            tag: "1d"
           controller:
             clusterDomain: "k8s.home.lex.la"
           gatewayClassConfig:
@@ -38,10 +32,6 @@ spec:
             enabled: true
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
-            # TEMPORARY: H2C feature-branch proxy image (see above).
-            image:
-              repository: ttl.sh/cf-tunnel-h2c-proxy
-              tag: "1d"
     - path: manifests/cloudflare-tunnel-gateway-controller
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
