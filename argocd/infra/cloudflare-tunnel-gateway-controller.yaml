@@ -17,6 +17,12 @@ spec:
       targetRevision: 2.0.4
       helm:
         valuesObject:
+          # TEMPORARY: PR #236 (Mirror Multiple+Percentage) feature-branch images
+          # for the upstream Gateway API v1.5 conformance run. Revert once the
+          # chart release with these features lands.
+          image:
+            repository: ttl.sh/cf-tunnel-gateway-ctrl
+            tag: "pr-236-1d"
           controller:
             clusterDomain: "k8s.home.lex.la"
           gatewayClassConfig:
@@ -32,6 +38,10 @@ spec:
             enabled: true
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
+            # TEMPORARY: PR #236 feature-branch proxy image (see above).
+            image:
+              repository: ttl.sh/cf-tunnel-gateway-proxy
+              tag: "pr-236-1d"
     - path: manifests/cloudflare-tunnel-gateway-controller
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
