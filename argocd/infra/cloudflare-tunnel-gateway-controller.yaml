@@ -11,15 +11,16 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # OVERRIDE: PR #241 feature build (GatewayBackendClientCertificate).
-    # Using the PR's published chart so RBAC for backendtlspolicies (added
-    # in master after 2.0.4) is included — no out-of-band ClusterRole needed.
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
-      repoURL: ttl.sh
-      targetRevision: 0.0.0-pr.241-1d
+      repoURL: ghcr.io/lexfrei/charts
+      targetRevision: 2.0.4
       helm:
         valuesObject:
+          # OVERRIDE: PR #241 feature build (GatewayBackendClientCertificate)
+          image:
+            repository: ttl.sh/cf-tunnel-gateway-ctrl
+            tag: pr-241-1d
           controller:
             clusterDomain: "k8s.home.lex.la"
           gatewayClassConfig:
@@ -35,6 +36,10 @@ spec:
             enabled: true
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
+            # OVERRIDE: PR #241 feature build
+            image:
+              repository: ttl.sh/cf-tunnel-gateway-proxy
+              tag: pr-241-1d
     - path: manifests/cloudflare-tunnel-gateway-controller
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
