@@ -22,11 +22,6 @@ spec:
         valuesObject:
           controller:
             clusterDomain: "k8s.home.lex.la"
-          # PR chart re-publishes the same `pr-244-1d` tag on every push.
-          # Force pull on each rollout so we pick up the latest build instead
-          # of the cached image. Revert with the chart override after merge.
-          image:
-            pullPolicy: Always
           gatewayClassConfig:
             create: true
             tunnelID: "59db961d-3851-468a-bf80-4d39f942b9e0"
@@ -40,8 +35,6 @@ spec:
             enabled: true
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
-            image:
-              pullPolicy: Always
     - path: manifests/cloudflare-tunnel-gateway-controller
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
