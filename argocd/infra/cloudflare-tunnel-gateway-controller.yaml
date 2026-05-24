@@ -17,6 +17,10 @@ spec:
       targetRevision: 2.0.4
       helm:
         valuesObject:
+          # OVERRIDE: PR #240 feature build (NamedRouteRule + DestinationPortMatching conformance gates)
+          image:
+            repository: ttl.sh/cf-tunnel-gateway-ctrl
+            tag: pr-240-1d
           controller:
             clusterDomain: "k8s.home.lex.la"
           gatewayClassConfig:
@@ -32,6 +36,10 @@ spec:
             enabled: true
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
+            # OVERRIDE: PR #240 feature build
+            image:
+              repository: ttl.sh/cf-tunnel-gateway-proxy
+              tag: pr-240-1d
     - path: manifests/cloudflare-tunnel-gateway-controller
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
