@@ -11,13 +11,19 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # OVERRIDE: PR #241 feature build (GatewayBackendClientCertificate).
-    # Using the PR's published chart so RBAC for backendtlspolicies (added
-    # in master after 2.0.4) is included — no out-of-band ClusterRole needed.
+    # OVERRIDE: PR #281 (latest merged) chart. Bumped from #241 because
+    # the #241 chart artifact was built before #243 fixed the
+    # build-chart greedy-sed bug (proxy deployment got the controller
+    # image; proxy crash-looped trying to start the controller binary).
+    # Standing rule: bump override to the latest merged PR every time;
+    # the alternative (rolling back to the last stable release) loses
+    # newer features. Latest stable v2.0.4 predates #241 (no backend
+    # mTLS RBAC), so the PR-chart path stays canonical until the next
+    # tagged release.
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
       repoURL: ttl.sh
-      targetRevision: 0.0.0-pr.241-1d
+      targetRevision: 0.0.0-pr.281-1d
       helm:
         valuesObject:
           controller:
