@@ -7,3 +7,7 @@ secrets/*
 !secrets/*.asc
 recovery-bao.txt
 secrets-backup-*/
+
+# Claude Code session state
+.claude/scheduled_tasks.lock
+.claude/worktrees/
