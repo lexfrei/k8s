@@ -19,7 +19,7 @@ spec:
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
       repoURL: ttl.sh
-      targetRevision: 0.0.0-pr.290-1d
+      targetRevision: 0.0.0-pr.292-1d
       helm:
         valuesObject:
           controller:
