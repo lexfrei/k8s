@@ -11,15 +11,16 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # OVERRIDE: PR #284 (latest merged) chart. Standing rule: bump
-    # override to the latest merged PR every time; the alternative
-    # (rolling back to the last stable release) loses newer features.
-    # Latest stable v2.0.4 predates #241 (backend mTLS) so the
-    # PR-chart path stays canonical until the next tagged release.
+    # OVERRIDE: PR #294 (v3 breaking change — drop non-proxy mode).
+    # v3 collapses the two v2 data planes into a single in-process L7
+    # proxy. Schema dropped: gatewayClassConfig.tunnelTokenSecretRef,
+    # gatewayClassConfig.cloudflared.*, proxy.enabled. Tunnel-token
+    # Secret now lives in proxy.tunnelTokenSecretRef (chart values),
+    # not the CRD. See PR #294 / docs/upgrading/v2-to-v3.md.
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
       repoURL: ttl.sh
-      targetRevision: 0.0.0-pr.292-1d
+      targetRevision: 0.0.0-pr.294-1d
       helm:
         valuesObject:
           controller:
@@ -29,12 +30,7 @@ spec:
             tunnelID: "59db961d-3851-468a-bf80-4d39f942b9e0"
             cloudflareCredentialsSecretRef:
               name: "cloudflare-credentials"
-            tunnelTokenSecretRef:
-              name: "cloudflare-tunnel-token"
-            cloudflared:
-              enabled: false
           proxy:
-            enabled: true
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
     - path: manifests/cloudflare-tunnel-gateway-controller
