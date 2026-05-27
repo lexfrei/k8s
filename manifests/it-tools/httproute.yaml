@@ -7,12 +7,22 @@ metadata:
 spec:
   parentRefs:
     # Attach via the dedicated ListenerSet to exercise the controller's
-    # new ListenerSet support end-to-end (PR #326). Routing is functionally
-    # equivalent to a direct Gateway parentRef thanks to the controller's
-    # listener-hostname inheritance.
+    # ListenerSet support end-to-end (PR #326). The controller binds and
+    # programs the route through this parent.
     - group: gateway.networking.k8s.io
       kind: ListenerSet
       name: it-tools-listenerset
+      namespace: cloudflare-tunnel-system
+    # ALSO keep a direct Gateway parentRef. external-dns v0.21.0's Gateway
+    # API source does NOT follow a Kind=ListenerSet parentRef to the parent
+    # Gateway's status address, so a ListenerSet-only route loses its DNS
+    # CNAME (verified: external-dns logged `action=DELETE record=tools.lex.la`
+    # the moment the route went ListenerSet-only). Keeping the Gateway parent
+    # lets external-dns resolve the tunnel CNAME while the ListenerSet parent
+    # still demonstrates the feature.
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: cloudflare-tunnel
       namespace: cloudflare-tunnel-system
   hostnames:
     - tools.lex.la
