@@ -20,6 +20,18 @@ spec:
           provider:
             name: cloudflare
           policy: sync
+          rbac:
+            # The chart's auto-generated RBAC for the gateway-httproute
+            # source grants gateways + httproutes but NOT listenersets.
+            # --gateway-listener-sets makes external-dns list/watch
+            # ListenerSet resources, so without this rule the informer
+            # cache never syncs and the process exits fatal
+            # ("failed to sync *v1.ListenerSet ... context deadline
+            # exceeded"). Grant the read verbs the informer needs.
+            additionalPermissions:
+              - apiGroups: ["gateway.networking.k8s.io"]
+                resources: ["listenersets"]
+                verbs: ["get", "watch", "list"]
           sources:
             - service
             - gateway-httproute
