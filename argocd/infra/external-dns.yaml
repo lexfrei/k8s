@@ -27,6 +27,12 @@ spec:
           extraArgs:
             - --annotation-filter=external-dns.alpha.kubernetes.io/cloudflare-proxied
             - --gateway-namespace=cloudflare-tunnel-system
+            # Follow HTTPRoute parentRefs of Kind=ListenerSet to the parent
+            # Gateway's status address (Gateway API v1.5.1 ListenerSet, opt-in
+            # since external-dns v0.21.0 / chart 1.21.1, PR kubernetes-sigs/
+            # external-dns#6254). Without this a ListenerSet-only route gets
+            # no DNS CNAME. Additive — direct Gateway parentRefs keep working.
+            - --gateway-listener-sets
           env:
             - name: CF_API_TOKEN
               valueFrom:

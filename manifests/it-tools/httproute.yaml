@@ -6,23 +6,14 @@ metadata:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   parentRefs:
-    # Attach via the dedicated ListenerSet to exercise the controller's
-    # ListenerSet support end-to-end (PR #326). The controller binds and
-    # programs the route through this parent.
+    # Attach solely via the dedicated ListenerSet (PR #326). external-dns
+    # follows the Kind=ListenerSet parentRef to the parent Gateway for the
+    # DNS CNAME because the deployment runs with --gateway-listener-sets
+    # (see argocd/infra/external-dns.yaml), so no direct Gateway parentRef
+    # is needed.
     - group: gateway.networking.k8s.io
       kind: ListenerSet
       name: it-tools-listenerset
-      namespace: cloudflare-tunnel-system
-    # ALSO keep a direct Gateway parentRef. external-dns v0.21.0's Gateway
-    # API source does NOT follow a Kind=ListenerSet parentRef to the parent
-    # Gateway's status address, so a ListenerSet-only route loses its DNS
-    # CNAME (verified: external-dns logged `action=DELETE record=tools.lex.la`
-    # the moment the route went ListenerSet-only). Keeping the Gateway parent
-    # lets external-dns resolve the tunnel CNAME while the ListenerSet parent
-    # still demonstrates the feature.
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: cloudflare-tunnel
       namespace: cloudflare-tunnel-system
   hostnames:
     - tools.lex.la
