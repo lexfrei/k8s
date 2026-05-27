@@ -32,7 +32,7 @@ spec:
             runAsGroup: 0
           containers:
             - name: backup
-              image: busybox:1.37
+              image: busybox:1.38
               imagePullPolicy: IfNotPresent
               command:
                 - /bin/sh
