@@ -11,17 +11,19 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # OVERRIDE: PR #303 (auto-roll proxy on tunnel-token Secret rotation).
-    # ProxySecretReconciler watches the tunnel-token Secret named in
-    # --proxy-token-secret and patches the proxy Deployment's pod
-    # template annotation on any data change, so Kubernetes natively
-    # rolls the pods. Closes the gap where ESO rotates the source
-    # Secret out-of-band and cloudflared continues with stale creds.
-    # See PR #303 / #114.
+    # OVERRIDE: PR #326 (Gateway API ListenerSet support, Standard channel).
+    # ListenerSetReconciler watches ListenerSet resources, honours the
+    # parent Gateway's spec.allowedListeners filter, applies precedence +
+    # hostname/protocol conflict detection across Gateway listeners and
+    # attached ListenerSets, validates per-entry TLS cert refs (with
+    # ListenerSet-scoped ReferenceGrant — Gateway grants are NOT inherited
+    # per spec), and accepts HTTPRoute/GRPCRoute parentRefs with
+    # Kind=ListenerSet. Closes issue #258.
+    # See PR #326.
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
       repoURL: ttl.sh
-      targetRevision: 0.0.0-pr.303-1d
+      targetRevision: 0.0.0-pr.326-1d
       helm:
         valuesObject:
           controller:

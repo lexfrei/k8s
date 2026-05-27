@@ -7,10 +7,41 @@ metadata:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   gatewayClassName: cloudflare-tunnel
+  # Allow ListenerSets in the same namespace to attach additional listeners
+  # (Gateway API v1.5.1 Standard-channel feature). See PR #326 in the
+  # controller repo and the new docs/gateway-api/listenerset.md.
+  allowedListeners:
+    namespaces:
+      from: Same
   listeners:
     - name: https
       protocol: HTTPS
       port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+# Demonstrates ListenerSet support: contributes the tools.lex.la hostname
+# via a ListenerSet that attaches to the cloudflare-tunnel Gateway. The
+# it-tools HTTPRoute targets this ListenerSet via parentRef Kind=ListenerSet
+# (see manifests/it-tools/httproute.yaml). Functionally equivalent to a
+# direct Gateway-attached HTTPRoute today; doubles as the real-world
+# integration test for the new feature.
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: it-tools-listenerset
+  namespace: cloudflare-tunnel-system
+spec:
+  parentRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: cloudflare-tunnel
+  listeners:
+    - name: tools
+      port: 443
+      protocol: HTTPS
+      hostname: tools.lex.la
       allowedRoutes:
         namespaces:
           from: All

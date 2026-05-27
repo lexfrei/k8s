@@ -6,7 +6,13 @@ metadata:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   parentRefs:
-    - name: cloudflare-tunnel
+    # Attach via the dedicated ListenerSet to exercise the controller's
+    # new ListenerSet support end-to-end (PR #326). Routing is functionally
+    # equivalent to a direct Gateway parentRef thanks to the controller's
+    # listener-hostname inheritance.
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: it-tools-listenerset
       namespace: cloudflare-tunnel-system
   hostnames:
     - tools.lex.la
