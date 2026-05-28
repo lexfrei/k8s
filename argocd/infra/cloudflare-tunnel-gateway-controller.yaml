@@ -11,15 +11,14 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # OVERRIDE: PR #334 (route GRPCRoute traffic through the in-process L7
-    # proxy, closing the v3 regression where gRPC returned 404). Layered on
-    # top of the already-merged ListenerSet support. Pre-merge verification
-    # only — revert to the released chart once PR #334 merges. See PR #334,
-    # closes issue #305.
+    # OVERRIDE: PR #347 (BackendTLSPolicy parity across HTTP/gRPC/mirror +
+    # Gateway clientCertificateRef Secret rotation hot-reload, closes #307
+    # #342 #343 #344). Pre-merge verification only — revert to the released
+    # chart once PR #347 merges.
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
       repoURL: ttl.sh
-      targetRevision: 0.0.0-pr.334-1d
+      targetRevision: 0.0.0-pr.347-1d
       helm:
         valuesObject:
           controller:
