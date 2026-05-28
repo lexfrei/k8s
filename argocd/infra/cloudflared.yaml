@@ -19,8 +19,17 @@ spec:
         valuesObject:
           replicaCount: 1
           cloudflare:
-            mode: remote
-            tunnelTokenSecretName: node-ssh-tunnel-token
+            # Local mode keeps the tunnel ingress here, next to the rest of
+            # the in-cluster routing. The classic credentials.json (TunnelID
+            # + TunnelSecret + AccountTag) lives in OpenBao and is synced to
+            # the node-ssh-tunnel-credentials Secret by ExternalSecret.
+            mode: local
+            secretName: node-ssh-tunnel-credentials
+            # Chart appends `service: http_status:404` automatically when
+            # enableDefault404=true (default), so don't repeat it here.
+            ingress:
+              - hostname: storage-01-ssh.lex.la
+                service: ssh://172.16.101.4:22
     - path: manifests/cloudflared
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
