@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflared
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: cloudflared
+    server: "https://kubernetes.default.svc"
+  sources:
+    # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel
+    - chart: cloudflare-tunnel
+      repoURL: ghcr.io/lexfrei/charts
+      targetRevision: 0.15.5
+      helm:
+        valuesObject:
+          replicaCount: 1
+          cloudflare:
+            mode: remote
+            tunnelTokenSecretName: node-ssh-tunnel-token
+    - path: manifests/cloudflared
+      repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
