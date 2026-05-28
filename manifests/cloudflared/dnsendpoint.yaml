@@ -12,3 +12,9 @@ spec:
       recordTTL: 1
       targets:
         - ca2a41b6-a239-45be-92f1-ec3c58751916.cfargotunnel.com
+      # CRD source does not read the cloudflare-proxied annotation from
+      # metadata — that path is for service/HTTPRoute sources. For
+      # DNSEndpoint the flag must live in providerSpecific.
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "true"
