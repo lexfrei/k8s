@@ -24,6 +24,8 @@ spec:
             # + TunnelSecret + AccountTag) lives in OpenBao and is synced to
             # the node-ssh-tunnel-credentials Secret by ExternalSecret.
             mode: local
+            tunnelName: node-ssh
+            tunnelId: ca2a41b6-a239-45be-92f1-ec3c58751916
             secretName: node-ssh-tunnel-credentials
             # Chart appends `service: http_status:404` automatically when
             # enableDefault404=true (default), so don't repeat it here.
