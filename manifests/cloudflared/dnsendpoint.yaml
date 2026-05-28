@@ -1,0 +1,14 @@
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: storage-01-ssh
+  namespace: cloudflared
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+spec:
+  endpoints:
+    - dnsName: storage-01-ssh.lex.la
+      recordType: CNAME
+      recordTTL: 1
+      targets:
+        - ca2a41b6-a239-45be-92f1-ec3c58751916.cfargotunnel.com
