@@ -24,6 +24,8 @@ spec:
         valuesObject:
           controller:
             clusterDomain: "k8s.home.lex.la"
+            # PR #334 pre-merge gRPC verification: debug logs + http2 tunnel.
+            logLevel: debug
           gatewayClassConfig:
             create: true
             tunnelID: "59db961d-3851-468a-bf80-4d39f942b9e0"
@@ -32,6 +34,10 @@ spec:
           proxy:
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
+            # gRPC needs http2: cloudflared drops trailers over QUIC. PR #334
+            # pre-merge proof; revert with the chart override.
+            tunnel:
+              protocol: http2
     - path: manifests/cloudflare-tunnel-gateway-controller
       repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
