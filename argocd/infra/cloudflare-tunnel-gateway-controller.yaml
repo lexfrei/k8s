@@ -11,13 +11,13 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # OVERRIDE: PR #351 (lift stale conformance skips: exact-path,
-    # gateway-address, CORS-credentials, 3xx redirects; addresses #306 #308
-    # #310 #311). Test-only change; pre-merge verification only.
+    # OVERRIDE: PR #356 (per-fraction 500 for invalid backendRef, 503 for
+    # zero-ready-endpoint Service; backend stays in the weighted pool).
+    # Pre-merge verification only.
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
       repoURL: ttl.sh
-      targetRevision: 0.0.0-pr.351-1d
+      targetRevision: 0.0.0-pr.356-1d
       helm:
         valuesObject:
           controller:
