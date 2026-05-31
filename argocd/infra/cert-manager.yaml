@@ -27,8 +27,31 @@ spec:
             apiVersion: controller.config.cert-manager.io/v1alpha1
             kind: ControllerConfiguration
             enableGatewayAPI: true
+          # Resource requests lift the three cert-manager pods out of
+          # BestEffort QoS so they are not first to be evicted under node
+          # pressure; memory limits cap blast radius. CPU is left unlimited
+          # (throttling hurts admission/ACME latency more than it helps).
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          cainjector:
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
           webhook:
             replicaCount: 2
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
             podDisruptionBudget:
               enabled: true
               minAvailable: 1

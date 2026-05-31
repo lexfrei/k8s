@@ -21,6 +21,14 @@ spec:
 
           serviceMonitor:
             enabled: true
+
+          # Requests lift metrics-server out of BestEffort QoS.
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 192Mi
   syncPolicy:
     automated:
       prune: true

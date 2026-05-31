@@ -18,6 +18,15 @@ spec:
       helm:
         valuesObject:
           replicaCount: 1
+          # Requests lift cloudflared out of BestEffort QoS — it carries the
+          # public tunnel + node SSH backdoor, so it should not be first to
+          # be evicted under node pressure.
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
           cloudflare:
             # Local mode keeps the tunnel ingress here, next to the rest of
             # the in-cluster routing. The classic credentials.json (TunnelID

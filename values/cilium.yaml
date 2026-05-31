@@ -64,6 +64,14 @@ l2NeighDiscovery:
 # Operator configuration
 operator:
   replicas: 1
+  # Requests lift the operator out of BestEffort QoS (it is not on the
+  # datapath, but evicting it stalls LB-IPAM / gateway reconciliation).
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
 
 # Envoy proxy - disable external DaemonSet, use embedded in Cilium agent
 envoy:

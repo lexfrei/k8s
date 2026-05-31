@@ -19,6 +19,13 @@ spec:
         prometheus:
           monitor:
             enabled: true
+        # Requests lift kube-state-metrics out of BestEffort QoS.
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 192Mi
   syncPolicy:
     automated:
       prune: true
