@@ -90,7 +90,13 @@
         - ifnames
 
     - name: Configure journald volatile storage (keep journal off disk)
-      ansible.builtin.include_tasks: journald.yml
+      ansible.builtin.include_tasks:
+        file: journald.yml
+        # apply: required so --tags journald reaches the included tasks;
+        # include_tasks does not propagate the run tag to its children.
+        apply:
+          tags:
+            - journald
       tags:
         - journald
 
