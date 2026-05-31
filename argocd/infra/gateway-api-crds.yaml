@@ -14,7 +14,14 @@ spec:
     repoURL: "https://github.com/kubernetes-sigs/gateway-api.git"
     # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
     targetRevision: "v1.5.1"
-    path: "config/crd/standard"
+    # Experimental channel (not standard): Cilium's Gateway API controller
+    # hard-requires the experimental TLSRoute v1alpha2 + BackendTLSPolicy
+    # CRDs at startup, even when only standard resources are used. Since
+    # gateway-api v1.5 dropped TLSRoute v1alpha2 from the standard channel,
+    # a standard install makes the cilium operator fatal on every restart
+    # ("no matches for kind TLSRoute in version v1alpha2"). The experimental
+    # channel is a superset and still serves v1alpha2. See cilium/cilium#44920.
+    path: "config/crd/experimental"
   syncPolicy:
     automated:
       prune: true
