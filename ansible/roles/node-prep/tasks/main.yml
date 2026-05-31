@@ -89,9 +89,8 @@
         - network
         - ifnames
 
-    - name: Configure journald volatile storage (RPi only - SD card wear)
+    - name: Configure journald volatile storage (keep journal off disk)
       ansible.builtin.include_tasks: journald.yml
-      when: inventory_hostname in groups.get('rpi', [])
       tags:
         - journald
 
