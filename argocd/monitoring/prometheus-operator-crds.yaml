@@ -11,9 +11,9 @@ spec:
     namespace: monitoring
     server: "https://kubernetes.default.svc"
   source:
-    repoURL: "https://github.com/prometheus-operator/prometheus-operator.git"
-    targetRevision: v0.89.0
-    path: example/prometheus-operator-crd-full
+    repoURL: "https://prometheus-community.github.io/helm-charts"
+    chart: prometheus-operator-crds
+    targetRevision: 27.0.1
   syncPolicy:
     automated:
       prune: true
