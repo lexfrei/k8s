@@ -3,6 +3,12 @@ kind: Application
 metadata:
   name: lldap
   namespace: argocd
+  annotations:
+    # The managedFieldsManagers ignoreDifferences below only takes effect
+    # under server-side diff. Enable it for this app so ESO- and
+    # Cilium-defaulted fields are compared by field ownership (via the
+    # apiserver) instead of client-side, where they always read as drift.
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
