@@ -16,6 +16,7 @@ spec:
       helm:
         valuesObject:
           image:
+            tag: sha-1f6e968
             pullPolicy: IfNotPresent
           vpa:
             enabled: false
