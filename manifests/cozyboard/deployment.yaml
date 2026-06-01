@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/lexfrei/cozyboard:main-0f89733@sha256:ad41482cf4205812b40efae94c6662ae8cad17a161bc2a5692e3f3804c91ed0c
+          image: ghcr.io/lexfrei/cozyboard:main-0f89733@sha256:f55519311d6978adb7df8e77bdf119c0c7d1d94cd99020a3514d31a5bbf3a155
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
