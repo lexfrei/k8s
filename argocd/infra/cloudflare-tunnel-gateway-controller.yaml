@@ -11,15 +11,15 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # OVERRIDE: PR #363 (GRPCRoute gets Accepted=False/UnsupportedProtocol on an
-    # explicit quic tunnel; controller-only change. Homelab runs the default auto
-    # with no GRPCRoutes, so the new condition never fires here — this verifies
-    # the new controller binary does not regress existing route status / serving).
-    # Pre-merge verification only.
+    # OVERRIDE: PR #377 (perf refactor — cache the per-Gateway ListenerSet merge
+    # view across reconciles; behavior-preserving, no API change. Homelab has no
+    # ListenerSets, so the cache is a no-op here — this verifies the new controller
+    # binary does not regress existing route status / serving on the production
+    # cluster). Pre-merge verification only.
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
     - chart: cloudflare-tunnel-gateway-controller
       repoURL: ttl.sh
-      targetRevision: 0.0.0-pr.363-1d
+      targetRevision: 0.0.0-pr.377-1d
       helm:
         valuesObject:
           controller:
