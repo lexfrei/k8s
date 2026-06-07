@@ -11,9 +11,10 @@ kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 # MTU configuration
 mtu: 1500
 
-# Devices for BPF attachment and direct routing detection
-# ens+: k8s-storage-01 (ens1, Realtek RTL8125 PCIe)
-devices: "ens+"
+# Devices for BPF attachment and direct routing detection.
+# Active uplink is the onboard Broadcom port eno2; the SFP+ NIC (ens2)
+# failed, so match eno+. Add the SFP interface back here once it is restored.
+devices: "eno+"
 
 # Routing configuration
 # Native routing for better performance on same L2 network
