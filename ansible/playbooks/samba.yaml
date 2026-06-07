@@ -20,11 +20,6 @@
         name: smbd
         state: reloaded
 
-    - name: Restart nmbd
-      ansible.builtin.systemd:
-        name: nmbd
-        state: restarted
-
     - name: Restart Avahi
       ansible.builtin.systemd:
         name: avahi-daemon
@@ -54,6 +49,13 @@
         update_cache: true
         cache_valid_time: 3600
 
+    - name: Disable NetBIOS — stop and mask nmbd (clients discover via mDNS)
+      ansible.builtin.systemd:
+        name: nmbd
+        state: stopped
+        enabled: false
+        masked: true
+
     - name: Deploy smb.conf
       ansible.builtin.copy:
         src: ../files/smb.conf
@@ -63,7 +65,6 @@
         group: root
       notify:
         - Reload smbd
-        - Restart nmbd
 
     - name: Ensure passdb directory exists
       ansible.builtin.file:
