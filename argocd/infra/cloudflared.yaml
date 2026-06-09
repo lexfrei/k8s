@@ -14,7 +14,7 @@ spec:
     # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel
     - chart: cloudflare-tunnel
       repoURL: ghcr.io/lexfrei/charts
-      targetRevision: 0.15.9
+      targetRevision: 0.15.10
       helm:
         valuesObject:
           replicaCount: 1
