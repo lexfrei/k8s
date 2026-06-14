@@ -41,9 +41,22 @@ servers:
         parameters: IN AAAA .
         configBlock: |-
           rcode NOERROR
-      # Forward to router for split-horizon DNS, fallback to Cloudflare
+      # Split-horizon DNS: home.lex.la records exist ONLY on the router
+      # (172.16.0.1), so forward that zone there exclusively. Mixing it into
+      # a pool with public resolvers made ~2/3 of internal lookups land on
+      # Cloudflare and return NXDOMAIN, which the cache then pinned for 60s
+      # (denial TTL) — intermittently broken internal resolution from pods.
+      # k8s.home.lex.la is served by the kubernetes plugin above (runs first
+      # in the chain), so cluster names never reach these forwarders.
       - name: forward
-        parameters: . 172.16.0.1 1.1.1.1 1.0.0.1
+        parameters: home.lex.la 172.16.0.1
+        configBlock: |-
+          max_concurrent 1000
+          health_check 5s
+      # Everything else straight to Cloudflare. Keeping the router off this
+      # path also offloads it from the cluster's public-DNS query volume.
+      - name: forward
+        parameters: . 1.1.1.1 1.0.0.1
         configBlock: |-
           max_concurrent 1000
           health_check 5s
