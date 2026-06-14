@@ -20,7 +20,7 @@ spec:
             siteUsesHttps: true
             existingSecret: obico-secrets
             extraEnv:
-              ACCOUNT_ALLOW_SIGN_UP: "True"
+              ACCOUNT_ALLOW_SIGN_UP: "False"
           database:
             existingSecret: obico-db-app
             existingSecretKey: uri
