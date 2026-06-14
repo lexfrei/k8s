@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: obico
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  destination:
+    namespace: obico
+    server: "https://kubernetes.default.svc"
+  sources:
+    - chart: obico
+      repoURL: ghcr.io/lexfrei/charts
+      targetRevision: 0.1.0
+      helm:
+        valuesObject:
+          obico:
+            siteUsesHttps: true
+            existingSecret: obico-secrets
+            extraEnv:
+              ACCOUNT_ALLOW_SIGN_UP: "True"
+          database:
+            existingSecret: obico-db-app
+            existingSecretKey: uri
+          mlApi:
+            enabled: true
+          persistence:
+            data:
+              storageClassName: zfs-localpv
+            media:
+              storageClassName: zfs-localpv
+              size: 20Gi
+          httpRoute:
+            enabled: true
+            parentRefs:
+              - name: cilium-gateway-internal
+                namespace: kube-system
+                sectionName: https-home-lex-la
+            hostnames:
+              - obico.home.lex.la
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/obico
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
