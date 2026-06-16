@@ -13,7 +13,7 @@ spec:
   sources:
     - chart: obico
       repoURL: ghcr.io/lexfrei/charts
-      targetRevision: 0.1.2
+      targetRevision: 0.1.3
       helm:
         valuesObject:
           obico:
