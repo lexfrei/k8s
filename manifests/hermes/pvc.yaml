@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-data
+  namespace: hermes
+  labels:
+    app.kubernetes.io/name: hermes
+spec:
+  # HERMES_HOME (/opt/data): config.yaml, bundled skills, session memory
+  # (SQLite), and the openai-codex auth credentials all live here. This is
+  # the single source of mutable state — losing it means re-running
+  # `hermes auth` and rebuilding learned skills/memory.
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: zfs-localpv
+  resources:
+    requests:
+      storage: 10Gi

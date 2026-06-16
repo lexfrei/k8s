@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes
+  namespace: argocd
+  annotations:
+    # The managedFieldsManagers ignoreDifferences below only takes effect
+    # under server-side diff. Enable it so ESO-defaulted fields are compared
+    # by field ownership (via the apiserver) instead of client-side, where
+    # they always read as drift.
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  destination:
+    namespace: hermes
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://github.com/lexfrei/k8s.git"
+    targetRevision: HEAD
+    path: manifests/hermes
+  # ESO server-side defaults fields that git does not declare
+  # (data[*].remoteRef.*Strategy, target.deletionPolicy). Those are owned by
+  # the external-secrets field manager, so ignore the diffs they introduce —
+  # otherwise the app reports OutOfSync on every reconcile and selfHeal
+  # cannot converge.
+  ignoreDifferences:
+    - group: external-secrets.io
+      kind: ExternalSecret
+      managedFieldsManagers:
+        - external-secrets
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
