@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-rutracker
+  namespace: mcp-rutracker
+  labels:
+    app.kubernetes.io/name: mcp-rutracker
+spec:
+  replicas: 1
+  # Session cookie lives on an RWO PVC; avoid two pods racing the same file.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mcp-rutracker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mcp-rutracker
+    spec:
+      containers:
+        - name: mcp-rutracker
+          # renovate: datasource=docker depName=ghcr.io/lexfrei/mcp-rutracker
+          image: ghcr.io/lexfrei/mcp-rutracker:0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MCP_HTTP_HOST
+              value: 0.0.0.0
+            - name: MCP_HTTP_PORT
+              value: "8080"
+          envFrom:
+            - secretRef:
+                name: mcp-rutracker-secrets
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: session
+              mountPath: /home/nobody/.mcp-rutracker
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+      securityContext:
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: session
+          persistentVolumeClaim:
+            claimName: mcp-rutracker-session
