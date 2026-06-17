@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mcp-lostfilm-session
+  namespace: mcp-lostfilm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: zfs-localpv
+  resources:
+    requests:
+      storage: 128Mi
