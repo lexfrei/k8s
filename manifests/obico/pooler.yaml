@@ -11,10 +11,15 @@ spec:
   # pooler would not help.
   type: rw
   pgbouncer:
-    # session mode is safe for Django out of the box (no DISABLE_SERVER_SIDE_CURSORS
-    # requirement). With Django's default CONN_MAX_AGE=0 the app opens short-lived
-    # connections, so the server connection returns to the pool quickly anyway.
-    poolMode: session
+    # transaction mode is required here, NOT session. Obico holds connections open
+    # (Django CONN_MAX_AGE=600), so under session mode every idle client connection
+    # pins one server connection and the pool exhausts at zero query load (the app
+    # keeps ~15 idle connections). Transaction mode holds a server connection only
+    # for the duration of a transaction, so idle clients cost nothing and real
+    # demand (a handful of concurrent transactions) fits easily.
+    # Safe here: Channels runs on Redis (no Postgres LISTEN/NOTIFY) and the app code
+    # uses no server-side cursors (no QuerySet.iterator()).
+    poolMode: transaction
     parameters:
       max_client_conn: "200"
       default_pool_size: "25"
