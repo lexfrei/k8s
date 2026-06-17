@@ -21,7 +21,7 @@ spec:
       containers:
         - name: mcp-rutracker
           # renovate: datasource=docker depName=ghcr.io/lexfrei/mcp-rutracker
-          image: ghcr.io/lexfrei/mcp-rutracker:0.1.0
+          image: ghcr.io/lexfrei/mcp-rutracker:0.2.0
           imagePullPolicy: IfNotPresent
           env:
             - name: MCP_HTTP_HOST
