@@ -1,0 +1,20 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: obico-db-pooler
+  namespace: obico
+spec:
+  cluster:
+    name: obico-db
+  instances: 1
+  # rw: route to the primary. Obico writes on every request, so a read-only
+  # pooler would not help.
+  type: rw
+  pgbouncer:
+    # session mode is safe for Django out of the box (no DISABLE_SERVER_SIDE_CURSORS
+    # requirement). With Django's default CONN_MAX_AGE=0 the app opens short-lived
+    # connections, so the server connection returns to the pool quickly anyway.
+    poolMode: session
+    parameters:
+      max_client_conn: "200"
+      default_pool_size: "25"
