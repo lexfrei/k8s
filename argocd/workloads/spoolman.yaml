@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spoolman
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  destination:
+    namespace: spoolman
+    server: "https://kubernetes.default.svc"
+  sources:
+    # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/spoolman
+    - chart: spoolman
+      repoURL: ghcr.io/lexfrei/charts
+      targetRevision: 0.1.0
+      helm:
+        valuesObject:
+          timezone: "Europe/Moscow"
+          persistence:
+            storageClassName: "zfs-localpv"
+          httpRoute:
+            enabled: true
+            parentRefs:
+              - name: cilium-gateway-internal
+                namespace: kube-system
+                sectionName: https-home-lex-la
+            hostnames:
+              - spoolman.home.lex.la
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
