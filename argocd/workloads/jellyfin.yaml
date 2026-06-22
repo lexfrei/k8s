@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jellyfin
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads
+  destination:
+    namespace: jellyfin
+    server: "https://kubernetes.default.svc"
+  sources:
+    - chart: jellyfin
+      repoURL: https://jellyfin.github.io/jellyfin-helm
+      targetRevision: 3.2.0
+      helm:
+        valuesObject:
+          image:
+            # Empty tag pins to the chart's appVersion (Jellyfin 10.11.8).
+            tag: ""
+          podSecurityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            # Transmission writes media as gid 1000 (users) with setgid dirs;
+            # matching gid lets Jellyfin read the library. OnRootMismatch keeps
+            # kubelet from recursively chowning the multi-TB read-only dataset
+            # (its root is already gid 1000).
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          nodeSelector:
+            kubernetes.io/hostname: k8s-storage-01
+          jellyfin:
+            env:
+              - name: JELLYFIN_PublishedServerUrl
+                value: https://jellyfin.home.lex.la
+              - name: TZ
+                value: Europe/Moscow
+          httpRoute:
+            enabled: true
+            annotations:
+              internal-dns/hostname: jellyfin.home.lex.la
+            parentRefs:
+              - name: cilium-gateway-internal
+                namespace: kube-system
+                sectionName: https-home-lex-la
+            hostnames:
+              - jellyfin.home.lex.la
+          persistence:
+            config:
+              enabled: true
+              storageClass: zfs-localpv
+              accessMode: ReadWriteOnce
+              size: 10Gi
+            # Torrent library mounted read-only at /media via the static PV
+            # bound to pool/transmission. Transmission stays the sole writer.
+            media:
+              enabled: true
+              type: pvc
+              existingClaim: jellyfin-media
+              readOnly: true
+            cache:
+              enabled: false
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/jellyfin
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

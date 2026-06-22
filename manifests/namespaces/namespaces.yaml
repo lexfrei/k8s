@@ -87,7 +87,7 @@ metadata:
     pod-security.kubernetes.io/warn: privileged
     pod-security.kubernetes.io/warn-version: v1.35
 
-# ===== Baseline audit+warn namespaces (26) =====
+# ===== Baseline audit+warn namespaces (27) =====
 
 # --- Bootstrap (3; kube-system is privileged above) ---
 
@@ -128,7 +128,7 @@ metadata:
     pod-security.kubernetes.io/warn: baseline
     pod-security.kubernetes.io/warn-version: v1.35
 
-# --- ArgoCD-managed app namespaces (18) ---
+# --- ArgoCD-managed app namespaces (19) ---
 
 ---
 apiVersion: v1
@@ -363,6 +363,18 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: mcp-myshows
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+  labels:
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit-version: v1.35
+    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn-version: v1.35
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jellyfin
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:

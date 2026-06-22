@@ -1,0 +1,42 @@
+# Read-only view of the Transmission downloads dataset (pool/transmission).
+# Same ZFS dataset as manifests/transmission/downloads-pv.yaml, mounted
+# read-only so Jellyfin can scan the library while Transmission stays the
+# sole writer. Both pods bind-mount the same host path on k8s-storage-01.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zfs-jellyfin-media-ro
+spec:
+  capacity:
+    storage: 10Ti
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef:
+    namespace: jellyfin
+    name: jellyfin-media
+  local:
+    path: /pool/transmission
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-storage-01
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-media
+  namespace: jellyfin
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 10Ti
+  volumeName: zfs-jellyfin-media-ro
