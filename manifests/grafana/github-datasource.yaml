@@ -1,0 +1,27 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: github-datasource
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  # grafana-operator installs the plugin into the Grafana deployment from this list.
+  plugins:
+    - name: grafana-github-datasource
+      version: "2.8.0"
+  # Token is injected from the ESO-managed Secret, not stored in git.
+  valuesFrom:
+    - targetPath: "secureJsonData.accessToken"
+      valueFrom:
+        secretKeyRef:
+          name: grafana-credentials
+          key: GITHUB_TOKEN
+  datasource:
+    name: GitHub
+    type: grafana-github-datasource
+    access: proxy
+    jsonData:
+      selectedAuthType: personal-access-token
+    secureJsonData:
+      accessToken: "${GITHUB_TOKEN}"
