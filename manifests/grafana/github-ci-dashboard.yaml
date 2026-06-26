@@ -222,26 +222,28 @@ spec:
         },
         {
           "id": 5,
-          "type": "table",
-          "title": "p95 run duration",
-          "description": "95th-percentile run wall-clock from the workflow usage API (billing cycle).",
+          "type": "stat",
+          "title": "Avg run duration",
+          "description": "Mean run wall-clock over the selected range (updated_at − run_started_at).",
           "gridPos": { "h": 5, "w": 4, "x": 0, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
               "refId": "A",
               "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
-              "queryType": "Workflow_Usage",
+              "queryType": "Workflow_Runs",
               "owner": "cozystack",
               "repository": "cozystack",
-              "options": { "workflow": "$workflow" }
+              "options": { "workflow": "$workflow", "branch": "" }
             }
           ],
           "transformations": [
-            { "id": "filterFieldsByName", "options": { "include": { "names": [ "p95 run duration (approx.)" ] } } }
+            { "id": "convertFieldType", "options": { "conversions": [ { "targetField": "run_started_at", "destinationType": "number" }, { "targetField": "updated_at", "destinationType": "number" } ] } },
+            { "id": "calculateField", "options": { "mode": "binary", "binary": { "left": "updated_at", "operator": "-", "right": "run_started_at" }, "alias": "duration", "replaceFields": false } },
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "duration" ] } } }
           ],
-          "fieldConfig": { "defaults": { "custom": { "align": "center" } }, "overrides": [] },
-          "options": { "showHeader": false, "cellHeight": "lg" }
+          "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "fixed", "fixedColor": "text" } }, "overrides": [] },
+          "options": { "reduceOptions": { "calcs": [ "mean" ], "fields": "", "values": false }, "colorMode": "none", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
         },
         {
           "id": 6,
@@ -282,9 +284,9 @@ spec:
         },
         {
           "id": 7,
-          "type": "table",
+          "type": "gauge",
           "title": "Success rate",
-          "description": "Successful runs with their share of all runs (billing cycle).",
+          "description": "Successful runs as a share of all runs (billing cycle), parsed from the workflow usage API.",
           "gridPos": { "h": 5, "w": 4, "x": 4, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
@@ -298,10 +300,19 @@ spec:
             }
           ],
           "transformations": [
-            { "id": "filterFieldsByName", "options": { "include": { "names": [ "successes" ] } } }
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "successes" ] } } },
+            { "id": "extractFields", "options": { "source": "successes", "format": "RegExp", "regExp": "/(?<rate>[0-9.]+)%/" } },
+            { "id": "convertFieldType", "options": { "conversions": [ { "targetField": "rate", "destinationType": "number" } ] } },
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "rate" ] } } }
           ],
-          "fieldConfig": { "defaults": { "custom": { "align": "center" } }, "overrides": [] },
-          "options": { "showHeader": false, "cellHeight": "lg" }
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent", "min": 0, "max": 100,
+              "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "yellow", "value": 50 }, { "color": "green", "value": 80 } ] }
+            },
+            "overrides": []
+          },
+          "options": { "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "showThresholdLabels": false, "showThresholdMarkers": true }
         }
       ]
     }
