@@ -104,6 +104,7 @@ spec:
             }
           ],
           "transformations": [
+            { "id": "filterByValue", "options": { "type": "exclude", "match": "any", "filters": [ { "fieldName": "conclusion", "config": { "id": "isNull" } }, { "fieldName": "conclusion", "config": { "id": "equal", "options": { "value": "" } } } ] } },
             {
               "id": "groupBy",
               "options": {
@@ -113,9 +114,9 @@ spec:
                 }
               }
             },
-            { "id": "organize", "options": { "renameByName": { "id (count)": "Runs" } } }
+            { "id": "rowsToFields", "options": { "mappings": [ { "fieldName": "conclusion", "handlerKey": "field.name" }, { "fieldName": "id (count)", "handlerKey": "field.value" } ] } }
           ],
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "Runs", "values": true }, "pieType": "donut", "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] } }
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "pieType": "donut", "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] } }
         },
         {
           "id": 3,
