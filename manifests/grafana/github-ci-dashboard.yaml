@@ -78,7 +78,7 @@ spec:
               { "matcher": { "id": "byName", "options": "skipped" },   "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } } ] }
             ]
           },
-          "options": { "xField": "created_at", "stacking": "normal", "showValue": "auto", "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" } }
+          "options": { "stacking": "normal", "showValue": "auto", "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" } }
         },
         {
           "id": 2,
@@ -160,6 +160,56 @@ spec:
             ]
           },
           "options": { "sortBy": [ { "displayName": "run_started_at", "desc": true } ] }
+        },
+        {
+          "id": 4,
+          "type": "barchart",
+          "title": "Success vs failure ratio per day — decided runs ($workflow)",
+          "description": "100%-stacked: green share = success rate, red = failure rate. Cancelled and in-progress runs excluded.",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 17 },
+          "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+              "queryType": "Workflow_Runs",
+              "owner": "cozystack",
+              "repository": "cozystack",
+              "options": { "workflow": "$workflow", "branch": "" }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": { "conversions": [ { "targetField": "created_at", "destinationType": "string", "dateFormat": "YYYY-MM-DD" } ] }
+            },
+            {
+              "id": "groupBy",
+              "options": {
+                "fields": {
+                  "created_at": { "operation": "groupby", "aggregations": [] },
+                  "conclusion": { "operation": "groupby", "aggregations": [] },
+                  "id": { "operation": "aggregate", "aggregations": [ "count" ] }
+                }
+              }
+            },
+            {
+              "id": "groupingToMatrix",
+              "options": { "columnField": "conclusion", "rowField": "created_at", "valueField": "id (count)" }
+            },
+            {
+              "id": "organize",
+              "options": { "excludeByName": { "cancelled": true, "action_required": true, "skipped": true, "null": true, "neutral": true, "timed_out": true } }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "custom": { "stacking": { "mode": "percent", "group": "A" }, "fillOpacity": 90 } },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "success" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] },
+              { "matcher": { "id": "byName", "options": "failure" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] }
+            ]
+          },
+          "options": { "stacking": "percent", "showValue": "auto", "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" } }
         }
       ]
     }
