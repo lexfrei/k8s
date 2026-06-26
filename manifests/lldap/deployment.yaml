@@ -23,7 +23,7 @@ spec:
         - name: lldap
           image: lldap/lldap:v0.6.3
           imagePullPolicy: IfNotPresent
-          args: ["run", "--config-file", "/data/lldap_config.toml"]
+          args: ["run"]
           ports:
             - name: ldap
               containerPort: 3890
@@ -50,6 +50,11 @@ spec:
                 secretKeyRef:
                   name: lldap-secrets
                   key: LLDAP_JWT_SECRET
+            - name: LLDAP_KEY_SEED
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-secrets
+                  key: LLDAP_KEY_SEED
           volumeMounts:
             - name: data
               mountPath: /data
