@@ -45,6 +45,15 @@ extra_server_args: >-
 # roles both read `server_config_yaml | from_yaml`, so we compose it here.
 server_config_cluster:
   secrets-encryption: true
+  # Pin node-ip to the static reservation. The node is multi-homed: eno2
+  # holds the 172.16.101.4 reservation, while ens2 is the previously-dead
+  # SFP+ NIC that can REVIVE on reboot and grab a DHCP lease in another
+  # subnet (172.16.10.x). Without this pin k3s auto-detects node-ip from
+  # whichever default route wins and may pick the wrong address, which no
+  # longer matches the registered etcd member peer URL — k3s then refuses
+  # to rejoin its own single-node etcd and the cluster never comes up.
+  # Caught 2026-06-26 when a kernel-activation reboot revived ens2.
+  node-ip: 172.16.101.4
   # etcd snapshot scheduler. MUST live in config.yaml (YAML-parsed), NOT
   # in extra_server_args — the k3s install script escapes asterisks when
   # serializing INSTALL_K3S_EXEC into the systemd ExecStart line, turning
