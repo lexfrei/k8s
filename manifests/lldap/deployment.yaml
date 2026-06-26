@@ -55,10 +55,6 @@ spec:
                 secretKeyRef:
                   name: lldap-secrets
                   key: LLDAP_KEY_SEED
-            # Reset admin password to LLDAP_LDAP_USER_PASS on every start so the
-            # admin account always matches the secret store (the self-heal path).
-            - name: LLDAP_FORCE_LDAP_USER_PASS_RESET
-              value: "true"
           volumeMounts:
             - name: data
               mountPath: /data
