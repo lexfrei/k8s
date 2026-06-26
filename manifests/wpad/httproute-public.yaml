@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: wpad-public
+  namespace: wpad
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+spec:
+  # macOS WPAD walks up the domain (wpad.home.lex.la → wpad.lex.la), so close
+  # the public vector too. The cloudflare-tunnel controller programs the DNS
+  # record and tunnel ingress from this route's hostname.
+  parentRefs:
+    - name: cloudflare-tunnel
+      namespace: cloudflare-tunnel-system
+  hostnames:
+    - wpad.lex.la
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /wpad.dat
+      backendRefs:
+        - name: wpad
+          port: 80

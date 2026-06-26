@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wpad
+  namespace: wpad
+data:
+  # A PAC that returns DIRECT changes nothing about routing — this is
+  # NEUTRALIZATION of accidental WPAD auto-discovery (wildcard *.home.lex.la
+  # makes wpad.* resolve to the ingress), NOT the introduction of a proxy.
+  wpad.dat: |
+    // Neutralizes accidental WPAD auto-discovery on home.lex.la / lex.la.
+    // Wildcard DNS makes wpad.* resolve to the ingress; clients must be
+    // told to go DIRECT instead of trying to proxy through it.
+    function FindProxyForURL(url, host) {
+        return "DIRECT";
+    }
+  # ".dat" is absent from nginx's default mime.types, so default_type wins and
+  # the PAC is served as application/x-ns-proxy-autoconfig. The single server
+  # block is the default server, so it answers any Host (home.lex.la + lex.la).
+  default.conf: |
+    server {
+        listen 8080;
+        server_name wpad.home.lex.la wpad.lex.la;
+        location = /wpad.dat {
+            default_type application/x-ns-proxy-autoconfig;
+            add_header Cache-Control "max-age=300";
+            root /usr/share/nginx/html;
+        }
+        location / { return 404; }
+    }

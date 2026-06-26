@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: wpad-internal
+  namespace: wpad
+spec:
+  parentRefs:
+    # Attaching to the :80 listener with an exact hostname creates a dedicated
+    # Envoy vhost (["wpad.home.lex.la"]) that beats the catch-all http→https
+    # redirect (vhost ["*"]) by domain specificity. WPAD DNS-discovery fetches
+    # over plain http:80, so /wpad.dat must be served without the 301.
+    - name: cilium-gateway-internal
+      namespace: kube-system
+      sectionName: http
+    - name: cilium-gateway-internal
+      namespace: kube-system
+      sectionName: https-home-lex-la
+  hostnames:
+    - wpad.home.lex.la
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /wpad.dat
+      backendRefs:
+        - name: wpad
+          port: 80
