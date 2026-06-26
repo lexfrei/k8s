@@ -223,8 +223,8 @@ spec:
         {
           "id": 5,
           "type": "stat",
-          "title": "Avg run duration",
-          "description": "Mean run wall-clock over the selected range (updated_at − run_started_at).",
+          "title": "Avg run duration (success)",
+          "description": "Mean wall-clock of successful runs over the selected range (updated_at − run_started_at).",
           "gridPos": { "h": 5, "w": 4, "x": 0, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
@@ -238,6 +238,7 @@ spec:
             }
           ],
           "transformations": [
+            { "id": "filterByValue", "options": { "type": "include", "match": "all", "filters": [ { "fieldName": "conclusion", "config": { "id": "regex", "options": { "value": "^success$" } } } ] } },
             { "id": "convertFieldType", "options": { "conversions": [ { "targetField": "run_started_at", "destinationType": "number" }, { "targetField": "updated_at", "destinationType": "number" } ] } },
             { "id": "calculateField", "options": { "mode": "binary", "binary": { "left": "updated_at", "operator": "-", "right": "run_started_at" }, "alias": "duration", "replaceFields": false } },
             { "id": "filterFieldsByName", "options": { "include": { "names": [ "duration" ] } } }
