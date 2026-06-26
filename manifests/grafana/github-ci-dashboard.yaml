@@ -223,9 +223,9 @@ spec:
         {
           "id": 5,
           "type": "table",
-          "title": "Workflow usage — billing cycle ($workflow)",
-          "description": "From the GitHub workflow usage API. Cost omitted ($0.00 on self-hosted runners). Success/fail include their share of all runs.",
-          "gridPos": { "h": 5, "w": 8, "x": 0, "y": 18 },
+          "title": "Usage — runs / p95 ($workflow)",
+          "description": "From the GitHub workflow usage API (billing cycle).",
+          "gridPos": { "h": 5, "w": 4, "x": 0, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -238,11 +238,12 @@ spec:
             }
           ],
           "transformations": [
-            { "id": "filterFieldsByName", "options": { "include": { "names": [ "runs", "successes", "failures", "p95 run duration (approx.)" ] } } },
-            { "id": "organize", "options": { "renameByName": { "successes": "success", "failures": "fail", "p95 run duration (approx.)": "p95 dur" } } }
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "runs", "p95 run duration (approx.)" ] } } },
+            { "id": "organize", "options": { "renameByName": { "p95 run duration (approx.)": "p95 dur" } } },
+            { "id": "transpose", "options": {} }
           ],
-          "fieldConfig": { "defaults": { "custom": { "align": "center", "cellOptions": { "type": "auto" } } }, "overrides": [] },
-          "options": { "showHeader": true, "cellHeight": "sm" }
+          "fieldConfig": { "defaults": { "custom": { "align": "left" } }, "overrides": [] },
+          "options": { "showHeader": false, "cellHeight": "sm" }
         },
         {
           "id": 6,
@@ -280,6 +281,31 @@ spec:
             "overrides": []
           },
           "options": { "legend": { "showLegend": false }, "tooltip": { "mode": "single", "sort": "none" } }
+        },
+        {
+          "id": 7,
+          "type": "table",
+          "title": "Usage — success / fail ($workflow)",
+          "description": "Counts with their share of all runs, from the workflow usage API (billing cycle).",
+          "gridPos": { "h": 5, "w": 4, "x": 4, "y": 18 },
+          "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+              "queryType": "Workflow_Usage",
+              "owner": "cozystack",
+              "repository": "cozystack",
+              "options": { "workflow": "$workflow" }
+            }
+          ],
+          "transformations": [
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "successes", "failures" ] } } },
+            { "id": "organize", "options": { "renameByName": { "successes": "success", "failures": "fail" } } },
+            { "id": "transpose", "options": {} }
+          ],
+          "fieldConfig": { "defaults": { "custom": { "align": "left" } }, "overrides": [] },
+          "options": { "showHeader": false, "cellHeight": "sm" }
         }
       ]
     }
