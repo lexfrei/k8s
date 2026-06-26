@@ -35,8 +35,8 @@ spec:
       "panels": [
         {
           "id": 1,
-          "type": "status-history",
-          "title": "Run outcomes over time ($workflow)",
+          "type": "barchart",
+          "title": "Runs per day by conclusion ($workflow)",
           "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
@@ -51,33 +51,34 @@ spec:
           ],
           "transformations": [
             {
-              "id": "organize",
+              "id": "convertFieldType",
+              "options": { "conversions": [ { "targetField": "created_at", "destinationType": "string", "dateFormat": "YYYY-MM-DD" } ] }
+            },
+            {
+              "id": "groupBy",
               "options": {
-                "excludeByName": {
-                  "id": true, "name": true, "head_branch": true, "head_sha": true,
-                  "created_at": true, "updated_at": true, "html_url": true, "url": true,
-                  "status": true, "event": true, "workflow_id": true, "run_number": true
-                },
-                "indexByName": { "run_started_at": 0, "conclusion": 1 }
+                "fields": {
+                  "created_at": { "operation": "groupby", "aggregations": [] },
+                  "conclusion": { "operation": "groupby", "aggregations": [] },
+                  "id": { "operation": "aggregate", "aggregations": [ "count" ] }
+                }
               }
+            },
+            {
+              "id": "groupingToMatrix",
+              "options": { "columnField": "conclusion", "rowField": "created_at", "valueField": "id (count)" }
             }
           ],
           "fieldConfig": {
-            "defaults": {
-              "mappings": [
-                { "type": "value", "options": {
-                  "success":   { "color": "green",  "index": 0 },
-                  "failure":   { "color": "red",    "index": 1 },
-                  "cancelled": { "color": "yellow", "index": 2 },
-                  "skipped":   { "color": "blue",   "index": 3 },
-                  "startup_failure": { "color": "orange", "index": 4 }
-                } }
-              ],
-              "color": { "mode": "fixed" }
-            },
-            "overrides": []
+            "defaults": { "custom": { "stacking": { "mode": "normal", "group": "A" }, "fillOpacity": 90 } },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "success" },   "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] },
+              { "matcher": { "id": "byName", "options": "failure" },   "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+              { "matcher": { "id": "byName", "options": "cancelled" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } } ] },
+              { "matcher": { "id": "byName", "options": "skipped" },   "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } } ] }
+            ]
           },
-          "options": { "colWidth": 0.9, "rowHeight": 0.9, "showValue": "never", "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" } }
+          "options": { "xField": "created_at", "stacking": "normal", "showValue": "auto", "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" } }
         },
         {
           "id": 2,
