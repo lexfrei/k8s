@@ -91,7 +91,7 @@ spec:
           "id": 2,
           "type": "piechart",
           "title": "Conclusion distribution (range)",
-          "gridPos": { "h": 9, "w": 8, "x": 0, "y": 8 },
+          "gridPos": { "h": 10, "w": 8, "x": 0, "y": 8 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -120,7 +120,7 @@ spec:
           "id": 3,
           "type": "table",
           "title": "Recent runs ($workflow)",
-          "gridPos": { "h": 9, "w": 16, "x": 8, "y": 8 },
+          "gridPos": { "h": 10, "w": 16, "x": 8, "y": 8 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -173,7 +173,7 @@ spec:
           "type": "barchart",
           "title": "Success vs failure ratio per day — decided runs ($workflow)",
           "description": "100%-stacked: green share = success rate, red = failure rate. Cancelled and in-progress runs excluded.",
-          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 17 },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 23 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -225,7 +225,7 @@ spec:
           "type": "stat",
           "title": "Workflow usage — billing cycle ($workflow)",
           "description": "Aggregate counters from the GitHub workflow usage API: run counts, approximate billable cost, and average/p95 run duration.",
-          "gridPos": { "h": 5, "w": 24, "x": 0, "y": 25 },
+          "gridPos": { "h": 5, "w": 12, "x": 0, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -240,7 +240,7 @@ spec:
           "transformations": [
             {
               "id": "filterFieldsByName",
-              "options": { "include": { "names": [ "runs", "successes", "failures", "cancelled", "average run duration (approx.)", "p95 run duration (approx.)", "current billing cycle cost (approx.)" ] } }
+              "options": { "include": { "names": [ "runs", "current billing cycle cost (approx.)", "average run duration (approx.)", "p95 run duration (approx.)" ] } }
             }
           ],
           "fieldConfig": {
@@ -258,7 +258,7 @@ spec:
           "type": "timeseries",
           "title": "Run duration over time ($workflow)",
           "description": "Per-run wall-clock duration (updated_at − run_started_at). Points; watch for the long-tail E2E outliers.",
-          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 30 },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 31 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -289,6 +289,37 @@ spec:
             "overrides": []
           },
           "options": { "legend": { "showLegend": false }, "tooltip": { "mode": "single", "sort": "none" } }
+        },
+        {
+          "id": 7,
+          "type": "gauge",
+          "title": "Success rate — billing cycle ($workflow)",
+          "description": "successes / (successes + failures) from the workflow usage API. Cancelled and in-progress excluded.",
+          "gridPos": { "h": 5, "w": 12, "x": 12, "y": 18 },
+          "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+              "queryType": "Workflow_Usage",
+              "owner": "cozystack",
+              "repository": "cozystack",
+              "options": { "workflow": "$workflow" }
+            }
+          ],
+          "transformations": [
+            { "id": "calculateField", "options": { "mode": "binary", "binary": { "left": "successes", "operator": "+", "right": "failures" }, "alias": "decided", "replaceFields": false } },
+            { "id": "calculateField", "options": { "mode": "binary", "binary": { "left": "successes", "operator": "/", "right": "decided" }, "alias": "success_rate", "replaceFields": false } },
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "success_rate" ] } } }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit", "min": 0, "max": 1,
+              "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "green", "value": 0.8 } ] }
+            },
+            "overrides": []
+          },
+          "options": { "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "showThresholdLabels": false, "showThresholdMarkers": true }
         }
       ]
     }
