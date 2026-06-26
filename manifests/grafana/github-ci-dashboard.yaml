@@ -301,7 +301,7 @@ spec:
           ],
           "transformations": [
             { "id": "filterFieldsByName", "options": { "include": { "names": [ "successes" ] } } },
-            { "id": "extractFields", "options": { "source": "successes", "format": "RegExp", "regExp": "/(?<rate>[0-9.]+)%/" } },
+            { "id": "extractFields", "options": { "source": "successes", "format": "regexp", "regExp": "/(?<rate>[0-9.]+)%/" } },
             { "id": "convertFieldType", "options": { "conversions": [ { "targetField": "rate", "destinationType": "number" } ] } },
             { "id": "filterFieldsByName", "options": { "include": { "names": [ "rate" ] } } }
           ],
