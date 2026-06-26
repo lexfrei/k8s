@@ -5,13 +5,13 @@ metadata:
   namespace: security
   labels:
     app.kubernetes.io/name: lldap
-  annotations:
-    # Run after lldap Deployment/Service are synced and serving, re-run each sync.
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
+  # Plain managed Job (no Sync hook, no TTL): runs once on first apply, then
+  # stays Completed so ArgoCD never re-runs it — the lex password is set a
+  # single time, not re-applied on every sync. To re-bootstrap (new user or
+  # group, or after a users.db loss) delete this Job; the next sync recreates
+  # it and re-applies the config idempotently.
   backoffLimit: 5
-  ttlSecondsAfterFinished: 600
   template:
     metadata:
       labels:
