@@ -219,6 +219,76 @@ spec:
             ]
           },
           "options": { "stacking": "percent", "showValue": "auto", "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" } }
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Workflow usage — billing cycle ($workflow)",
+          "description": "Aggregate counters from the GitHub workflow usage API: run counts, approximate billable cost, and average/p95 run duration.",
+          "gridPos": { "h": 5, "w": 24, "x": 0, "y": 25 },
+          "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+              "queryType": "Workflow_Usage",
+              "owner": "cozystack",
+              "repository": "cozystack",
+              "options": { "workflow": "$workflow" }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "filterFieldsByName",
+              "options": { "include": { "names": [ "runs", "successes", "failures", "cancelled", "average run duration (approx.)", "p95 run duration (approx.)", "current billing cycle cost (approx.)" ] } }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "color": { "mode": "fixed", "fixedColor": "text" } },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "successes" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] },
+              { "matcher": { "id": "byName", "options": "failures" },  "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+              { "matcher": { "id": "byName", "options": "cancelled" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } } ] }
+            ]
+          },
+          "options": { "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "orientation": "horizontal", "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "justifyMode": "auto" }
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Run duration over time ($workflow)",
+          "description": "Per-run wall-clock duration (updated_at − run_started_at). Points; watch for the long-tail E2E outliers.",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 30 },
+          "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+              "queryType": "Workflow_Runs",
+              "owner": "cozystack",
+              "repository": "cozystack",
+              "options": { "workflow": "$workflow", "branch": "" }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "convertFieldType",
+              "options": { "conversions": [ { "targetField": "run_started_at", "destinationType": "number" }, { "targetField": "updated_at", "destinationType": "number" } ] }
+            },
+            {
+              "id": "calculateField",
+              "options": { "mode": "binary", "binary": { "left": "updated_at", "operator": "-", "right": "run_started_at" }, "alias": "duration", "replaceFields": false }
+            },
+            {
+              "id": "organize",
+              "options": { "excludeByName": { "id": true, "name": true, "head_branch": true, "head_sha": true, "updated_at": true, "run_started_at": true, "html_url": true, "url": true, "status": true, "conclusion": true, "event": true, "workflow_id": true, "run_number": true } }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "ms", "custom": { "drawStyle": "points", "pointSize": 5, "lineWidth": 0, "showPoints": "always" } },
+            "overrides": []
+          },
+          "options": { "legend": { "showLegend": false }, "tooltip": { "mode": "single", "sort": "none" } }
         }
       ]
     }
