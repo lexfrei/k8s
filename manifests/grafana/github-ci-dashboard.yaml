@@ -120,7 +120,7 @@ spec:
           "id": 3,
           "type": "table",
           "title": "Recent runs ($workflow)",
-          "gridPos": { "h": 10, "w": 16, "x": 8, "y": 8 },
+          "gridPos": { "h": 15, "w": 16, "x": 8, "y": 8 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -225,7 +225,7 @@ spec:
           "type": "stat",
           "title": "Workflow usage — billing cycle ($workflow)",
           "description": "Aggregate counters from the GitHub workflow usage API: run counts, approximate billable cost, and average/p95 run duration.",
-          "gridPos": { "h": 5, "w": 12, "x": 0, "y": 18 },
+          "gridPos": { "h": 5, "w": 4, "x": 0, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -240,18 +240,11 @@ spec:
           "transformations": [
             {
               "id": "filterFieldsByName",
-              "options": { "include": { "names": [ "runs", "current billing cycle cost (approx.)", "average run duration (approx.)", "p95 run duration (approx.)" ] } }
+              "options": { "include": { "names": [ "runs", "average run duration (approx.)", "p95 run duration (approx.)" ] } }
             }
           ],
-          "fieldConfig": {
-            "defaults": { "color": { "mode": "fixed", "fixedColor": "text" } },
-            "overrides": [
-              { "matcher": { "id": "byName", "options": "successes" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] },
-              { "matcher": { "id": "byName", "options": "failures" },  "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
-              { "matcher": { "id": "byName", "options": "cancelled" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } } ] }
-            ]
-          },
-          "options": { "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "orientation": "horizontal", "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "justifyMode": "auto" }
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" } }, "overrides": [] },
+          "options": { "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "orientation": "vertical", "colorMode": "none", "graphMode": "none", "textMode": "value_and_name", "justifyMode": "auto" }
         },
         {
           "id": 6,
@@ -292,10 +285,10 @@ spec:
         },
         {
           "id": 7,
-          "type": "gauge",
-          "title": "Success rate — billing cycle ($workflow)",
-          "description": "successes / (successes + failures) from the workflow usage API. Cancelled and in-progress excluded.",
-          "gridPos": { "h": 5, "w": 12, "x": 12, "y": 18 },
+          "type": "stat",
+          "title": "Success / failure ($workflow)",
+          "description": "Counts with shares from the workflow usage API (billing cycle).",
+          "gridPos": { "h": 5, "w": 4, "x": 4, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -308,18 +301,10 @@ spec:
             }
           ],
           "transformations": [
-            { "id": "calculateField", "options": { "mode": "binary", "binary": { "left": "successes", "operator": "+", "right": "failures" }, "alias": "decided", "replaceFields": false } },
-            { "id": "calculateField", "options": { "mode": "binary", "binary": { "left": "successes", "operator": "/", "right": "decided" }, "alias": "success_rate", "replaceFields": false } },
-            { "id": "filterFieldsByName", "options": { "include": { "names": [ "success_rate" ] } } }
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "successes", "failures" ] } } }
           ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "percentunit", "min": 0, "max": 1,
-              "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "green", "value": 0.8 } ] }
-            },
-            "overrides": []
-          },
-          "options": { "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "showThresholdLabels": false, "showThresholdMarkers": true }
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" } }, "overrides": [] },
+          "options": { "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }, "orientation": "vertical", "colorMode": "none", "graphMode": "none", "textMode": "value_and_name", "justifyMode": "auto" }
         }
       ]
     }
