@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lldap-bootstrap
+  namespace: security
+  labels:
+    app.kubernetes.io/name: lldap
+data:
+  # bootstrap.sh reads each file via `jq -c '.'` (no `.[]`): one JSON object per
+  # file, NOT a wrapping array. The lex password is spliced in at runtime by the
+  # render initContainer from secret lldap-secrets — never committed here.
+  users.json: |
+    {
+      "id": "lex",
+      "email": "lex@lex.la",
+      "displayName": "Lex",
+      "groups": ["admins", "lldap_admin"]
+    }
+  groups.json: |
+    {
+      "name": "admins"
+    }

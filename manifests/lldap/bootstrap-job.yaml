@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: lldap-bootstrap
+  namespace: security
+  labels:
+    app.kubernetes.io/name: lldap
+  annotations:
+    # Run after lldap Deployment/Service are synced and serving, re-run each sync.
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 5
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lldap
+    spec:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: templates
+          configMap:
+            name: lldap-bootstrap
+        - name: rendered-users
+          emptyDir: {}
+        - name: rendered-groups
+          emptyDir: {}
+      initContainers:
+        # Splice the lex password from the secret into the user config, and
+        # split users/groups into separate dirs so bootstrap.sh's group loader
+        # never sees a user file. Plaintext lives only in this emptyDir.
+        - name: render
+          image: lldap/lldap:v0.6.3
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              jq --arg pw "$LLDAP_USER_LEX_PASSWORD" '.password = $pw' \
+                /templates/users.json > /rendered-users/users.json
+              cp /templates/groups.json /rendered-groups/groups.json
+          env:
+            - name: LLDAP_USER_LEX_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-secrets
+                  key: LLDAP_USER_LEX_PASSWORD
+          volumeMounts:
+            - name: templates
+              mountPath: /templates
+            - name: rendered-users
+              mountPath: /rendered-users
+            - name: rendered-groups
+              mountPath: /rendered-groups
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+      containers:
+        - name: bootstrap
+          image: lldap/lldap:v0.6.3
+          imagePullPolicy: IfNotPresent
+          command: ["/app/bootstrap.sh"]
+          env:
+            - name: LLDAP_URL
+              value: "http://lldap.security.svc:17170"
+            - name: LLDAP_ADMIN_USERNAME
+              value: "admin"
+            - name: LLDAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-secrets
+                  key: LLDAP_LDAP_USER_PASS
+            - name: USER_CONFIGS_DIR
+              value: "/rendered-users"
+            - name: GROUP_CONFIGS_DIR
+              value: "/rendered-groups"
+            - name: DO_CLEANUP
+              value: "false"
+          volumeMounts:
+            - name: rendered-users
+              mountPath: /rendered-users
+            - name: rendered-groups
+              mountPath: /rendered-groups
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
