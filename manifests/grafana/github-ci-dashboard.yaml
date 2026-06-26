@@ -223,8 +223,8 @@ spec:
         {
           "id": 5,
           "type": "table",
-          "title": "Usage — runs / p95 ($workflow)",
-          "description": "From the GitHub workflow usage API (billing cycle).",
+          "title": "p95 run duration",
+          "description": "95th-percentile run wall-clock from the workflow usage API (billing cycle).",
           "gridPos": { "h": 5, "w": 4, "x": 0, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
@@ -238,12 +238,10 @@ spec:
             }
           ],
           "transformations": [
-            { "id": "filterFieldsByName", "options": { "include": { "names": [ "runs", "p95 run duration (approx.)" ] } } },
-            { "id": "organize", "options": { "renameByName": { "p95 run duration (approx.)": "p95 dur" } } },
-            { "id": "transpose", "options": {} }
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "p95 run duration (approx.)" ] } } }
           ],
-          "fieldConfig": { "defaults": { "custom": { "align": "left" } }, "overrides": [] },
-          "options": { "showHeader": false, "cellHeight": "sm" }
+          "fieldConfig": { "defaults": { "custom": { "align": "center" } }, "overrides": [] },
+          "options": { "showHeader": false, "cellHeight": "lg" }
         },
         {
           "id": 6,
@@ -285,8 +283,8 @@ spec:
         {
           "id": 7,
           "type": "table",
-          "title": "Usage — success / fail ($workflow)",
-          "description": "Counts with their share of all runs, from the workflow usage API (billing cycle).",
+          "title": "Success rate",
+          "description": "Successful runs with their share of all runs (billing cycle).",
           "gridPos": { "h": 5, "w": 4, "x": 4, "y": 18 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
@@ -300,12 +298,10 @@ spec:
             }
           ],
           "transformations": [
-            { "id": "filterFieldsByName", "options": { "include": { "names": [ "successes", "failures" ] } } },
-            { "id": "organize", "options": { "renameByName": { "successes": "success", "failures": "fail" } } },
-            { "id": "transpose", "options": {} }
+            { "id": "filterFieldsByName", "options": { "include": { "names": [ "successes" ] } } }
           ],
-          "fieldConfig": { "defaults": { "custom": { "align": "left" } }, "overrides": [] },
-          "options": { "showHeader": false, "cellHeight": "sm" }
+          "fieldConfig": { "defaults": { "custom": { "align": "center" } }, "overrides": [] },
+          "options": { "showHeader": false, "cellHeight": "lg" }
         }
       ]
     }
