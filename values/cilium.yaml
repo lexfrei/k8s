@@ -12,9 +12,12 @@ kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 mtu: 1500
 
 # Devices for BPF attachment and direct routing detection.
-# Active uplink is the onboard Broadcom port eno2; the SFP+ NIC (ens2)
-# failed, so match eno+. Add the SFP interface back here once it is restored.
-devices: "eno+"
+# Primary uplink is the SFP+ NIC ens2 (10G, holds the 172.16.101.4
+# reservation); eno2 (onboard Broadcom 1G) is the backup. ens2 revived
+# 2026-06-26 after a reboot, so both families must carry the BPF datapath
+# and masquerade — otherwise pod egress over the active uplink is not SNATed
+# and all upstream DNS/forward traffic times out.
+devices: "eno+,ens+"
 
 # Routing configuration
 # Native routing for better performance on same L2 network
