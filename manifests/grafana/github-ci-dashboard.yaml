@@ -91,7 +91,7 @@ spec:
           "id": 2,
           "type": "piechart",
           "title": "Conclusion distribution (range)",
-          "gridPos": { "h": 10, "w": 8, "x": 0, "y": 8 },
+          "gridPos": { "h": 5, "w": 8, "x": 0, "y": 8 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -112,9 +112,10 @@ spec:
                   "id": { "operation": "aggregate", "aggregations": ["count"] }
                 }
               }
-            }
+            },
+            { "id": "organize", "options": { "renameByName": { "id (count)": "Runs" } } }
           ],
-          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true }, "pieType": "donut", "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] } }
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "Runs", "values": true }, "pieType": "donut", "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] } }
         },
         {
           "id": 3,
@@ -225,7 +226,7 @@ spec:
           "type": "stat",
           "title": "Avg run duration (success)",
           "description": "Mean wall-clock of successful runs over the selected range (updated_at − run_started_at).",
-          "gridPos": { "h": 5, "w": 4, "x": 0, "y": 18 },
+          "gridPos": { "h": 5, "w": 4, "x": 0, "y": 13 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
@@ -288,7 +289,7 @@ spec:
           "type": "gauge",
           "title": "Success rate",
           "description": "Successful runs as a share of all runs (billing cycle), parsed from the workflow usage API.",
-          "gridPos": { "h": 5, "w": 4, "x": 4, "y": 18 },
+          "gridPos": { "h": 5, "w": 4, "x": 4, "y": 13 },
           "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
           "targets": [
             {
