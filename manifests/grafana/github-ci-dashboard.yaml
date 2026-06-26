@@ -51,6 +51,13 @@ spec:
           ],
           "transformations": [
             {
+              "id": "filterByValue",
+              "options": { "type": "exclude", "match": "any", "filters": [
+                { "fieldName": "conclusion", "config": { "id": "isNull" } },
+                { "fieldName": "conclusion", "config": { "id": "equal", "options": { "value": "" } } }
+              ] }
+            },
+            {
               "id": "convertFieldType",
               "options": { "conversions": [ { "targetField": "created_at", "destinationType": "string", "dateFormat": "YYYY-MM-DD" } ] }
             },
@@ -180,6 +187,12 @@ spec:
           ],
           "transformations": [
             {
+              "id": "filterByValue",
+              "options": { "type": "include", "match": "all", "filters": [
+                { "fieldName": "conclusion", "config": { "id": "regex", "options": { "value": "^(success|failure)$" } } }
+              ] }
+            },
+            {
               "id": "convertFieldType",
               "options": { "conversions": [ { "targetField": "created_at", "destinationType": "string", "dateFormat": "YYYY-MM-DD" } ] }
             },
@@ -196,10 +209,6 @@ spec:
             {
               "id": "groupingToMatrix",
               "options": { "columnField": "conclusion", "rowField": "created_at", "valueField": "id (count)" }
-            },
-            {
-              "id": "organize",
-              "options": { "excludeByName": { "cancelled": true, "action_required": true, "skipped": true, "null": true, "neutral": true, "timed_out": true } }
             }
           ],
           "fieldConfig": {
