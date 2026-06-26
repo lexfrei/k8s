@@ -1,0 +1,164 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: github-ci-dashboard
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  datasources:
+    - inputName: "DS_GITHUB"
+      datasourceName: "GitHub"
+  json: |
+    {
+      "title": "GitHub CI — cozystack/cozystack",
+      "uid": "github-ci-cozystack",
+      "schemaVersion": 39,
+      "editable": true,
+      "time": { "from": "now-7d", "to": "now" },
+      "refresh": "30m",
+      "templating": {
+        "list": [
+          {
+            "name": "workflow",
+            "type": "custom",
+            "label": "Workflow",
+            "query": "pull-requests.yaml,pull-requests-release.yaml",
+            "current": { "text": "pull-requests.yaml", "value": "pull-requests.yaml" },
+            "options": [
+              { "text": "pull-requests.yaml", "value": "pull-requests.yaml", "selected": true },
+              { "text": "pull-requests-release.yaml", "value": "pull-requests-release.yaml", "selected": false }
+            ]
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "type": "status-history",
+          "title": "Run outcomes over time ($workflow)",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+          "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+              "queryType": "Workflow_Runs",
+              "owner": "cozystack",
+              "repository": "cozystack",
+              "options": { "workflow": "$workflow", "branch": "" }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "id": true, "name": true, "head_branch": true, "head_sha": true,
+                  "created_at": true, "updated_at": true, "html_url": true, "url": true,
+                  "status": true, "event": true, "workflow_id": true, "run_number": true
+                },
+                "indexByName": { "run_started_at": 0, "conclusion": 1 }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": {
+                  "success":   { "color": "green",  "index": 0 },
+                  "failure":   { "color": "red",    "index": 1 },
+                  "cancelled": { "color": "yellow", "index": 2 },
+                  "skipped":   { "color": "blue",   "index": 3 },
+                  "startup_failure": { "color": "orange", "index": 4 }
+                } }
+              ],
+              "color": { "mode": "fixed" }
+            },
+            "overrides": []
+          },
+          "options": { "colWidth": 0.9, "rowHeight": 0.9, "showValue": "never", "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" } }
+        },
+        {
+          "id": 2,
+          "type": "piechart",
+          "title": "Conclusion distribution (range)",
+          "gridPos": { "h": 9, "w": 8, "x": 0, "y": 8 },
+          "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+              "queryType": "Workflow_Runs",
+              "owner": "cozystack",
+              "repository": "cozystack",
+              "options": { "workflow": "$workflow", "branch": "" }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "groupBy",
+              "options": {
+                "fields": {
+                  "conclusion": { "operation": "groupby", "aggregations": [] },
+                  "id": { "operation": "aggregate", "aggregations": ["count"] }
+                }
+              }
+            }
+          ],
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true }, "pieType": "donut", "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] } }
+        },
+        {
+          "id": 3,
+          "type": "table",
+          "title": "Recent runs ($workflow)",
+          "gridPos": { "h": 9, "w": 16, "x": 8, "y": 8 },
+          "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "grafana-github-datasource", "uid": "${DS_GITHUB}" },
+              "queryType": "Workflow_Runs",
+              "owner": "cozystack",
+              "repository": "cozystack",
+              "options": { "workflow": "$workflow", "branch": "" }
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": { "id": true, "name": true, "head_sha": true, "updated_at": true, "url": true, "workflow_id": true },
+                "indexByName": {
+                  "run_number": 0, "head_branch": 1, "status": 2, "conclusion": 3,
+                  "event": 4, "run_started_at": 5, "created_at": 6, "html_url": 7
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "conclusion" },
+                "properties": [
+                  { "id": "mappings", "value": [
+                    { "type": "value", "options": {
+                      "success":   { "color": "green",  "index": 0 },
+                      "failure":   { "color": "red",    "index": 1 },
+                      "cancelled": { "color": "yellow", "index": 2 }
+                    } }
+                  ] },
+                  { "id": "custom.cellOptions", "value": { "type": "color-text" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "html_url" },
+                "properties": [ { "id": "custom.cellOptions", "value": { "type": "auto" } } ]
+              }
+            ]
+          },
+          "options": { "sortBy": [ { "displayName": "run_started_at", "desc": true } ] }
+        }
+      ]
+    }
