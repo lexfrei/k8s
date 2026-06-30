@@ -13,7 +13,7 @@ spec:
   sources:
     - chart: transmission
       repoURL: ghcr.io/lexfrei/charts
-      targetRevision: 1.7.3
+      targetRevision: 1.7.4
       helm:
         valuesObject:
           podSecurityContext:
