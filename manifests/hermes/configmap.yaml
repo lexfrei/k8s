@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-profile-fix
+  namespace: hermes
+  labels:
+    app.kubernetes.io/name: hermes
+data:
+  # Debian's /etc/profile unconditionally resets PATH for non-root login
+  # shells (PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"),
+  # discarding the venv entries the Dockerfile's ENV PATH sets up. The
+  # terminal tool builds its per-session execution snapshot by running
+  # `bash -l` once, so without this file that snapshot loses
+  # /opt/hermes/.venv/bin and every later `python3`/`pip` call inside agent
+  # scripts hits the system interpreter (which lacks mcp, pyyaml, and the
+  # rest of hermes' bundled packages) instead of the venv one.
+  # /etc/profile sources /etc/profile.d/*.sh after the reset, so restoring
+  # PATH here runs late enough to win.
+  00-hermes-venv-path.sh: |
+    export PATH="/opt/hermes/bin:/opt/hermes/.venv/bin:/opt/data/.local/bin:$PATH"

@@ -50,6 +50,13 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /opt/data
+            # See configmap.yaml: restores the venv PATH that /etc/profile
+            # wipes out for non-root login shells, which otherwise breaks
+            # the terminal tool's bash -l session-snapshot capture.
+            - name: profile-fix
+              mountPath: /etc/profile.d/00-hermes-venv-path.sh
+              subPath: 00-hermes-venv-path.sh
+              readOnly: true
           resources:
             requests:
               cpu: 250m
@@ -69,3 +76,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: hermes-data
+        - name: profile-fix
+          configMap:
+            name: hermes-profile-fix
