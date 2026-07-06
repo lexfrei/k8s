@@ -7,6 +7,12 @@ podDisruptionBudget:
   minAvailable: 1
 rbac:
   create: true
+# Give CoreDNS its own ServiceAccount instead of running on the namespace
+# default SA. The chart binds the coredns ClusterRole to this SA, which lets
+# the default SA in kube-system drop its API access (least privilege / PSA).
+serviceAccount:
+  create: true
+  name: coredns
 service:
   clusterIP: 10.43.0.10
 servers:
