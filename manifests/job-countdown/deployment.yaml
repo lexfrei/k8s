@@ -19,6 +19,9 @@ spec:
       labels:
         app: job-countdown
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: job-countdown
           image: lexfrei/job-countdown:1.0.4

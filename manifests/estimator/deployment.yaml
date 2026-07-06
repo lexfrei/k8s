@@ -19,6 +19,9 @@ spec:
       labels:
         app: estimator
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: estimator
           image: ghcr.io/lexfrei/estimator:2.0.1
