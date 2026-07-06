@@ -1,0 +1,284 @@
+# Disable auto-mounting of the API token on every namespace's default
+# ServiceAccount (CIS 5.1.5 / least privilege). Pods that genuinely need
+# the API token use a dedicated ServiceAccount (e.g. coredns) or opt back
+# in with automountServiceAccountToken: true at the pod level.
+# Applied via ServerSideApply, so it patches the k8s-created default SAs.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: kube-system
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: openebs
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: cloudflare-tunnel-system
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: transmission-system
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: kube-public
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: kube-node-lease
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: cert-manager
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: cilium-secrets
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: cloudflared
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: cnpg-system
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: estimator
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: external-secrets
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: gateway-system
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: hermes
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: internal-dns
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: it-tools
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: job-countdown
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: kuberture
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: me-site
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: security
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: wish-operator
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: obico
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: mcp-rutracker
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: mcp-lostfilm
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: mcp-myshows
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: jellyfin
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: wpad
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: spoolman
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
