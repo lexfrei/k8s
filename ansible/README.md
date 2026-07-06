@@ -120,6 +120,13 @@ To upgrade K3s across the cluster:
    ansible-playbook ~/.ansible/collections/ansible_collections/k3s/orchestration/playbooks/upgrade.yml
    ```
 
+3. Re-tighten `config.yaml` permissions. The collection rewrites `/etc/rancher/k3s/config.yaml` as world-readable (0644), but it holds the server token, so restore 0600 after every install/upgrade:
+   ```bash
+   ansible-playbook playbooks/harden-k3s-config.yaml --limit server
+   ```
+
+The k3s server token in `inventory/group_vars/k3s_cluster.yaml` is ansible-vault encrypted; `ansible.cfg` reads the vault password from the macOS login keychain (service `k8s-ansible-vault`) via the gitignored `.vault_pass` script.
+
 ### Add New Worker Node
 
 To add a new worker node to the cluster:

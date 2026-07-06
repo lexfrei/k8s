@@ -1,0 +1,27 @@
+---
+# Restrict permissions on /etc/rancher/k3s/config.yaml to 0600.
+#
+# The file holds the k3s server token but the k3s.orchestration collection
+# writes it world-readable (0644, hardcoded in the k3s_server / k3s_upgrade
+# roles). This playbook tightens it to 0600 (root only).
+#
+# IMPORTANT: the collection resets the file to 0644 on every site.yml /
+# upgrade.yml run, so re-run this playbook after any k3s install or upgrade.
+#
+# Usage:
+#   ansible-playbook playbooks/harden-k3s-config.yaml --limit server
+
+- name: Harden k3s config.yaml permissions
+  hosts: server
+  become: true
+  tags:
+    - k3s
+    - hardening
+
+  tasks:
+    - name: Ensure /etc/rancher/k3s/config.yaml is root-only (0600)
+      ansible.builtin.file:
+        path: /etc/rancher/k3s/config.yaml
+        owner: root
+        group: root
+        mode: "0600"
