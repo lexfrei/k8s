@@ -36,7 +36,7 @@ configs:
           config:
             issuer: https://authelia.lex.la
             clientID: argocd
-            clientSecret: $dex.authelia.clientSecret
+            clientSecret: $argocd-dex-authelia:dex.authelia.clientSecret
             scopes:
               - openid
               - profile
@@ -53,8 +53,6 @@ configs:
       g, admins, role:admin
       p, homepage, applications, get, */*, allow
   secret:
-    extra:
-      dex.authelia.clientSecret: c6d255b2b92e2fec47c1b56dea8ab2bff77a7a7c7f46ef3c99859779c7932afd
     resource.compareoptions: |
       ignoreAggregatedRoles: true
     resource.exclusions: |
