@@ -19,6 +19,11 @@ spec:
           image:
             # Empty tag pins to the chart's appVersion (Jellyfin 10.11.8).
             tag: ""
+          # Jellyfin never calls the Kubernetes API, so drop the auto-mounted
+          # ServiceAccount token (least-privilege, CIS 5.1.6 direction). The
+          # chart sets automountServiceAccountToken=false on the dedicated SA.
+          serviceAccount:
+            automount: false
           podSecurityContext:
             runAsNonRoot: true
             runAsUser: 1000
