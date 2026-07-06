@@ -20,6 +20,9 @@ spec:
       labels:
         app.kubernetes.io/name: cozyboard
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: app
           image: ghcr.io/lexfrei/cozyboard:main-0f89733@sha256:f55519311d6978adb7df8e77bdf119c0c7d1d94cd99020a3514d31a5bbf3a155
