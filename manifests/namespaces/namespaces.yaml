@@ -3,10 +3,9 @@
 # Tiers (all three levels — enforce/audit/warn — set equal per namespace):
 #   - privileged (5): infra with host access (CNI, storage, node/ipmi
 #     exporters, tunnel) — cannot be constrained.
-#   - restricted (18): workloads that pass the restricted profile.
-#   - baseline (6): not yet restricted-ready — estimator, it-tools,
-#     job-countdown (need seccomp), internal-dns (caps), hermes, obico
-#     (s6/CUDA root images).
+#   - restricted (22): workloads that pass the restricted profile.
+#   - baseline (2): hermes and obico — root images (s6-overlay init /
+#     CUDA ml-api) that cannot currently meet runAsNonRoot.
 #   - security: audit/warn = baseline only, no enforce — openbao-0 runs with
 #     Unconfined AppArmor (baseline forbids it); enforce once that is fixed.
 #
@@ -218,11 +217,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
-    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/enforce-version: v1.35
-    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/audit-version: v1.35
-    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/warn-version: v1.35
 ---
 apiVersion: v1
@@ -274,11 +273,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
-    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/enforce-version: v1.35
-    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/audit-version: v1.35
-    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/warn-version: v1.35
 ---
 apiVersion: v1
@@ -288,11 +287,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
-    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/enforce-version: v1.35
-    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/audit-version: v1.35
-    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/warn-version: v1.35
 ---
 apiVersion: v1
@@ -302,11 +301,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
-    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/enforce-version: v1.35
-    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/audit-version: v1.35
-    pod-security.kubernetes.io/warn: baseline
+    pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/warn-version: v1.35
 ---
 apiVersion: v1
