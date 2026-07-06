@@ -1,17 +1,20 @@
 ---
-# Restrict permissions on /etc/rancher/k3s/config.yaml to 0600.
+# Tighten permissions on k3s server files that the k3s.orchestration
+# collection / k3s itself leave world-readable:
+#   - /etc/rancher/k3s/config.yaml holds the server token but is written
+#     0644 (hardcoded in the k3s_server / k3s_upgrade roles) -> 0600.
+#   - /var/lib/rancher/k3s/server/tls/*.crt are written 0644 by k3s -> 0600
+#     (CIS 1.1.20). These are public certificates, so this is defence in
+#     depth rather than a leak; the matching private keys are already 0600.
 #
-# The file holds the k3s server token but the k3s.orchestration collection
-# writes it world-readable (0644, hardcoded in the k3s_server / k3s_upgrade
-# roles). This playbook tightens it to 0600 (root only).
-#
-# IMPORTANT: the collection resets the file to 0644 on every site.yml /
-# upgrade.yml run, so re-run this playbook after any k3s install or upgrade.
+# IMPORTANT: both are reset on every collection site.yml / upgrade.yml run
+# (and k3s rewrites the certs on rotation), so re-run this playbook after any
+# k3s install or upgrade.
 #
 # Usage:
 #   ansible-playbook playbooks/harden-k3s-config.yaml --limit server
 
-- name: Harden k3s config.yaml permissions
+- name: Harden k3s file permissions
   hosts: server
   become: true
   tags:
@@ -25,3 +28,20 @@
         owner: root
         group: root
         mode: "0600"
+
+    - name: Find k3s PKI certificate files
+      ansible.builtin.find:
+        paths: /var/lib/rancher/k3s/server/tls
+        patterns: "*.crt"
+        recurse: true
+      register: k3s_pki_certs
+
+    - name: Ensure k3s PKI certificate files are root-only (0600)
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        owner: root
+        group: root
+        mode: "0600"
+      loop: "{{ k3s_pki_certs.files }}"
+      loop_control:
+        label: "{{ item.path }}"

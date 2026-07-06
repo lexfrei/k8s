@@ -18,6 +18,10 @@ all:
                 # ZFS ARC is capped at 8 GiB — reserve from kubelet scheduling
                 kubelet-arg:
                   - "system-reserved=memory=8Gi"
+                  # Cap PIDs per pod so a single fork-bomb cannot exhaust the
+                  # node PID space (CIS 4.2.13). 16384 is ~15x the observed
+                  # peak (~1073) yet far below the 4M node pid_max.
+                  - "pod-max-pids=16384"
 
         # K3s agent nodes (workers) — none currently
         agent:
