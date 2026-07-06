@@ -1,10 +1,11 @@
 # Pod Security Standards labels for all namespaces.
 #
-# Phase A:
+# Tiers:
 #   - 5 namespaces with known privileged workloads:
 #     enforce/audit/warn = privileged
-#   - 17 other namespaces: audit/warn = baseline (no enforce yet —
-#     collect violations before turning it on in Phase B)
+#   - app + bootstrap namespaces: enforce/audit/warn = baseline
+#   - security: audit/warn = baseline only (no enforce yet — openbao-0
+#     uses an AppArmor profile baseline forbids; enforce after that is fixed)
 #
 # Every Namespace carries argocd.argoproj.io/sync-options: Delete=false
 # so that removing a line from this file never deletes the live namespace
@@ -87,7 +88,8 @@ metadata:
     pod-security.kubernetes.io/warn: privileged
     pod-security.kubernetes.io/warn-version: v1.35
 
-# ===== Baseline audit+warn namespaces (27) =====
+# ===== Baseline namespaces =====
+# enforce=baseline for all except security (audit/warn only, see header).
 
 # --- Bootstrap (3; kube-system is privileged above) ---
 
@@ -99,6 +101,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -111,6 +115,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -123,6 +129,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -138,6 +146,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -150,6 +160,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -162,6 +174,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -174,6 +188,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -186,6 +202,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -198,6 +216,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -210,6 +230,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -222,6 +244,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -234,6 +258,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -246,6 +272,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -258,6 +286,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -270,6 +300,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -282,6 +314,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -294,6 +328,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -318,6 +354,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -330,6 +368,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -342,6 +382,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -354,6 +396,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -366,6 +410,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -378,6 +424,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
@@ -390,6 +438,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
