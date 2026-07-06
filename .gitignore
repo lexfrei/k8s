@@ -8,6 +8,9 @@ secrets/*
 recovery-bao.txt
 secrets-backup-*/
 
+# Ansible vault password provider (reads from macOS keychain; machine-local)
+ansible/.vault_pass
+
 # Claude Code session state
 .claude/scheduled_tasks.lock
 .claude/worktrees/
