@@ -4,10 +4,9 @@
 #   - privileged (5): infra with host access (CNI, storage, node/ipmi
 #     exporters, tunnel) — cannot be constrained.
 #   - restricted (22): workloads that pass the restricted profile.
-#   - baseline (2): hermes and obico — root images (s6-overlay init /
-#     CUDA ml-api) that cannot currently meet runAsNonRoot.
-#   - security: audit/warn = baseline only, no enforce — openbao-0 runs with
-#     Unconfined AppArmor (baseline forbids it); enforce once that is fixed.
+#   - baseline (3): hermes, obico (root images — s6-overlay init / CUDA
+#     ml-api, can't meet runAsNonRoot) and security (authelia + lldap run
+#     as root; openbao now uses the runtime-default AppArmor profile).
 #
 # Every Namespace carries argocd.argoproj.io/sync-options: Delete=false
 # so that removing a line from this file never deletes the live namespace
@@ -343,6 +342,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
   labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: v1.35
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: v1.35
     pod-security.kubernetes.io/warn: baseline
