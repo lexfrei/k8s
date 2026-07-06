@@ -60,6 +60,16 @@
             "matchStrings": [
                 "#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)(?:\\s+versioning=(?<versioning>[^\\s]+))?\\n\\s*tag:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
             ]
+        },
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/\\.yaml$/"
+            ],
+            "matchStrings": [
+                "imageName:\\s*(?<depName>[^\\s:]+):(?<currentValue>[^\\s\"]+)"
+            ],
+            "datasourceTemplate": "docker"
         }
     ],
     "automerge": true,
