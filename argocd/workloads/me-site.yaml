@@ -12,7 +12,7 @@ spec:
   sources:
     - chart: me-site
       repoURL: ghcr.io/lexfrei/charts
-      targetRevision: 0.5.1
+      targetRevision: 0.6.0
       helm:
         valuesObject:
           image:
