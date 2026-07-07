@@ -16,9 +16,28 @@ spec:
       chart: zfs-localpv
       helm:
         valuesObject:
+          # Resources for the node/controller openebs-zfs-plugin containers.
+          # No CPU limit (avoid throttling CSI ops); memory limits are
+          # generous over observed usage (node ~52Mi, controller ~13Mi).
+          # NOTE: this chart only exposes one resources block per pod, so the
+          # CSI sidecars (provisioner/resizer/snapshotter/registrar) cannot be
+          # sized individually here — they remain requests/limits-less.
           zfsNode:
             tolerations:
               - operator: Exists
+            resources:
+              requests:
+                cpu: 25m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+          zfsController:
+            resources:
+              requests:
+                cpu: 25m
+                memory: 64Mi
+              limits:
+                memory: 192Mi
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/openebs-zfs

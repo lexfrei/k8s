@@ -17,6 +17,14 @@ spec:
       helm:
         valuesObject:
           logLevel: info
+          # No CPU limit (avoid throttling); memory limit is generous over
+          # observed steady-state (~32Mi) so a resync spike cannot OOM it.
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 192Mi
           provider:
             name: cloudflare
           policy: sync

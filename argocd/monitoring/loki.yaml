@@ -139,6 +139,16 @@ spec:
               enabled: false
           test:
             enabled: false
+          # The rules sidecar (loki-sc-rules) shipped with no resources at
+          # all. Observed steady-state ~75Mi; no CPU limit (avoid throttling),
+          # memory limit gives generous headroom.
+          sidecar:
+            resources:
+              requests:
+                cpu: 25m
+                memory: 96Mi
+              limits:
+                memory: 256Mi
     - repoURL: https://github.com/lexfrei/k8s.git
       targetRevision: HEAD
       path: manifests/loki

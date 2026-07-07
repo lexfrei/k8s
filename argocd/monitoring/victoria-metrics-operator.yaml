@@ -16,14 +16,17 @@ spec:
     chart: victoria-metrics-operator
     helm:
       valuesObject:
-        operator:
-          resources:
-            requests:
-              cpu: 50m
-              memory: 100Mi
-            limits:
-              cpu: 200m
-              memory: 200Mi
+        # Chart 0.65.x reads the operator deployment's resources from the
+        # top-level `resources:` key. The previous `operator.resources` was
+        # silently ignored, so the rendered pod had no resources at all.
+        # No CPU limit (avoid throttling); memory limit gives generous
+        # headroom over observed steady-state usage (~45Mi).
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
   syncPolicy:
     automated:
       prune: true

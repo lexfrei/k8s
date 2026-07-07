@@ -16,12 +16,27 @@ spec:
       chart: external-dns
       helm:
         valuesObject:
+          # external-dns main container. No CPU limit (avoid throttling);
+          # memory limit generous over observed steady-state (~17Mi).
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 192Mi
           provider:
             name: webhook
             webhook:
               image:
                 repository: ghcr.io/lexfrei/external-dns-unifios-webhook
                 tag: "0.2.0"
+              # unifios webhook sidecar. Observed steady-state ~37Mi.
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 64Mi
+                limits:
+                  memory: 192Mi
               env:
                 - name: WEBHOOK_UNIFI_API_KEY
                   valueFrom:

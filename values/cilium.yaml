@@ -65,6 +65,17 @@ bpf:
 l2NeighDiscovery:
   enabled: true
 
+# cilium-agent (DaemonSet) resources. Memory REQUEST only, deliberately
+# NO memory limit: agent memory scales with endpoints/policy/BPF maps and
+# a hard limit risks an OOMKill of the datapath (Cilium's own guidance).
+# The request (generous over observed ~251Mi) lifts it out of BestEffort
+# so the kubelet ranks it below disposable workloads under MemoryPressure.
+# CPU request only (no limit → no throttling of the datapath).
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
 # Operator configuration
 operator:
   replicas: 1

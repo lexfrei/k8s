@@ -35,6 +35,19 @@ spec:
                 cpu: 500m
                 memory: 512Mi
 
+            # Liveness only catches a truly hung process. sealedcode/uninitcode
+            # are forced to 200 so a (transient, auto-unsealed) sealed state is
+            # NOT treated as failure — a misread here would restart-loop the
+            # single secrets backend for the whole cluster. Generous delay +
+            # failureThreshold=5 (50s) avoids restarts on brief stalls.
+            livenessProbe:
+              enabled: true
+              path: "/v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200"
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              timeoutSeconds: 5
+              failureThreshold: 5
+
             standalone:
               enabled: true
               config: |
