@@ -43,6 +43,15 @@ spec:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
+          # TCP liveness catches the HTTP server dying while PID 1 (a wrapper)
+          # stays up. Generous thresholds avoid false restarts on brief hangs.
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
           volumeMounts:
             - name: session
               mountPath: /home/nobody/.mcp-lostfilm

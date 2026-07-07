@@ -30,6 +30,20 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+          # TCP probes: MCP HTTP surface requires auth, so a plain httpGet
+          # would 401. TCP confirms the server is accepting connections.
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
           resources:
             requests:
               cpu: 50m
