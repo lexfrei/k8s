@@ -1,0 +1,98 @@
+---
+# OS-level hardening for the storage node, derived from a Lynis audit
+# (hardening index 66/100). Only the items verified SAFE for a single-node
+# k3s + Cilium + ZFS host are applied here; each is idempotent.
+#
+# What this does:
+#   1. Masks rpcbind (socket + service). NFS is unused on this node
+#      (no mounts, no nfs-kernel-server); rpcbind is only pulled in by
+#      nfs-common and needlessly listens on 0.0.0.0:111 (tcp+udp, v4+v6).
+#   2. sshd hardening drop-in (/etc/ssh/sshd_config.d/10-hardening.conf):
+#      disables X11 / agent / TCP forwarding (headless node, access is via
+#      the Cloudflare tunnel which needs none of them) and tightens
+#      MaxAuthTries / MaxSessions. The base config is already key-only
+#      (PasswordAuthentication no, PermitRootLogin prohibit-password) and is
+#      intentionally left untouched. The full config is validated with
+#      `sshd -t` before sshd is *reloaded* (never restarted) so the live
+#      connection — and the tunnel riding it — is not dropped.
+#   3. sysctl drop-in (/etc/sysctl.d/90-hardening.conf):
+#      fs.suid_dumpable=0 (no core dumps from setuid binaries) and
+#      fs.protected_fifos=2 (FIFO protection in world-writable dirs).
+#
+# Deliberately NOT applied (would break k3s / Cilium / ZFS / boot) — do not
+# add these no matter what a future audit suggests:
+#   - net.ipv4.conf.all.forwarding=0    -> k8s needs IP forwarding
+#   - net.ipv4.conf.all.rp_filter=1     -> Cilium sets 0; strict drops pods
+#   - kernel.modules_disabled=1         -> blocks ZFS/bpf module loads
+#   - net.core.bpf_jit_harden=2         -> overhead on Cilium eBPF datapath
+#   - usb_storage blacklist             -> node boots via a USB->GRUB chain
+#   - ufw / host firewall               -> clashes with k3s/Cilium iptables
+#
+# IMPORTANT: re-run after a node rebuild / reimage — the sshd and sysctl
+# drop-ins live under /etc and the rpcbind mask are all node-local state
+# that a fresh OS install would not carry over.
+#
+# Usage:
+#   ansible-playbook playbooks/harden-node.yaml
+
+- name: Harden storage node OS configuration
+  hosts: server
+  become: true
+  tags:
+    - hardening
+    - node
+
+  handlers:
+    - name: Reload sshd
+      ansible.builtin.systemd_service:
+        name: ssh
+        state: reloaded
+
+  tasks:
+    # --- 1. rpcbind: dead attack surface, NFS is unused ------------------
+    - name: Mask and stop rpcbind (NFS unused)
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: false
+        masked: true
+      loop:
+        - rpcbind.socket
+        - rpcbind.service
+
+    # --- 2. sshd hardening drop-in --------------------------------------
+    - name: Write sshd hardening drop-in
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/10-hardening.conf
+        owner: root
+        group: root
+        mode: "0644"
+        backup: true
+        content: |
+          # Managed by ansible/playbooks/harden-node.yaml — do not edit by hand.
+          # Base config stays key-only (PasswordAuthentication no,
+          # PermitRootLogin prohibit-password); only the extras below are set.
+          X11Forwarding no
+          AllowAgentForwarding no
+          AllowTcpForwarding no
+          MaxAuthTries 4
+          MaxSessions 4
+      notify: Reload sshd
+
+    - name: Validate full sshd configuration
+      ansible.builtin.command:
+        cmd: /usr/sbin/sshd -t
+      changed_when: false
+
+    # --- 3. sysctl hardening drop-in ------------------------------------
+    - name: Apply hardening sysctl values
+      ansible.posix.sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        sysctl_file: /etc/sysctl.d/90-hardening.conf
+        sysctl_set: true
+        reload: true
+        state: present
+      loop:
+        - { name: fs.suid_dumpable, value: "0" }
+        - { name: fs.protected_fifos, value: "2" }
