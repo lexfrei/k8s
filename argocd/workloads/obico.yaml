@@ -33,6 +33,19 @@ spec:
             passwordSecretKey: password
           mlApi:
             enabled: true
+          tasks:
+            # The post-print compile_timelapse task runs ffmpeg/libx264 on the
+            # collected 720p detection frames; at the chart-default 512Mi limit
+            # the encoder is OOM-killed (SIGKILL) on every compile, so prints
+            # never get their server-side timelapse. CPU raised alongside so
+            # the encode is not throttled into minutes.
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "2Gi"
+                cpu: "1"
           persistence:
             data:
               storageClassName: zfs-localpv
