@@ -11,11 +11,22 @@ spec:
     namespace: obico
     server: "https://kubernetes.default.svc"
   sources:
-    - chart: obico
-      repoURL: ghcr.io/lexfrei/charts
-      targetRevision: 0.2.1
+    # Upstream chart, contributed from lexfrei/charts and now maintained in the
+    # obico-server repo. It is not published to any Helm registry, so consume it
+    # straight from git; "release" is the deploy branch the images are built from.
+    - repoURL: https://github.com/TheSpaghettiDetective/obico-server.git
+      targetRevision: release
+      path: charts/obico
       helm:
         valuesObject:
+          image:
+            # The chart defaults to the moving "release" tag; pin the CalVer the
+            # build-images workflow published so upgrades are deliberate.
+            web:
+              tag: "2026.7.9"
+            mlApi:
+              cpu:
+                tag: "2026.7.9"
           obico:
             siteUsesHttps: true
             existingSecret: obico-secrets
