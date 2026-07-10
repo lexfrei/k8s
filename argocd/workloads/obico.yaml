@@ -50,8 +50,9 @@ spec:
             data:
               storageClassName: zfs-localpv
             media:
-              storageClassName: zfs-localpv
-              size: 20Gi
+              # Static ZFS dataset (pool/obico-media) so Samba can export the
+              # timelapses from the host; PV/PVC in manifests/obico/media-pv.yaml.
+              existingClaim: obico-media-static
           httpRoute:
             enabled: true
             parentRefs:

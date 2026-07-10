@@ -1,6 +1,6 @@
 ---
 # Deploy Samba file server with Avahi mDNS on storage nodes
-# Shares: TimeMachine, Lex, Dump, Transmission (per-user)
+# Shares: TimeMachine (per-user), Lex, Dump, Music, Transmission, Timelapses
 #
 # After deployment, set passwords imperatively:
 #   ssh ansible@172.16.101.4

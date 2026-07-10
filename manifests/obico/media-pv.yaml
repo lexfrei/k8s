@@ -1,0 +1,45 @@
+# Obico media on a static ZFS dataset (pool/obico-media) instead of a
+# dynamic zfs-localpv volume. Two reasons:
+#   - the dataset has a stable host mountpoint (/pool/obico-media), so Samba
+#     can export the timelapses directly ([Timelapses] share in smb.conf);
+#   - the data survives PVC deletion and cluster resets (same pattern as
+#     pool/transmission).
+# The dataset itself is created by ansible/playbooks/zfs.yaml.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zfs-obico-media
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef:
+    namespace: obico
+    name: obico-media-static
+  local:
+    path: /pool/obico-media
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k8s-storage-01
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: obico-media-static
+  namespace: obico
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 20Gi
+  volumeName: zfs-obico-media

@@ -46,6 +46,14 @@
           # asserted here for reproducibility.
           recordsize: 1M
 
+    - name: Configure pool/obico-media properties
+      community.general.zfs:
+        name: pool/obico-media
+        state: present
+        extra_zfs_properties:
+          atime: "off"
+          xattr: sa
+
     - name: Configure pool/dump properties
       community.general.zfs:
         name: pool/dump
