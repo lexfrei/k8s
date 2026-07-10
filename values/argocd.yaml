@@ -84,6 +84,12 @@ repoServer:
   env:
     - name: GOMEMLIMIT
       value: "400MiB"
+    # The obico-server repo is ~300MB (built frontend bundles are checked into
+    # the release branch); the initial clone cannot finish within the default
+    # 90s exec timeout, and a timeout-killed fetch leaves tmp_pack garbage
+    # behind (argo-cd#18831), so give git enough time to finish.
+    - name: ARGOCD_EXEC_TIMEOUT
+      value: "5m"
 server:
   replicas: 1
   pdb:
