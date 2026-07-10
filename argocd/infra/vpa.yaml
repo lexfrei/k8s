@@ -19,23 +19,13 @@ spec:
           serviceMonitor:
             enabled: true
           recommender:
-            extraArgs:
-              # Seed the usage histogram from VictoriaMetrics so recommendations
-              # survive recommender restarts and are useful immediately instead
-              # of after days of in-memory accumulation.
-              - --storage=prometheus
-              - --prometheus-address=http://vmsingle-vmsingle.monitoring.svc:8429
-              - --prometheus-cadvisor-job-name=monitoring/kubelet-cadvisor
-              # 8d/15m returned ~11M datapoints and blew through vmsingle's
-              # per-query memory budget (422: not enough memory), leaving the
-              # recommender with no history at all. 2d/30m fits comfortably and
-              # still covers most of the histogram weight given the 24h decay
-              # half-life.
-              - --history-length=2d
-              - --history-resolution=30m
-              - --container-pod-name-label=pod
-              - --container-name-label=container
-              - --container-namespace-label=namespace
+            # History persistence relies on the default checkpoint mechanism
+            # (VerticalPodAutoscalerCheckpoint objects). --storage=prometheus is
+            # unusable in VPA 1.7.0: the release ships with the history metric
+            # names unwired (kubernetes/autoscaler#9747), so the query goes out
+            # without a metric name and any backend rejects it with duplicate
+            # series. Fixed upstream for 1.7.1; not worth restoring even then —
+            # checkpoints survive restarts without an external dependency.
             resources:
               requests:
                 cpu: 50m
