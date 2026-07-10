@@ -49,14 +49,26 @@ spec:
             # collected 720p detection frames; at the chart-default 512Mi limit
             # the encoder is OOM-killed (SIGKILL) on every compile, so prints
             # never get their server-side timelapse. CPU raised alongside so
-            # the encode is not throttled into minutes.
+            # the encode is not throttled into minutes. Request matches the
+            # observed steady state (~700Mi VPA target); VPA scales limits
+            # proportionally to the limit/request ratio, so keep it modest.
             resources:
               requests:
-                memory: "256Mi"
+                memory: "512Mi"
                 cpu: "100m"
               limits:
                 memory: "2Gi"
                 cpu: "1"
+          redis:
+            # Observed usage sits flat at ~250Mi — right at the chart-default
+            # 256Mi limit, so give it real headroom.
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "50m"
+              limits:
+                memory: "512Mi"
+                cpu: "200m"
           persistence:
             data:
               storageClassName: zfs-localpv
