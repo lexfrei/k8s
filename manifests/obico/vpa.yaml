@@ -1,0 +1,73 @@
+# Vertical Pod Autoscaler policies for the obico workloads.
+#
+# All deployments here are single-replica, and the updater's global
+# --min-replicas default of 2 would silently block any actuation, so every
+# policy sets updatePolicy.minReplicas: 1. InPlaceOrRecreate resizes pods
+# without a restart when the kubelet allows it and falls back to eviction
+# otherwise (requires k8s 1.33+; in-place resize is GA since 1.35).
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: obico-web
+  namespace: obico
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: obico-web
+  updatePolicy:
+    updateMode: InPlaceOrRecreate
+    minReplicas: 1
+  resourcePolicy:
+    containerPolicies:
+      # The tasks container runs the post-print compile_timelapse ffmpeg
+      # encode — a short, rare burst that the usage histogram barely sees.
+      # Its request:limit ratio is 256Mi:2Gi / 100m:1, deliberately wide so
+      # the encode survives; VPA scales limits proportionally to requests,
+      # so pinning minAllowed at the current requests keeps the limits from
+      # ever dropping below 2Gi / 1 CPU (the OOM fix would be undone
+      # otherwise).
+      - containerName: tasks
+        minAllowed:
+          cpu: 100m
+          memory: 256Mi
+      - containerName: server
+        minAllowed:
+          cpu: 50m
+          memory: 256Mi
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: obico-ml-api
+  namespace: obico
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: obico-ml-api
+  updatePolicy:
+    updateMode: InPlaceOrRecreate
+    minReplicas: 1
+  resourcePolicy:
+    containerPolicies:
+      # Inference bursts only while a print is being watched; keep enough
+      # floor that the model can always load.
+      - containerName: ml-api
+        minAllowed:
+          cpu: 100m
+          memory: 512Mi
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: obico-redis
+  namespace: obico
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: obico-redis
+  updatePolicy:
+    updateMode: InPlaceOrRecreate
+    minReplicas: 1

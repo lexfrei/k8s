@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vpa
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  destination:
+    namespace: vpa-system
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "ghcr.io/stevehipwell/helm-charts"
+      targetRevision: "1.12.0"
+      chart: vertical-pod-autoscaler
+      helm:
+        valuesObject:
+          serviceMonitor:
+            enabled: true
+          recommender:
+            extraArgs:
+              # Seed the usage histogram from VictoriaMetrics so recommendations
+              # survive recommender restarts and are useful immediately instead
+              # of after days of in-memory accumulation.
+              - --storage=prometheus
+              - --prometheus-address=http://vmsingle-vmsingle.monitoring.svc:8429
+              - --prometheus-cadvisor-job-name=monitoring/kubelet-cadvisor
+              - --history-length=8d
+              - --history-resolution=15m
+              - --container-pod-name-label=pod
+              - --container-name-label=container
+              - --container-namespace-label=namespace
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 512Mi
+          updater:
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 256Mi
+          admissionController:
+            resources:
+              requests:
+                cpu: 25m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
