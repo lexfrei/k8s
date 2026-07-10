@@ -26,8 +26,13 @@ spec:
               - --storage=prometheus
               - --prometheus-address=http://vmsingle-vmsingle.monitoring.svc:8429
               - --prometheus-cadvisor-job-name=monitoring/kubelet-cadvisor
-              - --history-length=8d
-              - --history-resolution=15m
+              # 8d/15m returned ~11M datapoints and blew through vmsingle's
+              # per-query memory budget (422: not enough memory), leaving the
+              # recommender with no history at all. 2d/30m fits comfortably and
+              # still covers most of the histogram weight given the 24h decay
+              # half-life.
+              - --history-length=2d
+              - --history-resolution=30m
               - --container-pod-name-label=pod
               - --container-name-label=container
               - --container-namespace-label=namespace
