@@ -11,25 +11,15 @@ spec:
     namespace: obico
     server: "https://kubernetes.default.svc"
   sources:
-    # Upstream chart, contributed from lexfrei/charts and now maintained in the
-    # obico-server repo. It is not published to any Helm registry, and the
-    # obico-server repo itself is too heavy for ArgoCD to clone (built frontend
-    # bundles are checked into its history; a full fetch exceeds any sane git
-    # timeout), so the chart is vendored byte-for-byte into charts/obico.
-    # Vendored from obico-server @ 2a405848; re-vendor to pick up chart changes.
-    - repoURL: https://github.com/lexfrei/k8s.git
-      targetRevision: HEAD
-      path: charts/obico
+    # Upstream chart, consumed as the OCI artifact obico-server publishes on
+    # every release-branch build (cosign-signed; image references are baked in,
+    # pinned to the exact commit the chart was built from — no local image
+    # overrides needed).
+    - chart: obico
+      repoURL: ghcr.io/thespaghettidetective/charts
+      targetRevision: 2026.7.11
       helm:
         valuesObject:
-          image:
-            # The chart defaults to the moving "release" tag; pin the CalVer the
-            # build-images workflow published so upgrades are deliberate.
-            web:
-              tag: "2026.7.9"
-            mlApi:
-              cpu:
-                tag: "2026.7.9"
           obico:
             siteUsesHttps: true
             existingSecret: obico-secrets
