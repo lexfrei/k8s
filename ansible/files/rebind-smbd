@@ -1,0 +1,31 @@
+#!/bin/bash
+# networkd-dispatcher hook: rebind smbd when a LAN uplink gains or changes
+# its address.
+#
+# smbd runs with "bind interfaces only = yes" and binds its listening
+# sockets once, at start, resolving interface names to the IPs present at
+# that moment. It does NOT re-bind when an interface's address changes later
+# (DHCP renew, uplink failover between eno2/ens2) or if it started before the
+# NIC had a routable IP — in which case it sits on loopback only
+# (127.0.0.1:445), unreachable from the LAN. Restart it whenever a real
+# uplink becomes routable so it picks up the current address.
+#
+# Idempotent: only acts when smbd is NOT already listening on a non-loopback
+# address, so repeated routable events do not interrupt active SMB sessions.
+set -eu
+
+# Only react to the physical LAN uplinks; ignore loopback, the Cilium
+# pod-CIDR host interfaces, and other virtual churn.
+case "${IFACE:-}" in
+    eno*|ens*) ;;
+    *) exit 0 ;;
+esac
+
+# Already listening on a routable (non-loopback) address? Nothing to do.
+if ss -H -tln 'sport = :445' | awk '{print $4}' \
+        | grep -qvE '^127\.0\.0\.1:|^\[::1\]:'; then
+    exit 0
+fi
+
+logger -t rebind-smbd "smbd on loopback only after ${IFACE} -> ${STATE:-routable}; restarting to rebind"
+systemctl restart smbd

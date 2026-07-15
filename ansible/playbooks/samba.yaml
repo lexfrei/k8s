@@ -15,10 +15,14 @@
     - samba
 
   handlers:
-    - name: Reload smbd
+    # Restart, not reload: smbd binds its listening sockets at start with
+    # "bind interfaces only = yes" and a SIGHUP reload does NOT re-bind them
+    # when the interface set or an interface address changed. A full restart
+    # is required for smbd to pick up the current NIC addresses.
+    - name: Restart smbd
       ansible.builtin.systemd:
         name: smbd
-        state: reloaded
+        state: restarted
 
     - name: Restart Avahi
       ansible.builtin.systemd:
@@ -45,6 +49,9 @@
         name:
           - samba
           - samba-common-bin
+          # Event-driven rebind of smbd on uplink address changes (see the
+          # networkd-dispatcher hook task below).
+          - networkd-dispatcher
         state: present
         update_cache: true
         cache_valid_time: 3600
@@ -64,7 +71,7 @@
         owner: root
         group: root
       notify:
-        - Reload smbd
+        - Restart smbd
 
     - name: Ensure passdb directory exists
       ansible.builtin.file:
@@ -90,6 +97,39 @@
         name: smbd
         enabled: true
         state: started
+
+    - name: Deploy networkd-dispatcher hook to rebind smbd on address changes
+      ansible.builtin.copy:
+        src: ../files/rebind-smbd
+        dest: /etc/networkd-dispatcher/routable.d/10-rebind-smbd
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Enable and start networkd-dispatcher
+      ansible.builtin.systemd:
+        name: networkd-dispatcher
+        enabled: true
+        state: started
+
+    # smbd binds sockets at start; if it came up before the uplink had a
+    # routable IP (boot race, DHCP-reservation drift, uplink failover) it
+    # sits on loopback only and is unreachable. Heal that state on every
+    # run, idempotently — only restart when no non-loopback listener exists.
+    - name: Check whether smbd is listening on a routable (non-loopback) address
+      ansible.builtin.shell:
+        cmd: >-
+          ss -H -tln 'sport = :445' | awk '{print $4}'
+          | grep -qvE '^127\.0\.0\.1:|^\[::1\]:'
+      register: smbd_lan_bound
+      changed_when: false
+      failed_when: false
+
+    - name: Restart smbd if it is bound to loopback only
+      ansible.builtin.systemd:
+        name: smbd
+        state: restarted
+      when: smbd_lan_bound.rc != 0
 
     - name: Install Avahi daemon
       ansible.builtin.apt:
