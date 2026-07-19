@@ -3,6 +3,7 @@ kind: GrafanaDashboard
 metadata:
   name: truenas-server-overview
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: grafana

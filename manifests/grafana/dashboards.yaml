@@ -3,6 +3,7 @@ kind: GrafanaDashboard
 metadata:
   name: node-exporter-dashboard
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: "grafana"
@@ -13,6 +14,7 @@ kind: GrafanaDashboard
 metadata:
   name: coredns-dashboard
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: "grafana"
@@ -23,6 +25,7 @@ kind: GrafanaDashboard
 metadata:
   name: kube-state-metrics-dashboard
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: "grafana"
@@ -33,6 +36,7 @@ kind: GrafanaDashboard
 metadata:
   name: trivy-operator-dashboard
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: "grafana"
@@ -43,6 +47,7 @@ kind: GrafanaDashboard
 metadata:
   name: kyverno-dashboard
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: "grafana"

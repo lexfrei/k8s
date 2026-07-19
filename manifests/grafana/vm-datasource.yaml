@@ -3,6 +3,7 @@ kind: GrafanaDatasource
 metadata:
   name: victoria-metrics-datasource
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: "grafana"

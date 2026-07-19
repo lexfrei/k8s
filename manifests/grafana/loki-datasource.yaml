@@ -3,6 +3,7 @@ kind: GrafanaDatasource
 metadata:
   name: loki-datasource
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: "grafana"

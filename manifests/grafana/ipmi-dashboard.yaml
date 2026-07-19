@@ -3,6 +3,7 @@ kind: GrafanaDashboard
 metadata:
   name: ipmi-hardware-monitoring
 spec:
+  resyncPeriod: 2m
   instanceSelector:
     matchLabels:
       dashboards: grafana
