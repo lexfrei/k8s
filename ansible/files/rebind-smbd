@@ -1,31 +1,45 @@
 #!/bin/bash
-# networkd-dispatcher hook: rebind smbd when a LAN uplink gains or changes
-# its address.
+# Rebind smbd when a LAN uplink gains or changes its IPv4 address.
 #
-# smbd runs with "bind interfaces only = yes" and binds its listening
-# sockets once, at start, resolving interface names to the IPs present at
-# that moment. It does NOT re-bind when an interface's address changes later
-# (DHCP renew, uplink failover between eno2/ens2) or if it started before the
-# NIC had a routable IP — in which case it sits on loopback only
-# (127.0.0.1:445), unreachable from the LAN. Restart it whenever a real
-# uplink becomes routable so it picks up the current address.
+# smbd runs with "bind interfaces only = yes" and binds its listening sockets
+# once, at start, resolving interface names to the addresses present at that
+# moment. It does NOT re-bind later. Two ways that leaves SMB unreachable:
 #
-# Idempotent: only acts when smbd is NOT already listening on a non-loopback
-# address, so repeated routable events do not interrupt active SMB sessions.
+#   1. smbd starts before the NIC has any address  -> loopback only.
+#   2. smbd starts after SLAAC gave the NIC an IPv6 address but before DHCPv4
+#      handed out the IPv4 one -> binds IPv6 + loopback, never IPv4. Observed
+#      on 2026-07-19: the hook fired 34s into boot, restarted smbd while only
+#      the SLAAC address existed, and SMB stayed dead over IPv4.
+#
+# Hence the health check is specifically "is there a non-loopback IPv4
+# listener on 445", not "is there any non-loopback listener" — an IPv6 bind
+# must not mask a missing IPv4 bind.
+#
+# Runs from two places: networkd-dispatcher hooks (IFACE is set) and a
+# periodic systemd timer (IFACE unset) as a backstop, because event-driven
+# alone already proved able to miss the DHCPv4 arrival.
 set -eu
 
-# Only react to the physical LAN uplinks; ignore loopback, the Cilium
-# pod-CIDR host interfaces, and other virtual churn.
-case "${IFACE:-}" in
-    eno*|ens*) ;;
+# From networkd-dispatcher: only react to physical LAN uplinks, ignore
+# loopback, the Cilium pod-CIDR host interfaces and other virtual churn.
+# From the timer: IFACE is unset, so check unconditionally.
+case "${IFACE-}" in
+    ""|eno*|ens*) ;;
     *) exit 0 ;;
 esac
 
-# Already listening on a routable (non-loopback) address? Nothing to do.
+# smbd already listening on a routable IPv4 address? Nothing to do.
 if ss -H -tln 'sport = :445' | awk '{print $4}' \
-        | grep -qvE '^127\.0\.0\.1:|^\[::1\]:'; then
+        | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:' | grep -qv '^127\.'; then
     exit 0
 fi
 
-logger -t rebind-smbd "smbd on loopback only after ${IFACE} -> ${STATE:-routable}; restarting to rebind"
+# Nothing to bind to yet? Leave smbd alone — restarting now would just
+# reproduce the bad bind and, from the timer, spin in a restart loop.
+if ! ip -4 -brief addr show 2>/dev/null | grep -E '^(eno|ens)' \
+        | grep -qvE '\s(127\.|169\.254\.)'; then
+    exit 0
+fi
+
+logger -t rebind-smbd "smbd has no routable IPv4 listener on 445 (trigger: ${IFACE:-timer}); restarting to rebind"
 systemctl restart smbd

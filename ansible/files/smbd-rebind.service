@@ -1,0 +1,11 @@
+[Unit]
+Description=Ensure smbd is bound to a routable IPv4 address
+# Backstop for the networkd-dispatcher hooks: a DHCPv4 address can arrive
+# after the last network event smbd was restarted on, leaving it bound to
+# SLAAC IPv6 + loopback only and SMB unreachable over IPv4.
+After=network.target smbd.service
+Wants=smbd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/rebind-smbd

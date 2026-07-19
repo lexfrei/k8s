@@ -98,13 +98,41 @@
         enabled: true
         state: started
 
-    - name: Deploy networkd-dispatcher hook to rebind smbd on address changes
+    # smbd binds its sockets once at start and never re-binds. If it starts
+    # before the uplink has an address it sits on loopback; if it starts
+    # after SLAAC but before DHCPv4 it binds IPv6 only and SMB stays dead
+    # over IPv4. The helper below checks specifically for a routable IPv4
+    # listener and restarts smbd when one is missing.
+    - name: Install smbd rebind helper
       ansible.builtin.copy:
         src: ../files/rebind-smbd
-        dest: /etc/networkd-dispatcher/routable.d/10-rebind-smbd
+        dest: /usr/local/sbin/rebind-smbd
         mode: "0755"
         owner: root
         group: root
+
+    - name: Ensure networkd-dispatcher hook directories exist
+      ansible.builtin.file:
+        path: "/etc/networkd-dispatcher/{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      loop:
+        - routable.d
+        - configured.d
+
+    # Both event types: an address can arrive on an interface that is already
+    # routable, which emits "configured" rather than a new "routable".
+    - name: Hook the rebind helper into networkd-dispatcher events
+      ansible.builtin.file:
+        src: /usr/local/sbin/rebind-smbd
+        dest: "/etc/networkd-dispatcher/{{ item }}/10-rebind-smbd"
+        state: link
+        force: true
+      loop:
+        - routable.d
+        - configured.d
 
     - name: Enable and start networkd-dispatcher
       ansible.builtin.systemd:
@@ -112,24 +140,33 @@
         enabled: true
         state: started
 
-    # smbd binds sockets at start; if it came up before the uplink had a
-    # routable IP (boot race, DHCP-reservation drift, uplink failover) it
-    # sits on loopback only and is unreachable. Heal that state on every
-    # run, idempotently — only restart when no non-loopback listener exists.
-    - name: Check whether smbd is listening on a routable (non-loopback) address
-      ansible.builtin.shell:
-        cmd: >-
-          ss -H -tln 'sport = :445' | awk '{print $4}'
-          | grep -qvE '^127\.0\.0\.1:|^\[::1\]:'
-      register: smbd_lan_bound
-      changed_when: false
-      failed_when: false
+    # Backstop: the event-driven path already missed a DHCPv4 arrival once
+    # (2026-07-19), leaving smbd bound to SLAAC IPv6 only.
+    - name: Install smbd rebind backstop units
+      ansible.builtin.copy:
+        src: "../files/{{ item }}"
+        dest: "/etc/systemd/system/{{ item }}"
+        mode: "0644"
+        owner: root
+        group: root
+      loop:
+        - smbd-rebind.service
+        - smbd-rebind.timer
 
-    - name: Restart smbd if it is bound to loopback only
+    - name: Enable and start the smbd rebind timer
       ansible.builtin.systemd:
-        name: smbd
-        state: restarted
-      when: smbd_lan_bound.rc != 0
+        name: smbd-rebind.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    # Heal the current state during the run too, instead of waiting for the
+    # next event or timer tick. The helper is idempotent: it exits without
+    # touching smbd when a routable IPv4 listener already exists.
+    - name: Rebind smbd now if it has no routable IPv4 listener
+      ansible.builtin.command:
+        cmd: /usr/local/sbin/rebind-smbd
+      changed_when: false
 
     - name: Install Avahi daemon
       ansible.builtin.apt:
