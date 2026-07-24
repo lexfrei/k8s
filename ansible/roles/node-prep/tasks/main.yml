@@ -100,6 +100,17 @@
       tags:
         - journald
 
+    - name: Configure netplan uplinks (storage nodes only)
+      ansible.builtin.include_tasks:
+        file: netplan.yml
+        apply:
+          tags:
+            - netplan
+      when: inventory_hostname in groups.get('storage', [])
+      tags:
+        - network
+        - netplan
+
     - name: Configure ZFS (storage nodes only)
       ansible.builtin.include_tasks: zfs.yml
       when: inventory_hostname in groups.get('storage', [])

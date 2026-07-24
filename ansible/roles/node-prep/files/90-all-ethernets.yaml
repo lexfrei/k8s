@@ -1,0 +1,50 @@
+# Uplink configuration for the storage node.
+# Managed by Ansible (ansible/roles/node-prep/tasks/netplan.yml)
+#
+# Interface matching:
+#   Onboard NICs keep stable names (eno1/eno2) and are matched by name.
+#   The SFP+ card is matched by driver plus port suffix instead: predictable
+#   names encode the PCI slot, so the same card is ens2f0 in slot 2 and ens3f0
+#   in slot 3. A plain name entry stops matching after any reseat, leaving the
+#   port unconfigured and down — which is exactly how it failed once already.
+#
+# Route metrics decide which link carries egress when several are up. The 10G
+# port must win. Equal metrics make the default route non-deterministic and can
+# split the node across uplinks — k3s node-ip pinned to the address on one NIC
+# while traffic leaves through another, which breaks the etcd member peer URL.
+network:
+  version: 2
+  ethernets:
+    # HP 560SFP+ (Intel 82599ES, ixgbe) — 10G, primary uplink.
+    sfp10g-p0:
+      match:
+        driver: "ixgbe"
+        name: "*f0"
+      dhcp4: true
+      optional: true
+      dhcp4-overrides:
+        route-metric: 100
+
+    # Second port of the same card, normally unused. Configured anyway so that
+    # plugging a cable in just works instead of silently staying down.
+    sfp10g-p1:
+      match:
+        driver: "ixgbe"
+        name: "*f1"
+      dhcp4: true
+      optional: true
+      dhcp4-overrides:
+        route-metric: 150
+
+    # Onboard Broadcom BCM5720 — 1G, fallback path.
+    eno2:
+      dhcp4: true
+      optional: true
+      dhcp4-overrides:
+        route-metric: 200
+
+    eno1:
+      dhcp4: true
+      optional: true
+      dhcp4-overrides:
+        route-metric: 400

@@ -48,3 +48,10 @@
   ansible.builtin.reboot:
     reboot_timeout: 300
   listen: reboot required
+
+# Run detached: applying netplan can briefly drop the link Ansible is connected
+# over, and a blocking call would then hang until the SSH timeout.
+- name: Apply netplan
+  ansible.builtin.command: systemd-run --unit=netplan-apply-ansible --collect netplan apply
+  changed_when: true
+  listen: Apply netplan

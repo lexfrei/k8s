@@ -1,0 +1,20 @@
+---
+# Netplan uplink configuration (storage nodes)
+#
+# Until now this file lived only on the node and was edited by hand, so a NIC
+# change meant re-deriving the metric layout from memory. See the file itself
+# for why the SFP+ ports are matched by driver rather than by name.
+
+- name: Deploy netplan uplink configuration
+  ansible.builtin.copy:
+    src: 90-all-ethernets.yaml
+    dest: /etc/netplan/90-all-ethernets.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Apply netplan
+
+- name: Validate netplan configuration
+  ansible.builtin.command: netplan generate
+  register: node_prep_netplan_generate
+  changed_when: false
