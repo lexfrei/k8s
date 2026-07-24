@@ -12,14 +12,15 @@ kubeProxyReplacementHealthzBindAddr: "0.0.0.0:10256"
 mtu: 1500
 
 # Devices for BPF attachment and direct routing detection.
-# The node is multi-homed. The 172.16.101.4 reservation currently rides on
-# eno2 (onboard Broadcom 1G) — the active uplink. ens2 is the SFP+ NIC (10G)
-# that was primary until it dropped into firmware flash-recovery (died
-# 2026-06-07, briefly revived 2026-06-26, died again 2026-07-15 after a power
-# blink; not resurrectable by power-cycle or full AC removal — needs reflash
-# or replacement). Both NIC families must carry the BPF datapath and
-# masquerade so whichever uplink is active SNATs pod egress — otherwise
-# upstream DNS/forward traffic from pods times out.
+# The node is multi-homed. The 172.16.101.4 reservation rides on the SFP+ card
+# (Intel 82599ES, ens3f0, 10G) — the primary uplink; the onboard Broadcom 1G
+# ports (eno1/eno2) are the fallback path. The previous SFP+ card died in
+# firmware flash-recovery and its ports vanished from the system, which is why
+# both NIC families stay listed: whichever uplink is active must carry the BPF
+# datapath and masquerade, otherwise pod egress is not SNATed and upstream
+# DNS/forward traffic times out while host egress keeps working.
+# The wildcards also absorb interface renames — predictable names encode the
+# PCI slot, so the same card is ens2f0 in one slot and ens3f0 in another.
 devices: "eno+,ens+"
 
 # Routing configuration
