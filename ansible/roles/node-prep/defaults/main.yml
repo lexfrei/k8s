@@ -16,6 +16,9 @@ node_prep_k8s_packages:
 node_prep_qol_packages:
   - vim                 # Text editor for configuration
   - etcd-client         # etcdctl command-line tool for K3s embedded etcd
+  - iputils-ping        # ping — absent from the minimal Ubuntu server image
+  - iputils-arping      # L2 reachability check when routing is suspect
+  - iperf3              # Throughput testing after NIC or uplink changes
 
 # System utilities
 # Hardware and system monitoring tools
