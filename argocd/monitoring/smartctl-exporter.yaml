@@ -30,6 +30,17 @@ spec:
           # exhaustion and overall device status.
           prometheusRules:
             enabled: true
+            rules:
+              # The system SSD negotiates 3.0 Gb/s against its own 6.0 Gb/s
+              # capability, so this fires permanently. It is a port limit, not
+              # a fault: the drive sits on the onboard Intel C222 controller,
+              # where only the first two ports run at 6 Gb/s, and the remaining
+              # SATA ports are not available for it. The pool disks are on the
+              # HBA deliberately and are not moving to the chipset controller.
+              # No ata errors and no kernel link-speed downgrades accompany it,
+              # so there is nothing here to act on.
+              smartCTLDInterfaceSlow:
+                enabled: false
           nodeSelector:
             kubernetes.io/os: linux
           tolerations:
