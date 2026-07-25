@@ -22,6 +22,15 @@ all:
                   # node PID space (CIS 4.2.13). 16384 is ~15x the observed
                   # peak (~1073) yet far below the 4M node pid_max.
                   - "pod-max-pids=16384"
+                  # Keep 20 dead instances per container instead of the default
+                  # 1, so a crash loop leaves a trail. restartCount is only a
+                  # counter — without this, kubelet's GC reaps every previous
+                  # container within a minute and its log goes with it, leaving
+                  # `kubectl logs --previous` (a boolean, no depth argument) as
+                  # the single step back. Unrelated to containerLogMaxFiles,
+                  # which rotates the log of the LIVE container.
+                  # The flag is marked deprecated upstream but still functional.
+                  - "maximum-dead-containers-per-container=20"
 
         # K3s agent nodes (workers) — none currently
         agent:
