@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: smartctl-exporter
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: monitoring
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://prometheus-community.github.io/helm-charts"
+      targetRevision: "0.17.1"
+      chart: prometheus-smartctl-exporter
+      helm:
+        valuesObject:
+          config:
+            # Every disk except the USB stick, which only chain-loads GRUB and
+            # exposes no SMART data. include and exclude are mutually
+            # exclusive, so listing the exclusion covers future disk swaps
+            # without editing this file.
+            device_exclude: "/dev/sde"
+          serviceMonitor:
+            enabled: true
+            interval: 60s
+            scrapeTimeout: 30s
+          # Ships alerts for media errors, controller warnings, spare
+          # exhaustion and overall device status.
+          prometheusRules:
+            enabled: true
+          nodeSelector:
+            kubernetes.io/os: linux
+          tolerations:
+            - operator: Exists
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
