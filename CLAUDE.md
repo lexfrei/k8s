@@ -96,6 +96,10 @@ The cluster runs on K3s with these core components (in deployment order):
 
 ### Network Configuration
 
+- **Node uplink**: `ens3f0` — HP 560SFP+ (Intel 82599ES, `ixgbe`) in PCI-E Slot 3, 10G, carries the `172.16.101.4` reservation at netplan `route-metric: 100`. Onboard `eno2` (1G) is the fallback at metric 200.
+  - Predictable names encode the PCI slot, so the same card is `ens2f0` in slot 2 and `ens3f0` in slot 3. Netplan (`ansible/roles/node-prep/files/90-all-ethernets.yaml`) matches on driver plus port suffix rather than name so a reseat does not leave the port unconfigured.
+  - Slot 2 is x8 mechanically but **x1 electrically** (PCH root port), which caps a card there at 4 Gb/s. `dmidecode` reports the connector type, not the lane count — check `LnkCap` on the root port.
+  - Changing the active uplink requires three places to agree: k3s `node-ip`, Cilium `devices`, and the netplan metrics. Disagreement breaks either etcd member identity or pod egress masquerading.
 - **extractedprism**: Per-node TCP load balancer on 127.0.0.1:7445, retained for single-CP architecture
   - DaemonSet with hostNetwork, static bootstrap endpoint (172.16.101.4:6443) + dynamic EndpointSlice discovery
   - Cilium k8sServiceHost points to extractedprism (127.0.0.1:7445) instead of direct apiserver IP
