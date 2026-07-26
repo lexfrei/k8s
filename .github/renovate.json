@@ -4,6 +4,7 @@
         ":pinDependencies",
         ":semanticCommits"
     ],
+    "minimumReleaseAgeBehaviour": "timestamp-optional",
     "major": {
         "minimumReleaseAge": "5 days",
         "labels": [
