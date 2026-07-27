@@ -55,6 +55,11 @@ spec:
                 - ALL
             readOnlyRootFilesystem: true
             runAsNonRoot: true
+            # The image sets USER by name (bun); kubelet refuses to start a
+            # runAsNonRoot container it cannot prove is non-root, so the uid
+            # has to be spelled out numerically here.
+            runAsUser: 1000
+            runAsGroup: 1000
           volumeMounts:
             # Bun writes transpiler cache under /tmp; root fs is read-only.
             - name: tmp
