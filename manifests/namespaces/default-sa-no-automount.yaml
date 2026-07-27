@@ -282,3 +282,12 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Delete=false
 automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: cozyboard
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+automountServiceAccountToken: false
