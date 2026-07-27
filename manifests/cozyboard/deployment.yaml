@@ -24,7 +24,7 @@ spec:
         - name: cozyboard
           # Upstream CI publishes only `latest` and `main-<short-sha>` — no
           # semver tags, so renovate cannot track this. Bump by hand.
-          image: ghcr.io/lexfrei/cozyboard:main-250e875
+          image: ghcr.io/lexfrei/cozyboard:main-6ff9ea0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -55,9 +55,8 @@ spec:
                 - ALL
             readOnlyRootFilesystem: true
             runAsNonRoot: true
-            # The image sets USER by name (bun); kubelet refuses to start a
-            # runAsNonRoot container it cannot prove is non-root, so the uid
-            # has to be spelled out numerically here.
+            # The image sets the same uid numerically; stated here too so the
+            # pod does not silently follow a future base-image change.
             runAsUser: 1000
             runAsGroup: 1000
           volumeMounts:
