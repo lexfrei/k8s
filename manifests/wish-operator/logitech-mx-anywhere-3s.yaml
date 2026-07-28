@@ -1,0 +1,20 @@
+apiVersion: wishlist.k8s.lex.la/v1alpha1
+kind: Wish
+metadata:
+  name: logitech-mx-anywhere-3s
+  namespace: wish-operator
+spec:
+  title: "Logitech MX Anywhere 3S Wireless Mouse (Graphite)"
+  imageURL: "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/mx-anywhere-3s/product-gallery/graphite/mx-anywhere-3s-mouse-3qtr-front-graphite.png"
+  officialURL: "https://www.logitech.com/en-us/shop/p/mx-anywhere-3s"
+  purchaseURLs:
+    - "https://www.ozon.ru/product/logitech-mysh-besprovodnaya-logitech-mx-anywhere-3s-chernyy-1736127338/"
+  msrp: "₽ 7000"
+  tags:
+    - electronics
+    - mouse
+    - logitech
+  contextTags:
+    - any-occasion
+  description: "Compact wireless mouse with 8K DPI any-surface tracking, MagSpeed electromagnetic scroll wheel, quiet clicks, and programmable buttons. Bluetooth or Logi Bolt receiver, USB-C charging, pairs with up to three devices."
+  priority: 3
