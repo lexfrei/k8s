@@ -12,35 +12,34 @@
     - zfs
     - packages
 
-- name: Configure ZFS ARC memory limit
+- name: Configure ZFS module parameters
   ansible.builtin.copy:
     dest: /etc/modprobe.d/zfs.conf
     content: |
-      # Ansible managed
-      # Limit ZFS ARC to {{ node_prep_zfs_arc_max_human }} to leave RAM for k8s workloads
-      # Tunable at runtime: echo VALUE > /sys/module/zfs/parameters/zfs_arc_max
-      options zfs zfs_arc_max={{ node_prep_zfs_arc_max }}
+      # Ansible managed — see node_prep_zfs_module_params for the rationale
+      # behind each value. Tunable at runtime without a reboot:
+      #   echo VALUE > /sys/module/zfs/parameters/NAME
+      options zfs {% for name, value in node_prep_zfs_module_params | dictsort %}{{ name }}={{ value }}{{ " " if not loop.last else "" }}{% endfor %}
     owner: root
     group: root
     mode: "0644"
   tags:
     - zfs
 
-- name: Apply ZFS ARC limit at runtime (no reboot needed)
+- name: Apply ZFS module parameters at runtime (no reboot needed)
   ansible.builtin.shell: |
-    if [ -f /sys/module/zfs/parameters/zfs_arc_max ]; then
-      current=$(cat /sys/module/zfs/parameters/zfs_arc_max)
-      if [ "$current" != "{{ node_prep_zfs_arc_max }}" ]; then
-        echo {{ node_prep_zfs_arc_max }} > /sys/module/zfs/parameters/zfs_arc_max
-        echo "changed"
-      else
-        echo "ok"
-      fi
+    param=/sys/module/zfs/parameters/{{ item.key }}
+    if [ ! -f "$param" ]; then
+      echo "skipped (ZFS module not loaded or parameter absent)"
+    elif [ "$(cat "$param")" != "{{ item.value }}" ]; then
+      echo {{ item.value }} > "$param"
+      echo "changed"
     else
-      echo "skipped (ZFS module not loaded)"
+      echo "ok"
     fi
-  register: arc_result
-  changed_when: "'changed' in arc_result.stdout"
+  loop: "{{ node_prep_zfs_module_params | dict2items }}"
+  register: zfs_param_result
+  changed_when: "'changed' in zfs_param_result.stdout"
   tags:
     - zfs
 

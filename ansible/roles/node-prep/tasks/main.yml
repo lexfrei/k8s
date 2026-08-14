@@ -155,7 +155,7 @@
           - Journald set to volatile storage ({{ node_prep_journald_runtime_max_use }})
           {% endif -%}
           {% if inventory_hostname in groups.get('storage', []) -%}
-          - ZFS ARC configured (zfs_arc_max)
+          - ZFS module parameters configured ({{ node_prep_zfs_module_params | length }})
           {% endif -%}
           - k3s IO priority configured (best-effort/0, nice -10)
           {% if inventory_hostname not in groups.get('storage', []) -%}

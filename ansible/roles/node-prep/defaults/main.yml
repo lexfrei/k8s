@@ -105,8 +105,18 @@ node_prep_timezone: "Etc/UTC"
 node_prep_journald_runtime_max_use: "100M"   # Max volatile log size in tmpfs
 
 # ZFS configuration (storage nodes only)
-node_prep_zfs_arc_max: 8589934592            # 8 GB ARC limit
-node_prep_zfs_arc_max_human: "8 GB"          # Human-readable for comments
+# Written to /etc/modprobe.d/zfs.conf and applied under /sys/module/zfs/parameters
+# at runtime, so a change takes effect without a reboot.
+node_prep_zfs_module_params:
+  # Leave RAM for k8s workloads.
+  zfs_arc_max: 8589934592
+  # The pool is raidz1, whose random IOPS equal those of a single member disk —
+  # ~75-100 on 5400rpm drives. At the default queue depth of 10, async writes
+  # (Time Machine sparsebundle) fill the ZIO queue and reads wait behind them:
+  # measured 49-80ms asyncq_wait and 105ms read latency, enough to stall video
+  # playback from the same pool. A shorter queue trades write throughput for
+  # read latency, which is the right trade here.
+  zfs_vdev_async_write_max_active: 2
 
 # System upgrade configuration
 node_prep_system_upgrade_enabled: false      # Upgrade disabled by default (use playbook)
