@@ -74,6 +74,11 @@ server_config_cluster:
   # surviving on disk.
   etcd-snapshot-schedule-cron: "0 */6 * * *"
   etcd-snapshot-retention: 3
+  # Snapshots stay on the ZFS pool while the live database sits on the SSD
+  # (see playbooks/etcd-storage.yaml). The pool survives a single disk
+  # death; the SSD under the database has no power-loss protection, so
+  # keeping both on it would put the backup on the same failure domain.
+  etcd-snapshot-dir: /var/lib/rancher/k3s/server/db-zfs/snapshots
 
 server_config_yaml: "{{ (server_config_cluster | default({}) | combine(server_config_extra | default({}))) | to_nice_yaml }}"
 

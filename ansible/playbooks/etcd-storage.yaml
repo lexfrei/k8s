@@ -1,0 +1,50 @@
+---
+# Keep the live etcd database on the SSD, away from the ZFS pool.
+#
+# etcd needs low fsync latency, not bandwidth. The pool is raidz1 over four
+# 5400rpm disks, so it delivers the random-write IOPS of a single disk. Under
+# a monthly scrub the database answered apply requests in up to 9s, apiserver
+# started returning "http: Handler timeout", the embedded controller-manager
+# lost its leader lock and exited — and in k3s that one process is also the
+# apiserver, scheduler, etcd and kubelet, so the whole node went down.
+#
+# Snapshots deliberately stay on the pool; see etcd-snapshot-dir in
+# inventory/group_vars/k3s_cluster.yaml.
+#
+# Usage:
+#   ansible-playbook playbooks/etcd-storage.yaml
+
+- name: Place the etcd database on dedicated SSD storage
+  hosts: k8s-storage-01
+  become: true
+  tags:
+    - etcd
+
+  vars:
+    etcd_vg: ubuntu-vg
+    etcd_lv: k3s-etcd
+    etcd_size: 10g
+    etcd_mount: /var/lib/rancher/k3s/server/db
+
+  tasks:
+    - name: Create logical volume for the etcd database
+      community.general.lvol:
+        vg: "{{ etcd_vg }}"
+        lv: "{{ etcd_lv }}"
+        size: "{{ etcd_size }}"
+        state: present
+
+    - name: Create filesystem on the etcd volume
+      community.general.filesystem:
+        dev: "/dev/{{ etcd_vg }}/{{ etcd_lv }}"
+        fstype: ext4
+        opts: -L k3s-etcd
+
+    - name: Mount the etcd volume
+      ansible.posix.mount:
+        path: "{{ etcd_mount }}"
+        src: "/dev/{{ etcd_vg }}/{{ etcd_lv }}"
+        fstype: ext4
+        opts: defaults,noatime
+        passno: "2"
+        state: mounted
