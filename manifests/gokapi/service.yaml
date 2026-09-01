@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gokapi
+  namespace: gokapi
+  labels:
+    app: gokapi
+spec:
+  type: ClusterIP
+  ports:
+    - port: 53842
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: gokapi

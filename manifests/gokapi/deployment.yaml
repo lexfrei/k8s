@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gokapi
+  namespace: gokapi
+  labels:
+    app: gokapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gokapi
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: gokapi
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: gokapi
+          # renovate: datasource=docker depName=f0rc3/gokapi
+          image: f0rc3/gokapi:v2.2.4@sha256:43cd93b9e1f02d760923f67f6e74e1c4d4a9cccb9b08fa42ad60770333f231eb
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: Europe/Moscow
+            - name: GOKAPI_CONFIG_DIR
+              value: /app/config
+            - name: GOKAPI_DATA_DIR
+              value: /app/data
+            - name: GOKAPI_LOG_STDOUT
+              value: "true"
+            # Makes Gokapi read CF-Connecting-IP and keeps upload chunks below
+            # Cloudflare's 100 MB request body limit.
+            - name: GOKAPI_USE_CLOUDFLARE
+              value: "true"
+          ports:
+            - containerPort: 53842
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: "2"
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /app/config
+              subPath: config
+            - name: data
+              mountPath: /app/data
+              subPath: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gokapi
