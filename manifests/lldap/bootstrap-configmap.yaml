@@ -12,7 +12,7 @@ data:
   users.json: |
     {
       "id": "lex",
-      "email": "lex@lex.la",
+      "email": "f@lex.la",
       "displayName": "Lex",
       "groups": ["admins", "lldap_admin"]
     }
