@@ -17,6 +17,9 @@ spec:
       labels:
         app: gokapi
     spec:
+      # Kubernetes injects GOKAPI_PORT=tcp://<clusterIP>:53842 for the same-named
+      # Service; Gokapi parses GOKAPI_PORT as an integer port and refuses to start.
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
