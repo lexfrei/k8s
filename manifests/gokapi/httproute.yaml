@@ -3,8 +3,16 @@ kind: HTTPRoute
 metadata:
   name: gokapi
   namespace: gokapi
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
+  # Split horizon: the same hostname resolves to the internal Gateway on the
+  # home network and to the tunnel from anywhere else, so local uploads never
+  # leave the LAN while share links still work for everyone.
   parentRefs:
+    - name: cilium-gateway-internal
+      namespace: kube-system
+      sectionName: https-lex-la
     - name: cloudflare-tunnel
       namespace: cloudflare-tunnel-system
       sectionName: https
