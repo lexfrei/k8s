@@ -30,9 +30,10 @@ spec:
       filters:
         - type: RequestRedirect
           requestRedirect:
-            # Without an explicit scheme the port is taken from the listener
-            # and lands in the Location header as a literal :443.
-            scheme: https
+            # Do not add `scheme: https` here: Cilium reads it as an
+            # HTTP-to-HTTPS redirect and guards the rule with an inverted
+            # X-Forwarded-Proto match, so the redirect never fires behind a
+            # TLS-terminating gateway. It does not remove the :443 either.
             path:
               type: ReplaceFullPath
               replaceFullPath: /admin
