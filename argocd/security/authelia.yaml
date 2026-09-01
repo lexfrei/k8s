@@ -180,6 +180,19 @@ spec:
                       - profile
                       - email
                       - groups
+                  - client_id: gokapi
+                    client_name: Gokapi
+                    client_secret:
+                      path: /secrets/authelia-secrets/GOKAPI_CLIENT_SECRET_HASHED
+                    authorization_policy: two_factor
+                    claims_policy: full_claims
+                    redirect_uris:
+                      - https://share.lex.la/oauth-callback
+                    scopes:
+                      - openid
+                      - profile
+                      - email
+                      - groups
                   - client_id: openbao
                     client_name: OpenBao
                     client_secret:
