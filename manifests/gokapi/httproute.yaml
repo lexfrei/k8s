@@ -19,7 +19,23 @@ spec:
   hostnames:
     - share.lex.la
   rules:
-    - matches:
+    # Gokapi answers / with a meta-refresh to /index, which meta-refreshes on
+    # to the configured redirect target. Sending / straight to /admin collapses
+    # both hops into one 302.
+    - name: root-to-admin
+      matches:
+        - path:
+            type: Exact
+            value: /
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /admin
+            statusCode: 302
+    - name: app
+      matches:
         - path:
             type: PathPrefix
             value: /
