@@ -30,6 +30,9 @@ spec:
       filters:
         - type: RequestRedirect
           requestRedirect:
+            # Without an explicit scheme the port is taken from the listener
+            # and lands in the Location header as a literal :443.
+            scheme: https
             path:
               type: ReplaceFullPath
               replaceFullPath: /admin
