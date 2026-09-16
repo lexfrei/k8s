@@ -11,4 +11,4 @@ collections:
   # Provides roles and playbooks for K3s cluster management
   - name: https://github.com/k3s-io/k3s-ansible.git
     type: git
-    version: 281554e2522ab370014526ad734e0ec53b023e7c.2.0
+    version: 1a600b60d37e0f8a6e2e79b0e474147b5b108ae5.2.0
