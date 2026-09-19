@@ -5,6 +5,7 @@ metadata:
   namespace: cloudflare-tunnel-system
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.kubernetes.io/cloudflare-proxied: "true"
 spec:
   gatewayClassName: cloudflare-tunnel
   # Allow ListenerSets in the same namespace to attach additional listeners

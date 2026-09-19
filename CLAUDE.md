@@ -129,7 +129,7 @@ The cluster runs on K3s with these core components (in deployment order):
   - TLS certificates automatically managed by cert-manager via Gateway API integration
   - Supports wildcard certificates for *.lex.la, *.home.lex.la, *.k8s.home.lex.la, *.sviridk.in
 - **External DNS** automatically creates DNS records from Gateway annotations
-  - Internal Gateway: external-dns.alpha.kubernetes.io/target: "172.16.100.250" (DNS-only)
+  - Internal Gateway: external-dns.kubernetes.io/target: "172.16.100.250" (DNS-only)
   - Public DNS records managed by Cloudflare Tunnel automatically
 - **Cluster domain**: `k8s.home.lex.la` (configured in K3s and CoreDNS)
 - **Hubble**: Enabled for network observability

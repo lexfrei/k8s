@@ -5,6 +5,7 @@ metadata:
   namespace: gokapi
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.kubernetes.io/cloudflare-proxied: "true"
 spec:
   # Split horizon: the same hostname resolves to the internal Gateway on the
   # home network and to the tunnel from anywhere else, so local uploads never
