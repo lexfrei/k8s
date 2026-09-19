@@ -104,7 +104,7 @@ server:
     type: LoadBalancer
     annotations:
       io.cilium/lb-ipam-ips: "172.16.100.254"
-      external-dns.kubernetes.io/hostname: "api.argocd.home.lex.la"
+      internal-dns/hostname: "api.argocd.home.lex.la"
   ingress:
     enabled: false
   httproute:
