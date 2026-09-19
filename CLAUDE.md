@@ -118,7 +118,7 @@ The cluster runs on K3s with these core components (in deployment order):
     - GatewayClass: `cloudflare-tunnel` (managed by cloudflare-tunnel-gateway-controller)
     - Traffic routed through Cloudflare Tunnel (no direct IP/port-forwarding)
     - Tunnel ID: 59db961d-3851-468a-bf80-4d39f942b9e0
-    - Public hostnames: eta.lex.la, job.lex.la, map.lex.la, aleksei.sviridk.in, abs.lex.la, wish.lex.la, test.lex.la, authelia.lex.la
+    - Public hostnames: eta.lex.la, job.lex.la, wish.lex.la, share.lex.la, tools.lex.la (via ListenerSet), wpad.lex.la, authelia.lex.la, aleksei.sviridk.in, board.lexfrei.dev
     - DDoS protection via Cloudflare
   - **Internal Gateway** (cilium-gateway-internal): 172.16.100.250
     - GatewayClass: `cilium` (managed by Cilium)
@@ -128,9 +128,9 @@ The cluster runs on K3s with these core components (in deployment order):
     - Automatic HTTP→HTTPS redirect (301) via dedicated HTTPRoute
   - TLS certificates automatically managed by cert-manager via Gateway API integration
   - Supports wildcard certificates for *.lex.la, *.home.lex.la, *.k8s.home.lex.la, *.sviridk.in
-- **External DNS** automatically creates DNS records from Gateway annotations
-  - Internal Gateway: external-dns.kubernetes.io/target: "172.16.100.250" (DNS-only)
-  - Public DNS records managed by Cloudflare Tunnel automatically
+- **External DNS**: two external-dns instances, both on the upstream chart
+  - `external-dns` (Cloudflare provider, `kube-system`): publishes hostnames of HTTPRoutes attached to the `cloudflare-tunnel` Gateway plus `DNSEndpoint` CRDs; a resource is only picked up when it carries `external-dns.kubernetes.io/cloudflare-proxied: "true"` (the `--annotation-filter`). Since v0.22.0 the annotation prefix is `external-dns.kubernetes.io/` with no fallback to the old alpha prefix
+  - `internal-dns` (UniFi webhook provider, `internal-dns` namespace): publishes records to the UDR7 from `internal-dns/hostname` annotations on HTTPRoutes and Services (`--annotation-prefix=internal-dns/`). Everything else under `*.home.lex.la` falls through to the router wildcard → 172.16.100.250
 - **Cluster domain**: `k8s.home.lex.la` (configured in K3s and CoreDNS)
 - **Hubble**: Enabled for network observability
   - Web UI: https://hubble.home.lex.la (internal Gateway)
