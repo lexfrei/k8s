@@ -46,7 +46,7 @@ spec:
             - crd
           txtOwnerId: cloudflare
           extraArgs:
-            - --annotation-filter=external-dns.alpha.kubernetes.io/cloudflare-proxied
+            - --annotation-filter=external-dns.kubernetes.io/cloudflare-proxied
             - --gateway-namespace=cloudflare-tunnel-system
             # Follow HTTPRoute parentRefs of Kind=ListenerSet to the parent
             # Gateway's status address (Gateway API v1.5.1 ListenerSet, opt-in
