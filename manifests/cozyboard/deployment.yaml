@@ -22,9 +22,7 @@ spec:
     spec:
       containers:
         - name: cozyboard
-          # Upstream CI publishes only `latest` and `main-<short-sha>` — no
-          # semver tags, so renovate cannot track this. Bump by hand.
-          image: ghcr.io/lexfrei/cozyboard:main-6ff9ea0
+          image: ghcr.io/lexfrei/cozyboard:0.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
