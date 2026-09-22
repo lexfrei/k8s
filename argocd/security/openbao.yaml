@@ -48,6 +48,13 @@ spec:
               timeoutSeconds: 5
               failureThreshold: 5
 
+            # The default exec probe spawns a Go process under a stacked
+            # AppArmor label that the containerd profile cannot signal
+            # (k3s-io/k3s#13625); an HTTP probe stays in-process.
+            readinessProbe:
+              enabled: true
+              path: "/v1/sys/health?standbyok=true"
+
             standalone:
               enabled: true
               config: |
