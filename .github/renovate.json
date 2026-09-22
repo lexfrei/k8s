@@ -75,5 +75,8 @@
     ],
     "automerge": true,
     "prHourlyLimit": 5,
-    "prConcurrentLimit": 10
+    "prConcurrentLimit": 10,
+    "ansible-galaxy": {
+        "enabled": false
+    }
 }
