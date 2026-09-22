@@ -44,3 +44,25 @@ spec:
               ({{ $labels.instance }}) has been unreachable for more
               than 1 minute. Possible network failure (macb NIC death)
               or node crash.
+        - alert: NodeMemoryUncorrectableErrors
+          expr: increase(node_edac_uncorrectable_errors_total[1h]) > 0
+          labels:
+            severity: critical
+          annotations:
+            summary: "Uncorrectable ECC error on {{ $labels.instance }}"
+            description: >-
+              EDAC controller {{ $labels.controller }} on {{ $labels.instance }}
+              reported an uncorrectable memory error within the last hour.
+              Expect a panic or silent corruption; replace the DIMM.
+        - alert: NodeMemoryCorrectableErrorsHigh
+          expr: increase(node_edac_correctable_errors_total[24h]) > 10
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "ECC correctable errors accelerating on {{ $labels.instance }}"
+            description: >-
+              EDAC controller {{ $labels.controller }} on {{ $labels.instance }}
+              corrected {{ $value | printf "%.0f" }} memory errors in 24h.
+              A few per day is background; above 10 per day (the mcelog
+              page-offline threshold) a DIMM is degrading.

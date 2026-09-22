@@ -4,7 +4,7 @@ metadata:
   name: vmsingle
   namespace: monitoring
 spec:
-  retentionPeriod: "7d"
+  retentionPeriod: "60d"
   replicaCount: 1
   nodeSelector:
     kubernetes.io/hostname: k8s-storage-01
