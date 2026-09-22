@@ -32,6 +32,10 @@ api_port: 6443
 
 # Custom K3s server arguments
 # These flags match the existing cluster configuration
+# gateway-api-crd: since 1.37 k3s ships the standard-channel Gateway API
+# CRDs as a HelmChart with takeOwnership+forceConflicts, independent of
+# traefik. Left enabled it overwrites the experimental-channel CRDs that
+# ArgoCD manages (Cilium needs those) on every k3s restart.
 extra_server_args: >-
   --disable=traefik
   --disable=local-storage
@@ -39,6 +43,7 @@ extra_server_args: >-
   --disable=metrics-server
   --disable=coredns
   --disable=runtimes
+  --disable=gateway-api-crd
   --cluster-domain=k8s.home.lex.la
   --disable-network-policy
   --disable-kube-proxy
