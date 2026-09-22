@@ -66,3 +66,14 @@ spec:
               corrected {{ $value | printf "%.0f" }} memory errors in 24h.
               A few per day is background; above 10 per day (the mcelog
               page-offline threshold) a DIMM is degrading.
+        - alert: EtcdBackupStale
+          expr: time() - kube_cronjob_status_last_successful_time{cronjob="etcd-backup"} > 2 * 86400
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "etcd backup has not succeeded for 2 days"
+            description: >-
+              CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} last succeeded
+              {{ $value | humanizeDuration }} ago. A pod stuck Pending under
+              concurrencyPolicy Forbid skips every later run without a failed job.
