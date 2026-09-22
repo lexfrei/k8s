@@ -22,6 +22,15 @@ network:
         name: "*f0"
       dhcp4: true
       optional: true
+      # The uplink terminates on the router, so a router reboot is a carrier
+      # loss here. Without these two networkd drops the DHCP lease on the
+      # spot and the node loses its pinned address for the whole reboot;
+      # kubelet fails nodeIP validation and every controller loses its
+      # leader lease. ignore-carrier keeps the configuration across the
+      # carrier loss (IgnoreCarrierLoss), critical keeps the DHCP address
+      # across networkd restarts and lease expiry (KeepConfiguration).
+      ignore-carrier: true
+      critical: true
       dhcp4-overrides:
         route-metric: 100
 
