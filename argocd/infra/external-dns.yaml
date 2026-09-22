@@ -57,7 +57,7 @@ spec:
             # crd source — used by raw-TCP/SSH tunnel records that don't fit
             # gateway-httproute. The chart auto-generates RBAC for
             # externaldns.k8s.io/dnsendpoints when `crd` is in sources; the
-            # CRD itself ships via manifests/external-dns/dnsendpoint-crd.yaml.
+            # CRD itself comes from the chart's crds/ directory.
             - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
             - --crd-source-kind=DNSEndpoint
           env:
