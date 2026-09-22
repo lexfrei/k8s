@@ -31,6 +31,10 @@ all:
                   # which rotates the log of the LIVE container.
                   # The flag is marked deprecated upstream but still functional.
                   - "maximum-dead-containers-per-container=20"
+                  # Pod and container stats from containerd instead of cAdvisor,
+                  # whose ZFS handling has broken /stats/summary before. Beta in
+                  # 1.37, off by default.
+                  - "feature-gates=PodAndContainerStatsFromCRI=true"
 
         # K3s agent nodes (workers) — none currently
         agent:
@@ -39,7 +43,7 @@ all:
       vars:
         # K3s version for upgrades
         # Note: k3s-ansible requires explicit version, cannot use "stable" or "latest"
-        k3s_version: v1.36.3+k3s1
+        k3s_version: v1.37.0+k3s1
 
     # Cross-cutting groups for platform-specific configuration
 
