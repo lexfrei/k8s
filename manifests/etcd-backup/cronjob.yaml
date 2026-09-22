@@ -80,7 +80,7 @@ spec:
           volumes:
             - name: snapshots
               hostPath:
-                path: /var/lib/rancher/k3s/server/db/snapshots
+                path: /var/lib/rancher/k3s/server/db-zfs/snapshots
                 type: Directory
             - name: backup
               persistentVolumeClaim:
