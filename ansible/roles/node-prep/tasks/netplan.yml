@@ -18,3 +18,24 @@
   ansible.builtin.command: netplan generate
   register: node_prep_netplan_generate
   changed_when: false
+
+# netplan 1.2 leaves RequiredForOnline unset for `optional: true` links on
+# the networkd backend, so an unplugged port keeps systemd-networkd-wait-online
+# waiting for its 120 s timeout on every boot and every network-online.target
+# activation. One online link is all this single-uplink node needs.
+- name: Create wait-online drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/systemd-networkd-wait-online.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Make wait-online settle on the first online link
+  ansible.builtin.copy:
+    src: wait-online-any.conf
+    dest: /etc/systemd/system/systemd-networkd-wait-online.service.d/10-any.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload systemd
