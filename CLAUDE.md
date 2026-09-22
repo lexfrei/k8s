@@ -353,7 +353,7 @@ ansible-playbook k3s.orchestration.reboot
 
 **K3s Version:**
 - Defined in `ansible/inventory/production.yaml` → `k3s_version`
-- Renovate auto-updates version via GitHub releases datasource
+- Renovate does not track `k3s_version`; bump it by hand after reading the k3s release notes, including the packaged `manifests/` changes, not only the Kubernetes changelog
 - Collection playbooks use FQCN format: `k3s.orchestration.<playbook>`
 
 **Collection Installation:**
