@@ -14,6 +14,25 @@
     mode: "0600"
   notify: Apply netplan
 
+# The installer-generated file still names ens1, a port that no longer
+# exists, and renders the same route metric as the primary uplink.
+- name: Stop cloud-init from regenerating network config
+  ansible.builtin.copy:
+    dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    content: "network: {config: disabled}\n"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Remove stale netplan files
+  ansible.builtin.file:
+    path: "/etc/netplan/{{ item }}"
+    state: absent
+  loop:
+    - 50-cloud-init.yaml
+    - 90-all-ethernets.yaml.bak-preswap
+  notify: Apply netplan
+
 - name: Validate netplan configuration
   ansible.builtin.command: netplan generate
   register: node_prep_netplan_generate
