@@ -1,0 +1,25 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: snmp-udr7
+  namespace: monitoring
+spec:
+  jobName: snmp-udr7
+  targetEndpoints:
+    - targets:
+        - 172.16.0.1
+      path: /snmp
+      interval: 30s
+      scrapeTimeout: 20s
+      params:
+        module:
+          - if_mib,system,ucd_la_table,ucd_memory
+        auth:
+          - udr7
+      relabelConfigs:
+        - sourceLabels: [__address__]
+          targetLabel: __param_target
+        - sourceLabels: [__param_target]
+          targetLabel: instance
+        - targetLabel: __address__
+          replacement: snmp-exporter-prometheus-snmp-exporter.monitoring.svc:9116

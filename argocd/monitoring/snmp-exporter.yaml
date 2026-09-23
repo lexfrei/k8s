@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: snmp-exporter
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: monitoring
+  destination:
+    namespace: monitoring
+    server: "https://kubernetes.default.svc"
+  sources:
+    - repoURL: "https://prometheus-community.github.io/helm-charts"
+      targetRevision: "9.18.0"
+      chart: prometheus-snmp-exporter
+      helm:
+        valuesObject:
+          # Setting args drops the image CMD, so the bundled module file has
+          # to be listed explicitly next to the auth file.
+          extraArgs:
+            - --config.file=/etc/snmp_exporter/snmp.yml
+            - --config.file=/etc/snmp_exporter/auth/auth.yml
+          extraSecretMounts:
+            - name: auth
+              mountPath: /etc/snmp_exporter/auth
+              secretName: snmp-exporter-auth
+              readOnly: true
+              defaultMode: 0440
+          containerSecurityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          securityContext:
+            fsGroup: 1000
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+    - repoURL: https://github.com/lexfrei/k8s.git
+      targetRevision: HEAD
+      path: manifests/snmp-exporter
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
