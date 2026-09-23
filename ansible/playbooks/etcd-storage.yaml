@@ -40,11 +40,33 @@
         fstype: ext4
         opts: -L k3s-etcd
 
+    # The mount point sits inside the pool/k3s/server dataset. Without the
+    # ordering, systemd mounts the volume onto the root filesystem first,
+    # then zfs-mount (overlay=on) hides it, and k3s starts a brand-new
+    # empty cluster in the bare directory.
     - name: Mount the etcd volume
       ansible.posix.mount:
         path: "{{ etcd_mount }}"
         src: "/dev/{{ etcd_vg }}/{{ etcd_lv }}"
         fstype: ext4
-        opts: defaults,noatime
+        opts: defaults,noatime,x-systemd.requires=zfs-mount.service
         passno: "2"
         state: mounted
+
+    # The mount unit stays "active" even while shadowed, so RequiresMountsFor
+    # would not catch that case; mountpoint checks what the path resolves to.
+    - name: Refuse to start k3s without the etcd volume in place
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/k3s.service.d/etcd-mount.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Service]
+          ExecStartPre=/usr/bin/mountpoint -q {{ etcd_mount }}
+      notify: Reload systemd
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
