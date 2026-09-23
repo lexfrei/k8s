@@ -1,0 +1,23 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMProbe
+metadata:
+  name: wan-icmp
+  namespace: monitoring
+spec:
+  jobName: wan-icmp
+  interval: 15s
+  scrapeTimeout: 10s
+  module: icmp
+  vmProberSpec:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc:9115
+  targets:
+    staticConfig:
+      # LAN gateway, then the PPPoE peer, then two public anycast resolvers:
+      # the first failing hop tells whether the loss is local, on the
+      # access link, or further upstream. The peer address is whatever the
+      # BRAS hands out in IPCP and may change after a reconnect.
+      targets:
+        - 172.16.0.1
+        - 80.249.192.1
+        - 1.1.1.1
+        - 8.8.8.8
