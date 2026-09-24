@@ -34,26 +34,33 @@ network:
       dhcp4-overrides:
         route-metric: 100
 
-    # Second port of the same card, normally unused. Configured anyway so that
-    # plugging a cable in just works instead of silently staying down.
+    # The remaining ports are cabled to a test router on the bench (its LAN,
+    # WAN and SFP cage). The router runs its own DHCP server and sends RAs,
+    # so DHCP here handed the node a second default route into the test
+    # network after every reboot. Links stay up with IPv6 link-local only:
+    # that is how the bench board is reached when its uplink is down, and
+    # it adds no route.
     sfp10g-p1:
       match:
         driver: "ixgbe"
         name: "*f1"
-      dhcp4: true
+      dhcp4: false
+      dhcp6: false
+      accept-ra: false
+      link-local: [ipv6]
       optional: true
-      dhcp4-overrides:
-        route-metric: 150
 
-    # Onboard Broadcom BCM5720 — 1G, fallback path.
+    # Onboard Broadcom BCM5720 — 1G, bench ports as above.
     eno2:
-      dhcp4: true
+      dhcp4: false
+      dhcp6: false
+      accept-ra: false
+      link-local: [ipv6]
       optional: true
-      dhcp4-overrides:
-        route-metric: 200
 
     eno1:
-      dhcp4: true
+      dhcp4: false
+      dhcp6: false
+      accept-ra: false
+      link-local: [ipv6]
       optional: true
-      dhcp4-overrides:
-        route-metric: 400
