@@ -11,12 +11,16 @@ spec:
     namespace: cloudflare-tunnel-system
     server: "https://kubernetes.default.svc"
   sources:
-    # renovate: datasource=docker depName=ghcr.io/lexfrei/charts/cloudflare-tunnel-gateway-controller
+    # TEMPORARY v5.0.0 release candidate (PR #989 build of 201257db).
+    # Revert to the ghcr.io/lexfrei/charts release once v5.0.0 is tagged.
     - chart: cloudflare-tunnel-gateway-controller
-      repoURL: ghcr.io/lexfrei/charts
-      targetRevision: 4.0.0
+      repoURL: ttl.sh
+      targetRevision: 0.0.0-pr.989-1d
       helm:
         valuesObject:
+          image:
+            repository: ttl.sh/cf-tunnel-gateway-ctrl
+            digest: sha256:5b3d275e303b5d55445e73df15205df74b04207f2febe7ac6f30ac42f8822cae
           controller:
             clusterDomain: "k8s.home.lex.la"
           gatewayClassConfig:
@@ -25,6 +29,9 @@ spec:
             cloudflareCredentialsSecretRef:
               name: "cloudflare-credentials"
           proxy:
+            image:
+              repository: ttl.sh/cf-tunnel-gateway-proxy
+              digest: sha256:519225053525f374c0fdac57e295ee20ff26c6db3dfbfaa418e75f7c0e118472
             tunnelTokenSecretRef:
               name: "cloudflare-tunnel-token"
     - path: manifests/cloudflare-tunnel-gateway-controller
