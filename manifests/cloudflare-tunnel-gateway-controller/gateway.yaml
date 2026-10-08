@@ -32,6 +32,11 @@ kind: ListenerSet
 metadata:
   name: it-tools-listenerset
   namespace: cloudflare-tunnel-system
+  # external-dns v0.23.0 applies --annotation-filter to ListenerSets too
+  # (kubernetes-sigs/external-dns#6788); without it the attached HTTPRoute
+  # loses its parent and policy=sync deletes the DNS records.
+  annotations:
+    external-dns.kubernetes.io/cloudflare-proxied: "true"
 spec:
   parentRef:
     group: gateway.networking.k8s.io
