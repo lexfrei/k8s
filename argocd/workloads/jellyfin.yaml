@@ -13,7 +13,7 @@ spec:
   sources:
     - chart: jellyfin
       repoURL: https://jellyfin.github.io/jellyfin-helm
-      targetRevision: 3.4.0
+      targetRevision: 3.6.0
       helm:
         valuesObject:
           image:
