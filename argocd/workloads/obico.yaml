@@ -17,7 +17,7 @@ spec:
     # overrides needed).
     - chart: obico
       repoURL: ghcr.io/thespaghettidetective/charts
-      targetRevision: 2026.11.26
+      targetRevision: 2026.11.27
       helm:
         valuesObject:
           obico:
